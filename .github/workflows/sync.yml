@@ -1,11 +1,10 @@
-
-name: Sukka List to Stash V1.2 iOS Final
+name: Sukka List to Stash V1.4.2 Semantic Integrity Final
 
 on:
   workflow_dispatch:
 
   schedule:
-    # 每天 UTC 06:20 自动执行一次
+    # 每天 UTC 06:20 自动检查一次
     - cron: "20 6 * * *"
 
 permissions:
@@ -22,7 +21,7 @@ jobs:
 
     env:
       SOURCE_BASE: https://ruleset.skk.moe
-      MIN_TOTAL_RULES: 20
+      MIN_TOTAL_PROVIDERS: 20
 
     steps:
 
@@ -31,7 +30,7 @@ jobs:
       # ==========================================================
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -63,9 +62,11 @@ jobs:
           mkdir -p /tmp/sukka-stash/source/non_ip
           mkdir -p /tmp/sukka-stash/source/ip
 
-          mkdir -p /tmp/sukka-stash/output/domain
-          mkdir -p /tmp/sukka-stash/output/non_ip
-          mkdir -p /tmp/sukka-stash/output/ip
+          mkdir -p /tmp/sukka-stash/output/domain/domainset
+          mkdir -p /tmp/sukka-stash/output/domain/non_ip
+          mkdir -p /tmp/sukka-stash/output/ipcidr
+          mkdir -p /tmp/sukka-stash/output/classical/non_ip
+          mkdir -p /tmp/sukka-stash/output/classical/ip
 
 
       # ==========================================================
@@ -107,7 +108,7 @@ jobs:
 
 
       # ==========================================================
-      # 5. Discover List rules
+      # 5. Discover Sukka List
       # ==========================================================
 
       - name: Discover Sukka List rules
@@ -139,7 +140,7 @@ jobs:
 
           echo ""
           echo "===================================="
-          echo " Sukka List Rules"
+          echo " Sukka List Discovery"
           echo "===================================="
           echo " domainset : ${DOMAINSET}"
           echo " non_ip    : ${NON_IP}"
@@ -148,8 +149,8 @@ jobs:
           echo " TOTAL     : ${TOTAL}"
           echo "===================================="
 
-          if [ "${TOTAL}" -lt "${MIN_TOTAL_RULES}" ]; then
-            echo "ERROR: Too few rules discovered."
+          if [ "${TOTAL}" -lt "${MIN_TOTAL_PROVIDERS}" ]; then
+            echo "ERROR: Too few Sukka rule files."
             exit 1
           fi
 
@@ -163,7 +164,7 @@ jobs:
 
 
       # ==========================================================
-      # 6. Download List rules
+      # 6. Download Sukka List
       # ==========================================================
 
       - name: Download Sukka List rules
@@ -198,8 +199,7 @@ jobs:
               -o "${DEST}"
 
             if [ ! -s "${DEST}" ]; then
-              echo "ERROR: Empty source file:"
-              echo "${FILE}"
+              echo "ERROR: Empty source file: ${FILE}"
               exit 1
             fi
 
@@ -212,71 +212,133 @@ jobs:
 
 
       # ==========================================================
-      # 7. Convert Sukka List -> Stash iOS
+      # 7. Convert + Semantic Integrity Accounting
       # ==========================================================
 
-      - name: Convert List rules to Stash iOS
+      - name: Convert and audit Stash iOS rules
         run: |
           set -euo pipefail
 
           python3 <<'PY'
           from pathlib import Path
+          from collections import Counter
+          import ipaddress
+          import json
+
 
           SRC = Path("/tmp/sukka-stash/source")
           OUT = Path("/tmp/sukka-stash/output")
+          TMP = Path("/tmp/sukka-stash")
 
-          IOS_UNSUPPORTED_TYPES = {
+
+          # ======================================================
+          # Configuration
+          # ======================================================
+
+          IOS_UNSUPPORTED = {
               "PROCESS-NAME",
               "PROCESS-PATH",
           }
 
-          skipped_files = []
+
+          CIDR_TYPES = {
+              "IP-CIDR",
+              "IP-CIDR6",
+          }
+
+
+          DOMAIN_PROVIDER_TYPES = {
+              "DOMAIN",
+              "DOMAIN-SUFFIX",
+              "DOMAIN-WILDCARD",
+          }
+
+
+          KNOWN_SUKKA_MARKERS = {
+              "7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe",
+          }
+
+
+          SUKKA_MARKER_SUFFIX = (
+              ".m4d3.by.5ukk4w.skk.moe"
+          )
+
+
+          # ======================================================
+          # Global audit
+          # ======================================================
+
+          summary = {
+              "source_files": 0,
+              "active_files": 0,
+              "deprecated_files": 0,
+
+              "source_rules_total": 0,
+              "active_source_rules": 0,
+              "deprecated_source_rules": 0,
+
+              "markers_removed": 0,
+              "ios_process_filtered": 0,
+              "duplicates_removed": 0,
+
+              "output_rules": 0,
+              "output_providers": 0,
+
+              "domain_rules": 0,
+              "ipcidr_rules": 0,
+              "classical_rules": 0,
+
+              "domain_providers": 0,
+              "ipcidr_providers": 0,
+              "classical_providers": 0,
+
+              "no_resolve_ipcidr_providers": 0,
+
+              "unaccounted_rules": 0,
+          }
+
+
+          category_stats = {
+              "domainset": Counter(),
+              "non_ip": Counter(),
+              "ip": Counter(),
+          }
+
+
+          file_audit = []
+
+
+          removed_markers = []
           ios_filtered = []
+          skipped_files = []
 
-          generated = 0
-          filtered_count = 0
+          promoted_domain = []
+          kept_classical_non_ip = []
 
+          promoted_ipcidr = []
+          kept_classical_ip = []
+
+          no_resolve_ipcidr = []
+
+
+          # ======================================================
+          # Helpers
+          # ======================================================
 
           def is_deprecated(text: str) -> bool:
-              lower = text.lower()
+
+              low = text.lower()
 
               return (
-                  "deprecated" in lower
-                  or "has been merged with" in lower
-                  or "has been merged into" in lower
+                  "deprecated" in low
+                  or "has been merged with" in low
+                  or "has been merged into" in low
               )
 
 
-          # ======================================================
-          # domainset -> Stash behavior: domain
-          #
-          # Sukka:
-          # .example.com
-          #
-          # Stash:
-          # +.example.com
-          # ======================================================
+          def meaningful_lines(text: str):
 
-          for src in sorted(
-              (SRC / "domainset").glob("*.conf")
-          ):
-
-              text = src.read_text(
-                  encoding="utf-8",
-                  errors="ignore"
-              )
-
-              if is_deprecated(text):
-
-                  skipped_files.append(
-                      f"DEPRECATED: domainset/{src.name}"
-                  )
-
-                  continue
-
-
-              output = []
-
+              result = []
 
               for raw in text.splitlines():
 
@@ -288,20 +350,481 @@ jobs:
                   if line.startswith("#"):
                       continue
 
+                  result.append(line)
 
-                  if line.startswith("."):
-                      line = "+." + line[1:]
-
-
-                  if line not in output:
-                      output.append(line)
+              return result
 
 
-              if not output:
+          def normalize_domain(value: str):
+
+              value = value.strip()
+
+              if value.startswith("+."):
+                  value = value[2:]
+
+              value = value.lstrip(".")
+
+              return value.lower().rstrip(".")
+
+
+          def is_marker_domain(value: str):
+
+              domain = normalize_domain(value)
+
+              if domain in KNOWN_SUKKA_MARKERS:
+                  return True
+
+              if domain.endswith(
+                  SUKKA_MARKER_SUFFIX
+              ):
+                  return True
+
+              return False
+
+
+          def is_sukka_marker(line: str):
+
+              line = line.strip()
+
+              if not line:
+                  return False
+
+
+              # domainset raw form
+              if "," not in line:
+
+                  clean = (
+                      line
+                      .replace("*.", "")
+                      .replace("?", "")
+                  )
+
+                  return is_marker_domain(clean)
+
+
+              rule_type, remainder = (
+                  line.split(",", 1)
+              )
+
+
+              rule_type = (
+                  rule_type
+                  .strip()
+                  .upper()
+              )
+
+
+              if rule_type not in {
+                  "DOMAIN",
+                  "DOMAIN-SUFFIX",
+                  "DOMAIN-WILDCARD",
+              }:
+
+                  return False
+
+
+              value = (
+                  remainder
+                  .split(",", 1)[0]
+                  .strip()
+              )
+
+
+              clean = (
+                  value
+                  .replace("*.", "")
+                  .replace("?", "")
+              )
+
+
+              return is_marker_domain(clean)
+
+
+          def ordered_dedupe(lines):
+
+              seen = set()
+              output = []
+              removed = 0
+
+              for line in lines:
+
+                  if line in seen:
+
+                      removed += 1
+                      continue
+
+                  seen.add(line)
+                  output.append(line)
+
+              return output, removed
+
+
+          def write_lines(path: Path, lines):
+
+              path.parent.mkdir(
+                  parents=True,
+                  exist_ok=True
+              )
+
+              path.write_text(
+                  "\n".join(lines) + "\n",
+                  encoding="utf-8"
+              )
+
+
+          def new_file_record(
+              category,
+              src,
+              source_count,
+          ):
+
+              return {
+                  "source": f"{category}/{src.name}",
+                  "category": category,
+
+                  "deprecated": False,
+
+                  "source_rules": source_count,
+
+                  "markers_removed": 0,
+                  "ios_process_filtered": 0,
+                  "duplicates_removed": 0,
+
+                  "output_rules": 0,
+
+                  "target_behavior": None,
+                  "target_path": None,
+
+                  "no_resolve": False,
+
+                  "accounted_rules": 0,
+                  "unaccounted_rules": 0,
+              }
+
+
+          def finish_record(record):
+
+              if record["deprecated"]:
+
+                  accounted = (
+                      record["source_rules"]
+                  )
+
+              else:
+
+                  accounted = (
+                      record["markers_removed"]
+                      + record["ios_process_filtered"]
+                      + record["duplicates_removed"]
+                      + record["output_rules"]
+                  )
+
+
+              record["accounted_rules"] = accounted
+
+              record["unaccounted_rules"] = (
+                  record["source_rules"]
+                  - accounted
+              )
+
+
+              if record["unaccounted_rules"] != 0:
+
+                  raise RuntimeError(
+                      "RULE CONSERVATION FAILURE: "
+                      f"{record['source']} "
+                      f"source={record['source_rules']} "
+                      f"accounted={accounted} "
+                      f"unaccounted="
+                      f"{record['unaccounted_rules']}"
+                  )
+
+
+              file_audit.append(record)
+
+
+          def process_common(
+              lines,
+              category,
+              src,
+              record,
+              process_filter,
+          ):
+
+              cleaned = []
+
+
+              # ----------------------------------------------
+              # Marker + iOS process filter
+              # ----------------------------------------------
+
+              for line in lines:
+
+                  if is_sukka_marker(line):
+
+                      record["markers_removed"] += 1
+
+                      removed_markers.append(
+                          f"{category}/{src.name}: {line}"
+                      )
+
+                      continue
+
+
+                  if process_filter and "," in line:
+
+                      rule_type = (
+                          line
+                          .split(",", 1)[0]
+                          .strip()
+                          .upper()
+                      )
+
+
+                      if rule_type in IOS_UNSUPPORTED:
+
+                          record[
+                              "ios_process_filtered"
+                          ] += 1
+
+                          ios_filtered.append(
+                              f"{category}/{src.name}: {line}"
+                          )
+
+                          continue
+
+
+                  cleaned.append(line)
+
+
+              # ----------------------------------------------
+              # Exact duplicate removal
+              # ----------------------------------------------
+
+              cleaned, removed = ordered_dedupe(
+                  cleaned
+              )
+
+
+              record["duplicates_removed"] += removed
+
+
+              return cleaned
+
+
+          def register_output(
+              record,
+              behavior,
+              path,
+              output_lines,
+              no_resolve=False,
+          ):
+
+              record["target_behavior"] = behavior
+              record["target_path"] = str(
+                  path.relative_to(OUT)
+              )
+
+              record["output_rules"] = len(
+                  output_lines
+              )
+
+              record["no_resolve"] = no_resolve
+
+
+              summary["output_providers"] += 1
+              summary["output_rules"] += len(
+                  output_lines
+              )
+
+
+              if behavior == "domain":
+
+                  summary["domain_providers"] += 1
+
+                  summary["domain_rules"] += len(
+                      output_lines
+                  )
+
+
+              elif behavior == "ipcidr":
+
+                  summary["ipcidr_providers"] += 1
+
+                  summary["ipcidr_rules"] += len(
+                      output_lines
+                  )
+
+
+              else:
+
+                  summary[
+                      "classical_providers"
+                  ] += 1
+
+                  summary["classical_rules"] += len(
+                      output_lines
+                  )
+
+
+          # ======================================================
+          # Generic source registration
+          # ======================================================
+
+          def load_source(
+              category,
+              src,
+          ):
+
+              text = src.read_text(
+                  encoding="utf-8",
+                  errors="ignore"
+              )
+
+
+              lines = meaningful_lines(text)
+
+              count = len(lines)
+
+
+              summary["source_files"] += 1
+              summary["source_rules_total"] += count
+
+
+              category_stats[category][
+                  "source_files"
+              ] += 1
+
+              category_stats[category][
+                  "source_rules"
+              ] += count
+
+
+              record = new_file_record(
+                  category,
+                  src,
+                  count,
+              )
+
+
+              if is_deprecated(text):
+
+                  record["deprecated"] = True
+
+                  summary["deprecated_files"] += 1
+
+                  summary[
+                      "deprecated_source_rules"
+                  ] += count
+
+
+                  category_stats[category][
+                      "deprecated_files"
+                  ] += 1
+
+                  category_stats[category][
+                      "deprecated_rules"
+                  ] += count
+
 
                   skipped_files.append(
-                      f"EMPTY: domainset/{src.name}"
+                      f"DEPRECATED: "
+                      f"{category}/{src.name}"
                   )
+
+
+                  finish_record(record)
+
+                  return None, record
+
+
+              summary["active_files"] += 1
+              summary["active_source_rules"] += count
+
+
+              category_stats[category][
+                  "active_files"
+              ] += 1
+
+              category_stats[category][
+                  "active_rules"
+              ] += count
+
+
+              return lines, record
+
+
+          # ======================================================
+          # A. domainset
+          # ======================================================
+
+          for src in sorted(
+              (SRC / "domainset").glob("*.conf")
+          ):
+
+              lines, record = load_source(
+                  "domainset",
+                  src,
+              )
+
+
+              if lines is None:
+                  continue
+
+
+              cleaned = process_common(
+                  lines,
+                  "domainset",
+                  src,
+                  record,
+                  process_filter=False,
+              )
+
+
+              converted = []
+
+
+              for line in cleaned:
+
+                  value = line.strip()
+
+
+                  if value.startswith("."):
+
+                      value = (
+                          "+."
+                          + value[1:]
+                      )
+
+
+                  converted.append(value)
+
+
+              # Conversion may create duplicates:
+              #
+              # .example.com
+              # +.example.com
+              #
+              # -> same Stash rule
+
+              converted, removed = ordered_dedupe(
+                  converted
+              )
+
+
+              record[
+                  "duplicates_removed"
+              ] += removed
+
+
+              if not converted:
+
+                  skipped_files.append(
+                      f"EMPTY AFTER CLEAN: "
+                      f"domainset/{src.name}"
+                  )
+
+                  finish_record(record)
 
                   continue
 
@@ -309,335 +832,870 @@ jobs:
               dst = (
                   OUT
                   / "domain"
+                  / "domainset"
                   / f"{src.stem}.txt"
               )
 
 
-              dst.write_text(
-                  "\n".join(output) + "\n",
-                  encoding="utf-8"
-              )
-
-              generated += 1
-
-
-          # ======================================================
-          # classical converter
-          # ======================================================
-
-          def convert_classical(
-              src: Path,
-              dst: Path,
-              category: str
-          ):
-
-              global generated
-              global filtered_count
-
-
-              text = src.read_text(
-                  encoding="utf-8",
-                  errors="ignore"
+              write_lines(
+                  dst,
+                  converted,
               )
 
 
-              if is_deprecated(text):
-
-                  skipped_files.append(
-                      f"DEPRECATED: {category}/{src.name}"
-                  )
-
-                  return
-
-
-              output = []
-
-
-              for raw in text.splitlines():
-
-                  line = raw.strip()
-
-                  if not line:
-                      continue
-
-                  if line.startswith("#"):
-                      continue
-
-
-                  # ==============================================
-                  # iOS process rule filter
-                  # ==============================================
-
-                  if "," in line:
-
-                      rule_type = (
-                          line.split(",", 1)[0]
-                          .strip()
-                          .upper()
-                      )
-
-                      if rule_type in IOS_UNSUPPORTED_TYPES:
-
-                          ios_filtered.append(
-                              f"{category}/{src.name}: {line}"
-                          )
-
-                          filtered_count += 1
-
-                          continue
-
-
-                  # ==============================================
-                  # 其余 Sukka classical 规则尽量原样保留
-                  #
-                  # 包括：
-                  # DOMAIN-*
-                  # IP-CIDR
-                  # IP-CIDR6
-                  # IP-ASN
-                  # GEOIP
-                  # URL-REGEX
-                  # USER-AGENT
-                  # NETWORK
-                  # PROTOCOL
-                  # AND / OR / NOT
-                  # no-resolve
-                  # ==============================================
-
-                  if line not in output:
-                      output.append(line)
-
-
-              if not output:
-
-                  skipped_files.append(
-                      f"EMPTY AFTER IOS FILTER: "
-                      f"{category}/{src.name}"
-                  )
-
-                  return
-
-
-              dst.write_text(
-                  "\n".join(output) + "\n",
-                  encoding="utf-8"
+              register_output(
+                  record,
+                  "domain",
+                  dst,
+                  converted,
               )
 
-              generated += 1
+
+              promoted_domain.append(
+                  f"domainset/{src.name}"
+              )
+
+
+              finish_record(record)
 
 
           # ======================================================
-          # non_ip
+          # B. non_ip
           # ======================================================
 
           for src in sorted(
               (SRC / "non_ip").glob("*.conf")
           ):
 
-              dst = (
-                  OUT
-                  / "non_ip"
-                  / f"{src.stem}.txt"
+              lines, record = load_source(
+                  "non_ip",
+                  src,
               )
 
-              convert_classical(
+
+              if lines is None:
+                  continue
+
+
+              cleaned = process_common(
+                  lines,
+                  "non_ip",
                   src,
-                  dst,
-                  "non_ip"
+                  record,
+                  process_filter=True,
               )
+
+
+              if not cleaned:
+
+                  skipped_files.append(
+                      f"EMPTY AFTER CLEAN: "
+                      f"non_ip/{src.name}"
+                  )
+
+                  finish_record(record)
+
+                  continue
+
+
+              # ----------------------------------------------
+              # Can this become behavior: domain?
+              # ----------------------------------------------
+
+              pure_domain = True
+
+              converted = []
+
+
+              for line in cleaned:
+
+                  if "," not in line:
+
+                      pure_domain = False
+                      break
+
+
+                  rule_type, remainder = (
+                      line.split(",", 1)
+                  )
+
+
+                  rule_type = (
+                      rule_type
+                      .strip()
+                      .upper()
+                  )
+
+
+                  # Extra classical parameters:
+                  # keep the whole file classical.
+                  if "," in remainder:
+
+                      pure_domain = False
+                      break
+
+
+                  value = remainder.strip()
+
+
+                  if (
+                      rule_type
+                      not in DOMAIN_PROVIDER_TYPES
+                  ):
+
+                      pure_domain = False
+                      break
+
+
+                  if not value:
+
+                      pure_domain = False
+                      break
+
+
+                  if rule_type == "DOMAIN":
+
+                      converted.append(
+                          value
+                      )
+
+
+                  elif rule_type == "DOMAIN-SUFFIX":
+
+                      converted.append(
+                          "+."
+                          + value.lstrip(".")
+                      )
+
+
+                  elif rule_type == "DOMAIN-WILDCARD":
+
+                      converted.append(
+                          value
+                      )
+
+
+              if pure_domain and converted:
+
+                  converted, removed = ordered_dedupe(
+                      converted
+                  )
+
+                  record[
+                      "duplicates_removed"
+                  ] += removed
+
+
+                  dst = (
+                      OUT
+                      / "domain"
+                      / "non_ip"
+                      / f"{src.stem}.txt"
+                  )
+
+
+                  write_lines(
+                      dst,
+                      converted,
+                  )
+
+
+                  register_output(
+                      record,
+                      "domain",
+                      dst,
+                      converted,
+                  )
+
+
+                  promoted_domain.append(
+                      f"non_ip/{src.name}"
+                  )
+
+
+              else:
+
+                  dst = (
+                      OUT
+                      / "classical"
+                      / "non_ip"
+                      / f"{src.stem}.txt"
+                  )
+
+
+                  write_lines(
+                      dst,
+                      cleaned,
+                  )
+
+
+                  register_output(
+                      record,
+                      "classical",
+                      dst,
+                      cleaned,
+                  )
+
+
+                  kept_classical_non_ip.append(
+                      src.stem
+                  )
+
+
+              finish_record(record)
 
 
           # ======================================================
-          # ip
+          # C. ip
           # ======================================================
 
           for src in sorted(
               (SRC / "ip").glob("*.conf")
           ):
 
-              dst = (
-                  OUT
-                  / "ip"
-                  / f"{src.stem}.txt"
+              lines, record = load_source(
+                  "ip",
+                  src,
               )
 
-              convert_classical(
+
+              if lines is None:
+                  continue
+
+
+              cleaned = process_common(
+                  lines,
+                  "ip",
                   src,
-                  dst,
-                  "ip"
+                  record,
+                  process_filter=True,
+              )
+
+
+              if not cleaned:
+
+                  skipped_files.append(
+                      f"EMPTY AFTER CLEAN: "
+                      f"ip/{src.name}"
+                  )
+
+                  finish_record(record)
+
+                  continue
+
+
+              pure_cidr = True
+
+              cidrs = []
+
+              has_no_resolve = False
+
+
+              for line in cleaned:
+
+                  if "," not in line:
+
+                      pure_cidr = False
+                      break
+
+
+                  rule_type, remainder = (
+                      line.split(",", 1)
+                  )
+
+
+                  rule_type = (
+                      rule_type
+                      .strip()
+                      .upper()
+                  )
+
+
+                  if rule_type not in CIDR_TYPES:
+
+                      pure_cidr = False
+                      break
+
+
+                  value = remainder.strip()
+
+
+                  if value.lower().endswith(
+                      ",no-resolve"
+                  ):
+
+                      has_no_resolve = True
+
+                      value = value[
+                          :-len(",no-resolve")
+                      ].strip()
+
+
+                  try:
+
+                      network = ipaddress.ip_network(
+                          value,
+                          strict=False
+                      )
+
+
+                  except ValueError:
+
+                      pure_cidr = False
+                      break
+
+
+                  cidrs.append(
+                      str(network)
+                  )
+
+
+              if pure_cidr and cidrs:
+
+                  # Different source strings may normalize
+                  # into the same network.
+
+                  cidrs, removed = ordered_dedupe(
+                      cidrs
+                  )
+
+
+                  record[
+                      "duplicates_removed"
+                  ] += removed
+
+
+                  dst = (
+                      OUT
+                      / "ipcidr"
+                      / f"{src.stem}.txt"
+                  )
+
+
+                  write_lines(
+                      dst,
+                      cidrs,
+                  )
+
+
+                  register_output(
+                      record,
+                      "ipcidr",
+                      dst,
+                      cidrs,
+                      no_resolve=has_no_resolve,
+                  )
+
+
+                  promoted_ipcidr.append(
+                      src.stem
+                  )
+
+
+                  if has_no_resolve:
+
+                      no_resolve_ipcidr.append(
+                          src.stem
+                      )
+
+
+              else:
+
+                  dst = (
+                      OUT
+                      / "classical"
+                      / "ip"
+                      / f"{src.stem}.txt"
+                  )
+
+
+                  write_lines(
+                      dst,
+                      cleaned,
+                  )
+
+
+                  register_output(
+                      record,
+                      "classical",
+                      dst,
+                      cleaned,
+                  )
+
+
+                  kept_classical_ip.append(
+                      src.stem
+                  )
+
+
+              finish_record(record)
+
+
+          # ======================================================
+          # Aggregate accounting
+          # ======================================================
+
+          summary["markers_removed"] = sum(
+              item["markers_removed"]
+              for item in file_audit
+          )
+
+
+          summary["ios_process_filtered"] = sum(
+              item["ios_process_filtered"]
+              for item in file_audit
+          )
+
+
+          summary["duplicates_removed"] = sum(
+              item["duplicates_removed"]
+              for item in file_audit
+          )
+
+
+          summary[
+              "no_resolve_ipcidr_providers"
+          ] = len(no_resolve_ipcidr)
+
+
+          accounted = (
+              summary["deprecated_source_rules"]
+              + summary["markers_removed"]
+              + summary["ios_process_filtered"]
+              + summary["duplicates_removed"]
+              + summary["output_rules"]
+          )
+
+
+          summary["unaccounted_rules"] = (
+              summary["source_rules_total"]
+              - accounted
+          )
+
+
+          # ======================================================
+          # Global conservation
+          # ======================================================
+
+          if summary["unaccounted_rules"] != 0:
+
+              raise RuntimeError(
+                  "GLOBAL RULE CONSERVATION FAILURE: "
+                  f"source="
+                  f"{summary['source_rules_total']} "
+                  f"accounted={accounted} "
+                  f"unaccounted="
+                  f"{summary['unaccounted_rules']}"
               )
 
 
           # ======================================================
-          # Reports
+          # Category accounting
+          # ======================================================
+
+          for category in category_stats:
+
+              records = [
+                  item
+                  for item in file_audit
+                  if item["category"] == category
+              ]
+
+
+              cs = category_stats[category]
+
+
+              cs["markers_removed"] = sum(
+                  item["markers_removed"]
+                  for item in records
+              )
+
+
+              cs["ios_process_filtered"] = sum(
+                  item["ios_process_filtered"]
+                  for item in records
+              )
+
+
+              cs["duplicates_removed"] = sum(
+                  item["duplicates_removed"]
+                  for item in records
+              )
+
+
+              cs["output_rules"] = sum(
+                  item["output_rules"]
+                  for item in records
+              )
+
+
+              cs["unaccounted_rules"] = sum(
+                  item["unaccounted_rules"]
+                  for item in records
+              )
+
+
+          # ======================================================
+          # Save auxiliary reports
+          # ======================================================
+
+          def save_lines(name, items):
+
+              path = TMP / name
+
+              if items:
+
+                  path.write_text(
+                      "\n".join(items) + "\n",
+                      encoding="utf-8"
+                  )
+
+              elif path.exists():
+
+                  path.unlink()
+
+
+          save_lines(
+              "removed-markers.txt",
+              removed_markers
+          )
+
+
+          save_lines(
+              "ios-filtered.txt",
+              ios_filtered
+          )
+
+
+          save_lines(
+              "promoted-domain.txt",
+              promoted_domain
+          )
+
+
+          save_lines(
+              "classical-non-ip.txt",
+              kept_classical_non_ip
+          )
+
+
+          save_lines(
+              "promoted-ipcidr.txt",
+              promoted_ipcidr
+          )
+
+
+          save_lines(
+              "classical-ip.txt",
+              kept_classical_ip
+          )
+
+
+          save_lines(
+              "no-resolve-ipcidr.txt",
+              no_resolve_ipcidr
+          )
+
+
+          save_lines(
+              "skipped.txt",
+              skipped_files
+          )
+
+
+          # ======================================================
+          # Semantic audit JSON
+          # ======================================================
+
+          audit = {
+              "schema_version": 1,
+
+              "generator": (
+                  "Sukka List -> Stash "
+                  "V1.4.2 Semantic Integrity Final"
+              ),
+
+              "upstream": (
+                  "https://ruleset.skk.moe/"
+              ),
+
+              "summary": summary,
+
+              "categories": {
+                  name: dict(stats)
+                  for name, stats
+                  in category_stats.items()
+              },
+
+              "files": file_audit,
+          }
+
+
+          (TMP / "SEMANTIC_AUDIT.json").write_text(
+              json.dumps(
+                  audit,
+                  ensure_ascii=False,
+                  indent=2,
+                  sort_keys=True,
+              ) + "\n",
+              encoding="utf-8"
+          )
+
+
+          # ======================================================
+          # Semantic audit Markdown
+          # ======================================================
+
+          s = summary
+
+
+          markdown = f"""# Semantic Integrity Audit
+
+          Generator:
+
+          `Sukka List -> Stash V1.4.2 Semantic Integrity Final`
+
+          ## Global Rule Conservation
+
+          | Metric | Count |
+          |---|---:|
+          | Source files | {s['source_files']} |
+          | Active files | {s['active_files']} |
+          | Deprecated files | {s['deprecated_files']} |
+          | Source rules total | {s['source_rules_total']} |
+          | Deprecated source rules | {s['deprecated_source_rules']} |
+          | Sukka Markers removed | {s['markers_removed']} |
+          | iOS PROCESS rules filtered | {s['ios_process_filtered']} |
+          | Duplicates removed | {s['duplicates_removed']} |
+          | Final output rules | {s['output_rules']} |
+          | Unaccounted rules | {s['unaccounted_rules']} |
+
+          ## Output
+
+          | Behavior | Providers | Rules |
+          |---|---:|---:|
+          | domain | {s['domain_providers']} | {s['domain_rules']} |
+          | ipcidr | {s['ipcidr_providers']} | {s['ipcidr_rules']} |
+          | classical | {s['classical_providers']} | {s['classical_rules']} |
+
+          ## Conservation Equation
+
+          ```text
+          source_rules_total
+          =
+          deprecated_source_rules
+          + markers_removed
+          + ios_process_filtered
+          + duplicates_removed
+          + output_rules
+          ```
+
+          ```text
+          {s['source_rules_total']}
+          =
+          {s['deprecated_source_rules']}
+          + {s['markers_removed']}
+          + {s['ios_process_filtered']}
+          + {s['duplicates_removed']}
+          + {s['output_rules']}
+          ```
+
+          ## Result
+
+          ```text
+          unaccounted_rules = {s['unaccounted_rules']}
+          ```
+
+          `0` means every source rule has been accounted for.
+          """
+
+
+          (TMP / "SEMANTIC_AUDIT.md").write_text(
+              "\n".join(
+                  line.strip()
+                  for line in markdown.splitlines()
+              ) + "\n",
+              encoding="utf-8"
+          )
+
+
+          # ======================================================
+          # Console summary
           # ======================================================
 
           print("")
           print("====================================")
-          print(" Sukka -> Stash iOS Conversion")
+          print(" V1.4.2 Semantic Integrity Audit")
           print("====================================")
-          print(f" Generated     : {generated}")
-          print(f" iOS filtered  : {filtered_count}")
-          print(f" Skipped files : {len(skipped_files)}")
+          print(
+              f" Source files        : "
+              f"{s['source_files']}"
+          )
+          print(
+              f" Source rules        : "
+              f"{s['source_rules_total']}"
+          )
+          print(
+              f" Deprecated rules    : "
+              f"{s['deprecated_source_rules']}"
+          )
+          print(
+              f" Markers removed     : "
+              f"{s['markers_removed']}"
+          )
+          print(
+              f" PROCESS filtered    : "
+              f"{s['ios_process_filtered']}"
+          )
+          print(
+              f" Duplicates removed  : "
+              f"{s['duplicates_removed']}"
+          )
+          print(
+              f" Output rules        : "
+              f"{s['output_rules']}"
+          )
+          print(
+              f" Unaccounted         : "
+              f"{s['unaccounted_rules']}"
+          )
+          print("------------------------------------")
+          print(
+              f" domain providers    : "
+              f"{s['domain_providers']}"
+          )
+          print(
+              f" ipcidr providers    : "
+              f"{s['ipcidr_providers']}"
+          )
+          print(
+              f" classical providers : "
+              f"{s['classical_providers']}"
+          )
           print("====================================")
 
 
-          if skipped_files:
-
-              Path(
-                  "/tmp/sukka-stash/skipped.txt"
-              ).write_text(
-                  "\n".join(skipped_files),
-                  encoding="utf-8"
-              )
-
-
-          if ios_filtered:
-
-              Path(
-                  "/tmp/sukka-stash/ios-filtered.txt"
-              ).write_text(
-                  "\n".join(ios_filtered),
-                  encoding="utf-8"
-              )
-
-
-              print("")
-              print("Filtered iOS process rules:")
-
-              for item in ios_filtered[:50]:
-                  print(f"  {item}")
-
-              if len(ios_filtered) > 50:
-                  print("  ...")
-
-
-          if generated == 0:
+          if s["output_providers"] == 0:
 
               raise RuntimeError(
-                  "No Stash iOS rule sets generated."
+                  "No Stash providers generated."
+              )
+
+
+          if s["unaccounted_rules"] != 0:
+
+              raise RuntimeError(
+                  "Semantic integrity audit failed."
               )
 
           PY
 
 
       # ==========================================================
-      # 8. Validate output
+      # 8. Validate provider counts
       # ==========================================================
 
-      - name: Validate Stash output
+      - name: Validate optimized output
         run: |
           set -euo pipefail
 
-          DOMAIN=$(
-            find /tmp/sukka-stash/output/domain \
+          DOMAIN_DOMAINSET=$(
+            find \
+              /tmp/sukka-stash/output/domain/domainset \
               -type f \
               -name "*.txt" \
               | wc -l
           )
 
-          NON_IP=$(
-            find /tmp/sukka-stash/output/non_ip \
+          DOMAIN_NON_IP=$(
+            find \
+              /tmp/sukka-stash/output/domain/non_ip \
               -type f \
               -name "*.txt" \
               | wc -l
           )
 
-          IP=$(
-            find /tmp/sukka-stash/output/ip \
+          IPCIDR=$(
+            find \
+              /tmp/sukka-stash/output/ipcidr \
               -type f \
               -name "*.txt" \
               | wc -l
           )
 
-          TOTAL=$((DOMAIN + NON_IP + IP))
+          CLASSICAL_NON_IP=$(
+            find \
+              /tmp/sukka-stash/output/classical/non_ip \
+              -type f \
+              -name "*.txt" \
+              | wc -l
+          )
+
+          CLASSICAL_IP=$(
+            find \
+              /tmp/sukka-stash/output/classical/ip \
+              -type f \
+              -name "*.txt" \
+              | wc -l
+          )
+
+
+          DOMAIN=$((DOMAIN_DOMAINSET + DOMAIN_NON_IP))
+
+          CLASSICAL=$((CLASSICAL_NON_IP + CLASSICAL_IP))
+
+          TOTAL=$((DOMAIN + IPCIDR + CLASSICAL))
 
 
           echo ""
           echo "===================================="
-          echo " Stash iOS Rule Sets"
+          echo " V1.4.2 Provider Output"
           echo "===================================="
-          echo " domain : ${DOMAIN}"
-          echo " non_ip : ${NON_IP}"
-          echo " ip     : ${IP}"
+          echo " domain/domainset : ${DOMAIN_DOMAINSET}"
+          echo " domain/non_ip    : ${DOMAIN_NON_IP}"
+          echo " ipcidr           : ${IPCIDR}"
+          echo " classical/non_ip : ${CLASSICAL_NON_IP}"
+          echo " classical/ip     : ${CLASSICAL_IP}"
           echo "------------------------------------"
-          echo " TOTAL  : ${TOTAL}"
+          echo " TOTAL            : ${TOTAL}"
           echo "===================================="
 
 
-          if [ "${TOTAL}" -lt "${MIN_TOTAL_RULES}" ]; then
-            echo "ERROR: Too few Stash iOS rule sets."
-            exit 1
-          fi
+          if [ "${TOTAL}" -lt "${MIN_TOTAL_PROVIDERS}" ]; then
 
+            echo "ERROR:"
+            echo "Too few providers generated."
 
-          if [ "${DOMAIN}" -eq 0 ] || \
-             [ "${NON_IP}" -eq 0 ] || \
-             [ "${IP}" -eq 0 ]; then
-
-            echo "ERROR: One or more categories are empty."
-            exit 1
-          fi
-
-
-          EMPTY=0
-
-
-          while IFS= read -r FILE; do
-
-            if [ ! -s "${FILE}" ]; then
-
-              echo "ERROR: Empty generated file:"
-              echo "${FILE}"
-
-              EMPTY=$((EMPTY + 1))
-
-            fi
-
-          done < <(
-            find /tmp/sukka-stash/output \
-              -type f \
-              -name "*.txt"
-          )
-
-
-          if [ "${EMPTY}" -ne 0 ]; then
             exit 1
           fi
 
 
       # ==========================================================
-      # 9. Tolerant Stash iOS audit
-      #
-      # 不维护完整规则类型白名单
+      # 9. Marker residual audit
       # ==========================================================
 
-      - name: Validate Stash iOS rules
+      - name: Audit Sukka Marker removal
         run: |
           set -euo pipefail
 
           python3 <<'PY'
           from pathlib import Path
 
-          ROOT = Path("/tmp/sukka-stash/output")
 
-          IOS_FORBIDDEN = {
-              "PROCESS-NAME",
-              "PROCESS-PATH",
-          }
+          ROOT = Path(
+              "/tmp/sukka-stash/output"
+          )
+
+
+          MARKER_SUFFIX = (
+              ".m4d3.by.5ukk4w.skk.moe"
+          )
+
 
           errors = []
-          checked = 0
-          types = {}
 
 
-          # ======================================================
-          # domain behavior
-          # ======================================================
-
-          for file in sorted(
-              (ROOT / "domain").glob("*.txt")
-          ):
+          for file in ROOT.rglob("*.txt"):
 
               for lineno, raw in enumerate(
                   file.read_text(
@@ -647,36 +1705,71 @@ jobs:
                   1
               ):
 
-                  line = raw.strip()
-
-                  if not line:
-                      continue
-
-                  if line.startswith("#"):
-                      continue
+                  line = raw.lower()
 
 
-                  checked += 1
-
-
-                  if "," in line:
+                  if MARKER_SUFFIX in line:
 
                       errors.append(
                           f"{file}:{lineno}: "
-                          f"classical syntax found "
-                          f"in domain provider: {line}"
+                          f"{raw.strip()}"
                       )
 
 
+          print(
+              f"Residual Sukka markers: "
+              f"{len(errors)}"
+          )
+
+
+          if errors:
+
+              for item in errors[:100]:
+                  print(item)
+
+              raise RuntimeError(
+                  "Sukka Marker residual audit failed."
+              )
+
+
+          print(
+              "All Sukka Markers were removed."
+          )
+
+          PY
+
+
+      # ==========================================================
+      # 10. Stash semantic validation
+      # ==========================================================
+
+      - name: Validate Stash semantics
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY'
+          from pathlib import Path
+          import ipaddress
+
+
+          ROOT = Path(
+              "/tmp/sukka-stash/output"
+          )
+
+
+          errors = []
+
+
           # ======================================================
-          # classical providers
+          # domain
           # ======================================================
 
-          for folder in ("non_ip", "ip"):
+          for folder in (
+              ROOT / "domain" / "domainset",
+              ROOT / "domain" / "non_ip",
+          ):
 
-              for file in sorted(
-                  (ROOT / folder).glob("*.txt")
-              ):
+              for file in folder.glob("*.txt"):
 
                   for lineno, raw in enumerate(
                       file.read_text(
@@ -688,129 +1781,241 @@ jobs:
 
                       line = raw.strip()
 
+
                       if not line:
                           continue
 
-                      if line.startswith("#"):
+
+                      if "," in line:
+
+                          errors.append(
+                              f"{file}:{lineno}: "
+                              f"classical syntax in "
+                              f"domain provider"
+                          )
+
+
+          # ======================================================
+          # ipcidr
+          # ======================================================
+
+          for file in (
+              ROOT / "ipcidr"
+          ).glob("*.txt"):
+
+              for lineno, raw in enumerate(
+                  file.read_text(
+                      encoding="utf-8",
+                      errors="ignore"
+                  ).splitlines(),
+                  1
+              ):
+
+                  line = raw.strip()
+
+
+                  if not line:
+                      continue
+
+
+                  if "," in line:
+
+                      errors.append(
+                          f"{file}:{lineno}: "
+                          f"classical syntax in "
+                          f"ipcidr provider"
+                      )
+
+                      continue
+
+
+                  try:
+
+                      ipaddress.ip_network(
+                          line,
+                          strict=False
+                      )
+
+
+                  except ValueError:
+
+                      errors.append(
+                          f"{file}:{lineno}: "
+                          f"invalid CIDR: {line}"
+                      )
+
+
+          # ======================================================
+          # classical
+          # ======================================================
+
+          for folder in (
+              ROOT / "classical" / "non_ip",
+              ROOT / "classical" / "ip",
+          ):
+
+              for file in folder.glob("*.txt"):
+
+                  for lineno, raw in enumerate(
+                      file.read_text(
+                          encoding="utf-8",
+                          errors="ignore"
+                      ).splitlines(),
+                      1
+                  ):
+
+                      line = raw.strip()
+
+
+                      if not line:
                           continue
-
-
-                      checked += 1
 
 
                       if "," not in line:
 
                           errors.append(
                               f"{file}:{lineno}: "
-                              f"invalid classical rule: "
-                              f"{line}"
+                              f"invalid classical rule"
                           )
 
                           continue
 
 
-                      rule_type, remainder = (
-                          line.split(",", 1)
-                      )
-
                       rule_type = (
-                          rule_type
+                          line
+                          .split(",", 1)[0]
                           .strip()
                           .upper()
                       )
 
-                      remainder = remainder.strip()
 
-
-                      if not rule_type:
-
-                          errors.append(
-                              f"{file}:{lineno}: "
-                              f"empty rule type"
-                          )
-
-                          continue
-
-
-                      if not remainder:
+                      if rule_type in {
+                          "PROCESS-NAME",
+                          "PROCESS-PATH",
+                      }:
 
                           errors.append(
                               f"{file}:{lineno}: "
-                              f"empty rule value"
+                              f"iOS PROCESS rule remained"
                           )
-
-                          continue
-
-
-                      types[rule_type] = (
-                          types.get(rule_type, 0) + 1
-                      )
-
-
-                      if rule_type in IOS_FORBIDDEN:
-
-                          errors.append(
-                              f"{file}:{lineno}: "
-                              f"iOS process rule remained: "
-                              f"{line}"
-                          )
-
-
-          print("")
-          print("====================================")
-          print(" Stash iOS Rule Audit")
-          print("====================================")
-          print(f" Checked : {checked}")
-          print(f" Errors  : {len(errors)}")
-          print("------------------------------------")
-          print("Detected rule types:")
-
-
-          for rule_type in sorted(types):
-
-              print(
-                  f"  {rule_type:<24} "
-                  f"{types[rule_type]}"
-              )
-
-
-          print("====================================")
 
 
           if errors:
 
               print("")
-              print("Validation errors:")
-
 
               for item in errors[:100]:
-                  print(f"  {item}")
-
-
-              if len(errors) > 100:
-
-                  print(
-                      f"  ... and "
-                      f"{len(errors) - 100} more"
-                  )
+                  print(item)
 
 
               raise RuntimeError(
-                  f"{len(errors)} Stash iOS "
-                  f"validation errors found"
+                  f"{len(errors)} Stash semantic "
+                  f"errors found."
               )
 
 
-          print("")
           print(
-              "Stash iOS rule audit passed."
+              "Stash semantic validation passed."
           )
 
           PY
 
 
       # ==========================================================
-      # 10. Generate conversion report
+      # 11. Validate semantic audit JSON
+      # ==========================================================
+
+      - name: Validate semantic integrity audit
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY'
+          from pathlib import Path
+          import json
+
+
+          path = Path(
+              "/tmp/sukka-stash/"
+              "SEMANTIC_AUDIT.json"
+          )
+
+
+          data = json.loads(
+              path.read_text(
+                  encoding="utf-8"
+              )
+          )
+
+
+          summary = data["summary"]
+
+
+          source = (
+              summary["source_rules_total"]
+          )
+
+
+          accounted = (
+              summary["deprecated_source_rules"]
+              + summary["markers_removed"]
+              + summary["ios_process_filtered"]
+              + summary["duplicates_removed"]
+              + summary["output_rules"]
+          )
+
+
+          print("")
+          print("====================================")
+          print(" Rule Conservation Check")
+          print("====================================")
+          print(f" Source     : {source}")
+          print(f" Accounted  : {accounted}")
+          print(
+              f" Unaccounted: "
+              f"{source - accounted}"
+          )
+          print("====================================")
+
+
+          if source != accounted:
+
+              raise RuntimeError(
+                  "Global semantic integrity "
+                  "check failed."
+              )
+
+
+          if summary["unaccounted_rules"] != 0:
+
+              raise RuntimeError(
+                  "Unaccounted rules detected."
+              )
+
+
+          bad_files = [
+              item
+              for item in data["files"]
+              if item["unaccounted_rules"] != 0
+          ]
+
+
+          if bad_files:
+
+              raise RuntimeError(
+                  f"{len(bad_files)} source files "
+                  f"failed rule conservation."
+              )
+
+
+          print(
+              "Semantic integrity audit passed."
+          )
+
+          PY
+
+
+      # ==========================================================
+      # 12. Generate full conversion report
       # ==========================================================
 
       - name: Generate conversion report
@@ -818,29 +2023,46 @@ jobs:
           set -euo pipefail
 
           {
-            echo "# Sukka -> Stash iOS Conversion Report"
+            echo "# Sukka -> Stash V1.4.2 Conversion Report"
             echo ""
-            echo "Source:"
+
+            echo "## Upstream"
             echo ""
             echo "https://ruleset.skk.moe/"
             echo ""
 
-            echo "## Mapping"
+            echo "## Pipeline"
             echo ""
-            echo "- List/domainset -> domain/"
-            echo "- List/non_ip -> non_ip/"
-            echo "- List/ip -> ip/"
+            echo '```text'
+            echo "Sukka List"
+            echo " -> Remove comments / blank lines"
+            echo " -> Detect Sukka Marker"
+            echo " -> Remove Marker"
+            echo " -> Filter iOS PROCESS rules"
+            echo " -> Analyze provider behavior"
+            echo " -> Convert / normalize"
+            echo " -> Deduplicate"
+            echo " -> Rule conservation audit"
+            echo " -> Stash semantic validation"
+            echo " -> Output"
+            echo '```'
             echo ""
 
-            echo "## iOS filtered rules"
+            echo "## Semantic Integrity"
             echo ""
 
-            if [ -s /tmp/sukka-stash/ios-filtered.txt ]; then
+            cat \
+              /tmp/sukka-stash/SEMANTIC_AUDIT.md
+
+            echo ""
+
+            echo "## Removed Sukka Markers"
+            echo ""
+
+            if [ -s /tmp/sukka-stash/removed-markers.txt ]; then
 
               echo '```text'
-
-              cat /tmp/sukka-stash/ios-filtered.txt
-
+              cat /tmp/sukka-stash/removed-markers.txt
               echo '```'
 
             else
@@ -849,109 +2071,210 @@ jobs:
 
             fi
 
-
-            echo ""
-            echo "## Skipped source files"
             echo ""
 
-            if [ -s /tmp/sukka-stash/skipped.txt ]; then
+            echo "## iOS PROCESS Rules Filtered"
+            echo ""
 
-              sed 's/^/- /' \
-                /tmp/sukka-stash/skipped.txt
+            if [ -s /tmp/sukka-stash/ios-filtered.txt ]; then
+
+              echo '```text'
+              cat /tmp/sukka-stash/ios-filtered.txt
+              echo '```'
 
             else
 
-              echo "- None"
+              echo "None"
 
             fi
 
+            echo ""
+
+            echo "## non_ip Promoted to domain"
+            echo ""
+
+            if [ -s /tmp/sukka-stash/promoted-domain.txt ]; then
+              sed 's/^/- /' \
+                /tmp/sukka-stash/promoted-domain.txt
+            else
+              echo "- None"
+            fi
+
+            echo ""
+
+            echo "## IP Promoted to ipcidr"
+            echo ""
+
+            if [ -s /tmp/sukka-stash/promoted-ipcidr.txt ]; then
+              sed 's/^/- /' \
+                /tmp/sukka-stash/promoted-ipcidr.txt
+            else
+              echo "- None"
+            fi
+
+            echo ""
+
+            echo "## ipcidr Providers Requiring no-resolve"
+            echo ""
+
+            if [ -s /tmp/sukka-stash/no-resolve-ipcidr.txt ]; then
+              sed 's/^/- /' \
+                /tmp/sukka-stash/no-resolve-ipcidr.txt
+            else
+              echo "- None"
+            fi
+
+            echo ""
+
+            echo "## Skipped Sources"
+            echo ""
+
+            if [ -s /tmp/sukka-stash/skipped.txt ]; then
+              sed 's/^/- /' \
+                /tmp/sukka-stash/skipped.txt
+            else
+              echo "- None"
+            fi
 
           } > /tmp/sukka-stash/REPORT.md
 
 
       # ==========================================================
-      # 11. Generate new checksum
+      # 13. Generate rule checksums
       # ==========================================================
 
-      - name: Generate new checksum
+      - name: Generate new rule checksum
         run: |
           set -euo pipefail
 
           cd /tmp/sukka-stash/output
 
-          find domain non_ip ip \
+
+          find domain ipcidr classical \
             -type f \
             -name "*.txt" \
             -print0 \
             | sort -z \
             | xargs -0 sha256sum \
-            > /tmp/sukka-stash/new.sha256
+            > /tmp/sukka-stash/new-rules.sha256
 
 
           sha256sum \
-            /tmp/sukka-stash/new.sha256 \
+            /tmp/sukka-stash/new-rules.sha256 \
+            | awk '{print $1}' \
+            > /tmp/sukka-stash/new-rules.master
+
+
+          echo "New rules hash:"
+          cat /tmp/sukka-stash/new-rules.master
+
+
+      # ==========================================================
+      # 14. Generate semantic version fingerprint
+      #
+      # Rules + Semantic audit are both part of the version.
+      #
+      # Therefore:
+      # upstream semantic change
+      # even with identical final rules
+      # can still update the audit metadata.
+      # ==========================================================
+
+      - name: Generate semantic fingerprint
+        run: |
+          set -euo pipefail
+
+
+          {
+            cat /tmp/sukka-stash/new-rules.master
+
+            sha256sum \
+              /tmp/sukka-stash/SEMANTIC_AUDIT.json \
+              | awk '{print $1}'
+
+          } > /tmp/sukka-stash/fingerprint.input
+
+
+          sha256sum \
+            /tmp/sukka-stash/fingerprint.input \
             | awk '{print $1}' \
             > /tmp/sukka-stash/new.master
 
 
-          echo "New rule version:"
+          echo "New semantic version:"
           cat /tmp/sukka-stash/new.master
 
 
       # ==========================================================
-      # 12. Generate current checksum
+      # 15. Current semantic fingerprint
       # ==========================================================
 
-      - name: Generate current checksum
+      - name: Generate current fingerprint
         run: |
           set -euo pipefail
 
+
           if [ -d domain ] && \
-             [ -d non_ip ] && \
-             [ -d ip ] && \
-             find domain non_ip ip \
-               -type f \
-               -name "*.txt" \
-               | grep -q .; then
+             [ -d ipcidr ] && \
+             [ -d classical ] && \
+             [ -s SEMANTIC_AUDIT.json ]; then
 
 
-            find domain non_ip ip \
+            find domain ipcidr classical \
               -type f \
               -name "*.txt" \
               -print0 \
               | sort -z \
               | xargs -0 sha256sum \
-              > /tmp/sukka-stash/current.sha256
+              > /tmp/sukka-stash/current-rules.sha256
 
 
             sha256sum \
-              /tmp/sukka-stash/current.sha256 \
+              /tmp/sukka-stash/current-rules.sha256 \
+              | awk '{print $1}' \
+              > /tmp/sukka-stash/current-rules.master
+
+
+            {
+              cat /tmp/sukka-stash/current-rules.master
+
+              sha256sum \
+                SEMANTIC_AUDIT.json \
+                | awk '{print $1}'
+
+            } > /tmp/sukka-stash/current-fingerprint.input
+
+
+            sha256sum \
+              /tmp/sukka-stash/current-fingerprint.input \
               | awk '{print $1}' \
               > /tmp/sukka-stash/current.master
 
 
           else
 
-            echo "none" \
+            echo "migration-required" \
               > /tmp/sukka-stash/current.master
 
           fi
 
 
-          echo "Current rule version:"
+          echo "Current semantic version:"
           cat /tmp/sukka-stash/current.master
 
 
       # ==========================================================
-      # 13. Compare
+      # 16. Compare
       # ==========================================================
 
-      - name: Compare rule versions
+      - name: Compare versions
         id: compare
         run: |
           set -euo pipefail
 
+
           NEW=$(cat /tmp/sukka-stash/new.master)
+
           OLD=$(cat /tmp/sukka-stash/current.master)
 
 
@@ -964,20 +2287,20 @@ jobs:
             echo "changed=false" \
               >> "$GITHUB_OUTPUT"
 
-            echo "Rules already up to date."
+            echo "Rules and semantic audit are unchanged."
 
           else
 
             echo "changed=true" \
               >> "$GITHUB_OUTPUT"
 
-            echo "New Stash iOS rules detected."
+            echo "Rule or semantic audit update detected."
 
           fi
 
 
       # ==========================================================
-      # 14. No update
+      # 17. No update
       # ==========================================================
 
       - name: No update required
@@ -985,26 +2308,27 @@ jobs:
         run: |
           echo ""
           echo "===================================="
-          echo " Sukka -> Stash V1.2 iOS"
+          echo " Sukka -> Stash V1.4.2"
           echo "===================================="
-          echo " STATUS : UP TO DATE"
-          echo " COMMIT : NO"
+          echo " RULES     : UP TO DATE"
+          echo " AUDIT     : UP TO DATE"
+          echo " COMMIT    : NO"
           echo "===================================="
 
 
       # ==========================================================
-      # 15. Replace rules
+      # 18. Replace output
       # ==========================================================
 
-      - name: Replace Stash rules
+      - name: Replace optimized directories
         if: steps.compare.outputs.changed == 'true'
         run: |
           set -euo pipefail
 
 
           rm -rf domain.new
-          rm -rf non_ip.new
-          rm -rf ip.new
+          rm -rf ipcidr.new
+          rm -rf classical.new
 
 
           cp -a \
@@ -1013,13 +2337,13 @@ jobs:
 
 
           cp -a \
-            /tmp/sukka-stash/output/non_ip \
-            non_ip.new
+            /tmp/sukka-stash/output/ipcidr \
+            ipcidr.new
 
 
           cp -a \
-            /tmp/sukka-stash/output/ip \
-            ip.new
+            /tmp/sukka-stash/output/classical \
+            classical.new
 
 
           DOMAIN_COUNT=$(
@@ -1030,424 +2354,27 @@ jobs:
           )
 
 
-          NON_IP_COUNT=$(
-            find non_ip.new \
+          IPCIDR_COUNT=$(
+            find ipcidr.new \
               -type f \
               -name "*.txt" \
               | wc -l
           )
 
 
-          IP_COUNT=$(
-            find ip.new \
+          CLASSICAL_COUNT=$(
+            find classical.new \
               -type f \
               -name "*.txt" \
               | wc -l
           )
 
 
-          TOTAL=$((DOMAIN_COUNT + NON_IP_COUNT + IP_COUNT))
-
-
-          echo ""
-          echo "===================================="
-          echo " New Stash iOS Rules"
-          echo "===================================="
-          echo " domain : ${DOMAIN_COUNT}"
-          echo " non_ip : ${NON_IP_COUNT}"
-          echo " ip     : ${IP_COUNT}"
-          echo "------------------------------------"
-          echo " TOTAL  : ${TOTAL}"
-          echo "===================================="
-
-
-          if [ "${TOTAL}" -lt "${MIN_TOTAL_RULES}" ]; then
-
-            echo "ERROR:"
-            echo "Pre-replacement validation failed."
-
-            rm -rf \
-              domain.new \
-              non_ip.new \
-              ip.new
-
-            exit 1
-          fi
-
-
-          if [ "${DOMAIN_COUNT}" -eq 0 ] || \
-             [ "${NON_IP_COUNT}" -eq 0 ] || \
-             [ "${IP_COUNT}" -eq 0 ]; then
-
-            echo "ERROR:"
-            echo "One or more rule categories are empty."
-
-            rm -rf \
-              domain.new \
-              non_ip.new \
-              ip.new
-
-            exit 1
-          fi
-
-
-          rm -rf \
-            domain \
-            non_ip \
-            ip
-
-
-          mv domain.new domain
-          mv non_ip.new non_ip
-          mv ip.new ip
-
-
-          echo ""
-          echo "Stash iOS rules replaced successfully."
-
-
-      # ==========================================================
-      # 16. Save metadata
-      # ==========================================================
-
-      - name: Save metadata
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          cp \
-            /tmp/sukka-stash/new.sha256 \
-            RULES_SHA256SUMS.txt
-
-
-          cp \
-            /tmp/sukka-stash/new.master \
-            RULES_VERSION.sha256
-
-
-          cp \
-            /tmp/sukka-stash/REPORT.md \
-            CONVERSION_REPORT.md
-
-
-      # ==========================================================
-      # 17. Update README
-      # ==========================================================
-
-      - name: Update README
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          DOMAIN=$(
-            find domain \
-              -type f \
-              -name "*.txt" \
-              | wc -l
+          TOTAL=$(
+            (
+              DOMAIN_COUNT
+              + IPCIDR_COUNT
+              + CLASSICAL_COUNT
+            )
           )
 
-
-          NON_IP=$(
-            find non_ip \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          IP=$(
-            find ip \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          TOTAL=$((DOMAIN + NON_IP + IP))
-
-
-          FILTERED=$(
-            if [ -s /tmp/sukka-stash/ios-filtered.txt ]; then
-              wc -l < /tmp/sukka-stash/ios-filtered.txt
-            else
-              echo 0
-            fi
-          )
-
-
-          VERSION=$(cat RULES_VERSION.sha256)
-
-
-          cat > README.md <<EOF
-          # Sukka Rules for Stash iOS
-
-          自动将 Sukka Ruleset Server 的通用 List 转换为 iOS Stash 专用 Rule Provider。
-
-          ## Upstream
-
-          https://ruleset.skk.moe/
-
-          ## Mapping
-
-          \`\`\`text
-          List/domainset -> domain/
-          List/non_ip    -> non_ip/
-          List/ip        -> ip/
-          \`\`\`
-
-          ## Provider Type
-
-          | Directory | behavior | format |
-          |---|---|---|
-          | domain | domain | text |
-          | non_ip | classical | text |
-          | ip | classical | text |
-
-          ## iOS Optimization
-
-          自动过滤：
-
-          \`\`\`text
-          PROCESS-NAME
-          PROCESS-PATH
-          \`\`\`
-
-          Filtered Rules:
-
-          \`\`\`
-          ${FILTERED}
-          \`\`\`
-
-          ## Rule Count
-
-          | Type | Count |
-          |---|---:|
-          | domain | ${DOMAIN} |
-          | non_ip | ${NON_IP} |
-          | ip | ${IP} |
-          | Total | ${TOTAL} |
-
-          ## Version
-
-          \`\`\`
-          ${VERSION}
-          \`\`\`
-
-          ## Raw URL Examples
-
-          \`\`\`text
-          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/domain/apple_cdn.txt
-
-          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/non_ip/ai.txt
-
-          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ip/telegram.txt
-          \`\`\`
-
-          ## Stash Example
-
-          \`\`\`yaml
-          rule-providers:
-
-            sukka-apple-cdn:
-              type: http
-              behavior: domain
-              format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/domain/apple_cdn.txt
-              interval: 86400
-
-            sukka-ai:
-              type: http
-              behavior: classical
-              format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/non_ip/ai.txt
-              interval: 86400
-
-            sukka-ai-ip:
-              type: http
-              behavior: classical
-              format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ip/ai.txt
-              interval: 86400
-
-          rules:
-
-            - RULE-SET,sukka-ai,AI
-            - RULE-SET,sukka-ai-ip,AI
-            - RULE-SET,sukka-apple-cdn,DIRECT
-            - MATCH,Proxy
-          \`\`\`
-
-          ## Features
-
-          - 每 24 小时自动同步
-          - 使用 Sukka 通用 List
-          - iOS 自动过滤 PROCESS-NAME / PROCESS-PATH
-          - domainset 转 Stash domain provider
-          - non_ip 保留 classical
-          - ip 保留 classical
-          - 保留 no-resolve
-          - 保留 IP-ASN
-          - 保留 AND / OR / NOT
-          - 不维护容易过时的规则类型白名单
-          - 自动跳过 Deprecated / 空规则
-          - SHA256 校验
-          - 无变化不 Commit
-          - 自动生成转换报告
-
-          ---
-
-          Generated by Sukka List -> Stash V1.2 iOS Final.
-          EOF
-
-
-      # ==========================================================
-      # 18. Final validation
-      # ==========================================================
-
-      - name: Final validation
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          DOMAIN=$(
-            find domain \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          NON_IP=$(
-            find non_ip \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          IP=$(
-            find ip \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          TOTAL=$((DOMAIN + NON_IP + IP))
-
-
-          echo ""
-          echo "===================================="
-          echo " Final Validation"
-          echo "===================================="
-          echo " domain : ${DOMAIN}"
-          echo " non_ip : ${NON_IP}"
-          echo " ip     : ${IP}"
-          echo "------------------------------------"
-          echo " TOTAL  : ${TOTAL}"
-          echo "===================================="
-
-
-          if [ "${TOTAL}" -lt "${MIN_TOTAL_RULES}" ]; then
-
-            echo "ERROR:"
-            echo "Final rule count too low."
-
-            exit 1
-          fi
-
-
-          if [ ! -s RULES_SHA256SUMS.txt ]; then
-
-            echo "ERROR:"
-            echo "RULES_SHA256SUMS.txt missing."
-
-            exit 1
-          fi
-
-
-          if [ ! -s RULES_VERSION.sha256 ]; then
-
-            echo "ERROR:"
-            echo "RULES_VERSION.sha256 missing."
-
-            exit 1
-          fi
-
-
-          if [ ! -s CONVERSION_REPORT.md ]; then
-
-            echo "ERROR:"
-            echo "CONVERSION_REPORT.md missing."
-
-            exit 1
-          fi
-
-
-          # ======================================================
-          # 最终确认没有 iOS PROCESS 规则残留
-          # ======================================================
-
-          if grep -RIE \
-            '^(PROCESS-NAME|PROCESS-PATH),' \
-            non_ip ip \
-            --include="*.txt"; then
-
-            echo "ERROR:"
-            echo "iOS-incompatible process rules remain."
-
-            exit 1
-          fi
-
-
-          echo ""
-          echo "Final validation passed."
-
-
-      # ==========================================================
-      # 19. Commit
-      # ==========================================================
-
-      - name: Commit changes
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-          git add -A
-
-
-          if git diff \
-            --cached \
-            --quiet; then
-
-            echo "No effective changes."
-
-            exit 0
-          fi
-
-
-          git commit \
-            -m "chore: sync Sukka List rules for Stash iOS"
-
-
-          git push
-
-
-      # ==========================================================
-      # 20. Completed
-      # ==========================================================
-
-      - name: Completed
-        run: |
-          echo ""
-          echo "===================================="
-          echo " Sukka List -> Stash V1.2 iOS"
-          echo "===================================="
-          echo " SOURCE : Sukka List"
-          echo " FORMAT : Stash iOS"
-          echo " SYNC   : 24 hours"
-          echo " STATUS : SUCCESS"
-          echo "===================================="
