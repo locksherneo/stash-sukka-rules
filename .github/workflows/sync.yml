@@ -1,19 +1,18 @@
 
-name: Sukka List to Stash V1.0 Final
+name: Sukka List to Stash V1.2 iOS Final
 
 on:
   workflow_dispatch:
 
   schedule:
-    # 每 24 小时同步一次
-    # UTC 06:20
+    # 每天 UTC 06:20 自动执行一次
     - cron: "20 6 * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: sukka-stash-sync
+  group: sukka-stash-ios-sync
   cancel-in-progress: false
 
 jobs:
@@ -77,6 +76,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "Fetching Sukka index..."
+
           curl \
             --fail \
             --location \
@@ -92,6 +93,15 @@ jobs:
 
           if [ ! -s /tmp/sukka-stash/index.html ]; then
             echo "ERROR: Sukka index is empty."
+            exit 1
+          fi
+
+          SIZE=$(wc -c < /tmp/sukka-stash/index.html)
+
+          echo "Index size: ${SIZE} bytes"
+
+          if [ "${SIZE}" -lt 500 ]; then
+            echo "ERROR: Sukka index looks abnormal."
             exit 1
           fi
 
@@ -127,8 +137,9 @@ jobs:
             /tmp/sukka-stash/files.txt || true
           )
 
+          echo ""
           echo "===================================="
-          echo " Sukka List"
+          echo " Sukka List Rules"
           echo "===================================="
           echo " domainset : ${DOMAINSET}"
           echo " non_ip    : ${NON_IP}"
@@ -142,14 +153,24 @@ jobs:
             exit 1
           fi
 
+          if [ "${DOMAINSET}" -eq 0 ] || \
+             [ "${NON_IP}" -eq 0 ] || \
+             [ "${IP}" -eq 0 ]; then
+
+            echo "ERROR: Missing Sukka List category."
+            exit 1
+          fi
+
 
       # ==========================================================
-      # 6. Download Sukka List
+      # 6. Download List rules
       # ==========================================================
 
       - name: Download Sukka List rules
         run: |
           set -euo pipefail
+
+          SUCCESS=0
 
           while IFS= read -r FILE; do
 
@@ -177,18 +198,24 @@ jobs:
               -o "${DEST}"
 
             if [ ! -s "${DEST}" ]; then
-              echo "ERROR: Empty source file: ${FILE}"
+              echo "ERROR: Empty source file:"
+              echo "${FILE}"
               exit 1
             fi
 
+            SUCCESS=$((SUCCESS + 1))
+
           done < /tmp/sukka-stash/files.txt
 
+          echo ""
+          echo "Downloaded ${SUCCESS} source files."
+
 
       # ==========================================================
-      # 7. Convert Sukka List → Stash
+      # 7. Convert Sukka List -> Stash iOS
       # ==========================================================
 
-      - name: Convert List rules to Stash
+      - name: Convert List rules to Stash iOS
         run: |
           set -euo pipefail
 
@@ -198,26 +225,35 @@ jobs:
           SRC = Path("/tmp/sukka-stash/source")
           OUT = Path("/tmp/sukka-stash/output")
 
-          skipped = []
+          IOS_UNSUPPORTED_TYPES = {
+              "PROCESS-NAME",
+              "PROCESS-PATH",
+          }
+
+          skipped_files = []
+          ios_filtered = []
+
           generated = 0
+          filtered_count = 0
 
 
-          def deprecated(text: str) -> bool:
-              low = text.lower()
+          def is_deprecated(text: str) -> bool:
+              lower = text.lower()
 
               return (
-                  "deprecated" in low
-                  or "has been merged with" in low
-                  or "has been merged into" in low
+                  "deprecated" in lower
+                  or "has been merged with" in lower
+                  or "has been merged into" in lower
               )
 
 
           # ======================================================
-          # domainset -> behavior: domain
+          # domainset -> Stash behavior: domain
           #
-          # Stash domain text provider 支持：
+          # Sukka:
+          # .example.com
           #
-          # example.com
+          # Stash:
           # +.example.com
           # ======================================================
 
@@ -230,13 +266,17 @@ jobs:
                   errors="ignore"
               )
 
-              if deprecated(text):
-                  skipped.append(
+              if is_deprecated(text):
+
+                  skipped_files.append(
                       f"DEPRECATED: domainset/{src.name}"
                   )
+
                   continue
 
+
               output = []
+
 
               for raw in text.splitlines():
 
@@ -248,24 +288,21 @@ jobs:
                   if line.startswith("#"):
                       continue
 
+
                   if line.startswith("."):
+                      line = "+." + line[1:]
 
-                      # Sukka .example.com
-                      # 转换 Stash +.example.com
-                      output.append(
-                          "+." + line[1:]
-                      )
 
-                  else:
-
+                  if line not in output:
                       output.append(line)
 
 
               if not output:
 
-                  skipped.append(
+                  skipped_files.append(
                       f"EMPTY: domainset/{src.name}"
                   )
+
                   continue
 
 
@@ -275,6 +312,7 @@ jobs:
                   / f"{src.stem}.txt"
               )
 
+
               dst.write_text(
                   "\n".join(output) + "\n",
                   encoding="utf-8"
@@ -284,27 +322,36 @@ jobs:
 
 
           # ======================================================
-          # non_ip -> behavior: classical
-          #
-          # 直接保留 Sukka List 规则语法
+          # classical converter
           # ======================================================
 
-          for src in sorted(
-              (SRC / "non_ip").glob("*.conf")
+          def convert_classical(
+              src: Path,
+              dst: Path,
+              category: str
           ):
+
+              global generated
+              global filtered_count
+
 
               text = src.read_text(
                   encoding="utf-8",
                   errors="ignore"
               )
 
-              if deprecated(text):
-                  skipped.append(
-                      f"DEPRECATED: non_ip/{src.name}"
+
+              if is_deprecated(text):
+
+                  skipped_files.append(
+                      f"DEPRECATED: {category}/{src.name}"
                   )
-                  continue
+
+                  return
+
 
               output = []
+
 
               for raw in text.splitlines():
 
@@ -316,16 +363,76 @@ jobs:
                   if line.startswith("#"):
                       continue
 
-                  output.append(line)
+
+                  # ==============================================
+                  # iOS process rule filter
+                  # ==============================================
+
+                  if "," in line:
+
+                      rule_type = (
+                          line.split(",", 1)[0]
+                          .strip()
+                          .upper()
+                      )
+
+                      if rule_type in IOS_UNSUPPORTED_TYPES:
+
+                          ios_filtered.append(
+                              f"{category}/{src.name}: {line}"
+                          )
+
+                          filtered_count += 1
+
+                          continue
+
+
+                  # ==============================================
+                  # 其余 Sukka classical 规则尽量原样保留
+                  #
+                  # 包括：
+                  # DOMAIN-*
+                  # IP-CIDR
+                  # IP-CIDR6
+                  # IP-ASN
+                  # GEOIP
+                  # URL-REGEX
+                  # USER-AGENT
+                  # NETWORK
+                  # PROTOCOL
+                  # AND / OR / NOT
+                  # no-resolve
+                  # ==============================================
+
+                  if line not in output:
+                      output.append(line)
 
 
               if not output:
 
-                  skipped.append(
-                      f"EMPTY: non_ip/{src.name}"
+                  skipped_files.append(
+                      f"EMPTY AFTER IOS FILTER: "
+                      f"{category}/{src.name}"
                   )
-                  continue
 
+                  return
+
+
+              dst.write_text(
+                  "\n".join(output) + "\n",
+                  encoding="utf-8"
+              )
+
+              generated += 1
+
+
+          # ======================================================
+          # non_ip
+          # ======================================================
+
+          for src in sorted(
+              (SRC / "non_ip").glob("*.conf")
+          ):
 
               dst = (
                   OUT
@@ -333,62 +440,20 @@ jobs:
                   / f"{src.stem}.txt"
               )
 
-              dst.write_text(
-                  "\n".join(output) + "\n",
-                  encoding="utf-8"
+              convert_classical(
+                  src,
+                  dst,
+                  "non_ip"
               )
-
-              generated += 1
 
 
           # ======================================================
-          # ip -> behavior: classical
-          #
-          # 保留：
-          # IP-CIDR
-          # IP-CIDR6
-          # IP-ASN
-          # GEOIP
-          # no-resolve
+          # ip
           # ======================================================
 
           for src in sorted(
               (SRC / "ip").glob("*.conf")
           ):
-
-              text = src.read_text(
-                  encoding="utf-8",
-                  errors="ignore"
-              )
-
-              if deprecated(text):
-                  skipped.append(
-                      f"DEPRECATED: ip/{src.name}"
-                  )
-                  continue
-
-              output = []
-
-              for raw in text.splitlines():
-
-                  line = raw.strip()
-
-                  if not line:
-                      continue
-
-                  if line.startswith("#"):
-                      continue
-
-                  output.append(line)
-
-
-              if not output:
-
-                  skipped.append(
-                      f"EMPTY: ip/{src.name}"
-                  )
-                  continue
-
 
               dst = (
                   OUT
@@ -396,38 +461,61 @@ jobs:
                   / f"{src.stem}.txt"
               )
 
-              dst.write_text(
-                  "\n".join(output) + "\n",
-                  encoding="utf-8"
+              convert_classical(
+                  src,
+                  dst,
+                  "ip"
               )
 
-              generated += 1
+
+          # ======================================================
+          # Reports
+          # ======================================================
+
+          print("")
+          print("====================================")
+          print(" Sukka -> Stash iOS Conversion")
+          print("====================================")
+          print(f" Generated     : {generated}")
+          print(f" iOS filtered  : {filtered_count}")
+          print(f" Skipped files : {len(skipped_files)}")
+          print("====================================")
 
 
-          print(
-              f"Generated {generated} Stash rule sets."
-          )
-
-
-          if skipped:
+          if skipped_files:
 
               Path(
                   "/tmp/sukka-stash/skipped.txt"
               ).write_text(
-                  "\n".join(skipped),
+                  "\n".join(skipped_files),
                   encoding="utf-8"
               )
 
-              print("")
-              print("Skipped:")
 
-              for item in skipped:
+          if ios_filtered:
+
+              Path(
+                  "/tmp/sukka-stash/ios-filtered.txt"
+              ).write_text(
+                  "\n".join(ios_filtered),
+                  encoding="utf-8"
+              )
+
+
+              print("")
+              print("Filtered iOS process rules:")
+
+              for item in ios_filtered[:50]:
                   print(f"  {item}")
+
+              if len(ios_filtered) > 50:
+                  print("  ...")
 
 
           if generated == 0:
+
               raise RuntimeError(
-                  "No Stash rule sets generated."
+                  "No Stash iOS rule sets generated."
               )
 
           PY
@@ -464,9 +552,10 @@ jobs:
 
           TOTAL=$((DOMAIN + NON_IP + IP))
 
+
           echo ""
           echo "===================================="
-          echo " Stash Rule Sets"
+          echo " Stash iOS Rule Sets"
           echo "===================================="
           echo " domain : ${DOMAIN}"
           echo " non_ip : ${NON_IP}"
@@ -475,53 +564,82 @@ jobs:
           echo " TOTAL  : ${TOTAL}"
           echo "===================================="
 
+
           if [ "${TOTAL}" -lt "${MIN_TOTAL_RULES}" ]; then
-            echo "ERROR: Too few Stash rule sets."
+            echo "ERROR: Too few Stash iOS rule sets."
+            exit 1
+          fi
+
+
+          if [ "${DOMAIN}" -eq 0 ] || \
+             [ "${NON_IP}" -eq 0 ] || \
+             [ "${IP}" -eq 0 ]; then
+
+            echo "ERROR: One or more categories are empty."
+            exit 1
+          fi
+
+
+          EMPTY=0
+
+
+          while IFS= read -r FILE; do
+
+            if [ ! -s "${FILE}" ]; then
+
+              echo "ERROR: Empty generated file:"
+              echo "${FILE}"
+
+              EMPTY=$((EMPTY + 1))
+
+            fi
+
+          done < <(
+            find /tmp/sukka-stash/output \
+              -type f \
+              -name "*.txt"
+          )
+
+
+          if [ "${EMPTY}" -ne 0 ]; then
             exit 1
           fi
 
 
       # ==========================================================
-      # 9. Check dangerous / invalid lines
+      # 9. Tolerant Stash iOS audit
+      #
+      # 不维护完整规则类型白名单
       # ==========================================================
 
-      - name: Validate Stash rule syntax
+      - name: Validate Stash iOS rules
         run: |
           set -euo pipefail
 
           python3 <<'PY'
           from pathlib import Path
 
-          root = Path(
-              "/tmp/sukka-stash/output"
-          )
+          ROOT = Path("/tmp/sukka-stash/output")
 
-          allowed = {
-              "DOMAIN",
-              "DOMAIN-SUFFIX",
-              "DOMAIN-KEYWORD",
-              "DOMAIN-REGEX",
-              "DOMAIN-WILDCARD",
-              "IP-CIDR",
-              "IP-CIDR6",
-              "IP-ASN",
-              "GEOIP",
-              "URL-REGEX",
-              "USER-AGENT",
-              "DEST-PORT",
-              "DST-PORT",
-              "PROTOCOL",
+          IOS_FORBIDDEN = {
+              "PROCESS-NAME",
+              "PROCESS-PATH",
           }
 
           errors = []
+          checked = 0
+          types = {}
 
 
-          # domain provider
-          for file in (
-              root / "domain"
-          ).glob("*.txt"):
+          # ======================================================
+          # domain behavior
+          # ======================================================
 
-              for i, raw in enumerate(
+          for file in sorted(
+              (ROOT / "domain").glob("*.txt")
+          ):
+
+              for lineno, raw in enumerate(
                   file.read_text(
                       encoding="utf-8",
                       errors="ignore"
@@ -534,21 +652,33 @@ jobs:
                   if not line:
                       continue
 
+                  if line.startswith("#"):
+                      continue
+
+
+                  checked += 1
+
+
                   if "," in line:
+
                       errors.append(
-                          f"{file}:{i}: "
-                          f"unexpected classical syntax"
+                          f"{file}:{lineno}: "
+                          f"classical syntax found "
+                          f"in domain provider: {line}"
                       )
 
 
+          # ======================================================
           # classical providers
-          for folder in ["non_ip", "ip"]:
+          # ======================================================
 
-              for file in (
-                  root / folder
-              ).glob("*.txt"):
+          for folder in ("non_ip", "ip"):
 
-                  for i, raw in enumerate(
+              for file in sorted(
+                  (ROOT / folder).glob("*.txt")
+              ):
+
+                  for lineno, raw in enumerate(
                       file.read_text(
                           encoding="utf-8",
                           errors="ignore"
@@ -561,47 +691,126 @@ jobs:
                       if not line:
                           continue
 
-                      if "," not in line:
-                          errors.append(
-                              f"{file}:{i}: "
-                              f"missing comma"
-                          )
+                      if line.startswith("#"):
                           continue
 
+
+                      checked += 1
+
+
+                      if "," not in line:
+
+                          errors.append(
+                              f"{file}:{lineno}: "
+                              f"invalid classical rule: "
+                              f"{line}"
+                          )
+
+                          continue
+
+
+                      rule_type, remainder = (
+                          line.split(",", 1)
+                      )
+
                       rule_type = (
-                          line.split(",", 1)[0]
+                          rule_type
                           .strip()
                           .upper()
                       )
 
-                      if rule_type not in allowed:
+                      remainder = remainder.strip()
+
+
+                      if not rule_type:
+
                           errors.append(
-                              f"{file}:{i}: "
-                              f"unknown type "
-                              f"{rule_type}"
+                              f"{file}:{lineno}: "
+                              f"empty rule type"
                           )
+
+                          continue
+
+
+                      if not remainder:
+
+                          errors.append(
+                              f"{file}:{lineno}: "
+                              f"empty rule value"
+                          )
+
+                          continue
+
+
+                      types[rule_type] = (
+                          types.get(rule_type, 0) + 1
+                      )
+
+
+                      if rule_type in IOS_FORBIDDEN:
+
+                          errors.append(
+                              f"{file}:{lineno}: "
+                              f"iOS process rule remained: "
+                              f"{line}"
+                          )
+
+
+          print("")
+          print("====================================")
+          print(" Stash iOS Rule Audit")
+          print("====================================")
+          print(f" Checked : {checked}")
+          print(f" Errors  : {len(errors)}")
+          print("------------------------------------")
+          print("Detected rule types:")
+
+
+          for rule_type in sorted(types):
+
+              print(
+                  f"  {rule_type:<24} "
+                  f"{types[rule_type]}"
+              )
+
+
+          print("====================================")
 
 
           if errors:
 
               print("")
-              print("Invalid rules:")
+              print("Validation errors:")
 
-              for item in errors[:50]:
-                  print(item)
+
+              for item in errors[:100]:
+                  print(f"  {item}")
+
+
+              if len(errors) > 100:
+
+                  print(
+                      f"  ... and "
+                      f"{len(errors) - 100} more"
+                  )
+
 
               raise RuntimeError(
-                  f"{len(errors)} invalid rules found"
+                  f"{len(errors)} Stash iOS "
+                  f"validation errors found"
               )
 
 
-          print("Stash rule syntax validation passed.")
+          print("")
+          print(
+              "Stash iOS rule audit passed."
+          )
 
           PY
 
 
       # ==========================================================
-      # 10. Generate report
+      # 10. Generate conversion report
       # ==========================================================
 
       - name: Generate conversion report
@@ -609,17 +818,38 @@ jobs:
           set -euo pipefail
 
           {
-            echo "# Sukka -> Stash Conversion Report"
+            echo "# Sukka -> Stash iOS Conversion Report"
             echo ""
             echo "Source:"
             echo ""
             echo "https://ruleset.skk.moe/"
             echo ""
+
             echo "## Mapping"
             echo ""
-            echo "- List/domainset -> domain/*.txt"
-            echo "- List/non_ip -> non_ip/*.txt"
-            echo "- List/ip -> ip/*.txt"
+            echo "- List/domainset -> domain/"
+            echo "- List/non_ip -> non_ip/"
+            echo "- List/ip -> ip/"
+            echo ""
+
+            echo "## iOS filtered rules"
+            echo ""
+
+            if [ -s /tmp/sukka-stash/ios-filtered.txt ]; then
+
+              echo '```text'
+
+              cat /tmp/sukka-stash/ios-filtered.txt
+
+              echo '```'
+
+            else
+
+              echo "None"
+
+            fi
+
+
             echo ""
             echo "## Skipped source files"
             echo ""
@@ -634,6 +864,7 @@ jobs:
               echo "- None"
 
             fi
+
 
           } > /tmp/sukka-stash/REPORT.md
 
@@ -656,14 +887,19 @@ jobs:
             | xargs -0 sha256sum \
             > /tmp/sukka-stash/new.sha256
 
+
           sha256sum \
             /tmp/sukka-stash/new.sha256 \
             | awk '{print $1}' \
             > /tmp/sukka-stash/new.master
 
 
+          echo "New rule version:"
+          cat /tmp/sukka-stash/new.master
+
+
       # ==========================================================
-      # 12. Current checksum
+      # 12. Generate current checksum
       # ==========================================================
 
       - name: Generate current checksum
@@ -678,6 +914,7 @@ jobs:
                -name "*.txt" \
                | grep -q .; then
 
+
             find domain non_ip ip \
               -type f \
               -name "*.txt" \
@@ -686,10 +923,12 @@ jobs:
               | xargs -0 sha256sum \
               > /tmp/sukka-stash/current.sha256
 
+
             sha256sum \
               /tmp/sukka-stash/current.sha256 \
               | awk '{print $1}' \
               > /tmp/sukka-stash/current.master
+
 
           else
 
@@ -697,6 +936,10 @@ jobs:
               > /tmp/sukka-stash/current.master
 
           fi
+
+
+          echo "Current rule version:"
+          cat /tmp/sukka-stash/current.master
 
 
       # ==========================================================
@@ -711,8 +954,10 @@ jobs:
           NEW=$(cat /tmp/sukka-stash/new.master)
           OLD=$(cat /tmp/sukka-stash/current.master)
 
+
           echo "Old: ${OLD}"
           echo "New: ${NEW}"
+
 
           if [ "${NEW}" = "${OLD}" ]; then
 
@@ -726,19 +971,36 @@ jobs:
             echo "changed=true" \
               >> "$GITHUB_OUTPUT"
 
-            echo "New rules detected."
+            echo "New Stash iOS rules detected."
 
           fi
 
 
       # ==========================================================
-      # 14. Replace
+      # 14. No update
+      # ==========================================================
+
+      - name: No update required
+        if: steps.compare.outputs.changed == 'false'
+        run: |
+          echo ""
+          echo "===================================="
+          echo " Sukka -> Stash V1.2 iOS"
+          echo "===================================="
+          echo " STATUS : UP TO DATE"
+          echo " COMMIT : NO"
+          echo "===================================="
+
+
+      # ==========================================================
+      # 15. Replace rules
       # ==========================================================
 
       - name: Replace Stash rules
         if: steps.compare.outputs.changed == 'true'
         run: |
           set -euo pipefail
+
 
           rm -rf domain.new
           rm -rf non_ip.new
@@ -749,9 +1011,11 @@ jobs:
             /tmp/sukka-stash/output/domain \
             domain.new
 
+
           cp -a \
             /tmp/sukka-stash/output/non_ip \
             non_ip.new
+
 
           cp -a \
             /tmp/sukka-stash/output/ip \
@@ -765,12 +1029,14 @@ jobs:
               | wc -l
           )
 
+
           NON_IP_COUNT=$(
             find non_ip.new \
               -type f \
               -name "*.txt" \
               | wc -l
           )
+
 
           IP_COUNT=$(
             find ip.new \
@@ -779,36 +1045,69 @@ jobs:
               | wc -l
           )
 
-          TOTAL=$(
-            (
-              DOMAIN_COUNT
-            )
-          )
 
-          TOTAL=$(
-            expr \
-              "${DOMAIN_COUNT}" \
-              + "${NON_IP_COUNT}" \
-              + "${IP_COUNT}"
-          )
+          TOTAL=$((DOMAIN_COUNT + NON_IP_COUNT + IP_COUNT))
+
+
+          echo ""
+          echo "===================================="
+          echo " New Stash iOS Rules"
+          echo "===================================="
+          echo " domain : ${DOMAIN_COUNT}"
+          echo " non_ip : ${NON_IP_COUNT}"
+          echo " ip     : ${IP_COUNT}"
+          echo "------------------------------------"
+          echo " TOTAL  : ${TOTAL}"
+          echo "===================================="
+
 
           if [ "${TOTAL}" -lt "${MIN_TOTAL_RULES}" ]; then
 
-            echo "ERROR: Replacement validation failed."
+            echo "ERROR:"
+            echo "Pre-replacement validation failed."
+
+            rm -rf \
+              domain.new \
+              non_ip.new \
+              ip.new
 
             exit 1
           fi
 
 
-          rm -rf domain non_ip ip
+          if [ "${DOMAIN_COUNT}" -eq 0 ] || \
+             [ "${NON_IP_COUNT}" -eq 0 ] || \
+             [ "${IP_COUNT}" -eq 0 ]; then
+
+            echo "ERROR:"
+            echo "One or more rule categories are empty."
+
+            rm -rf \
+              domain.new \
+              non_ip.new \
+              ip.new
+
+            exit 1
+          fi
+
+
+          rm -rf \
+            domain \
+            non_ip \
+            ip
+
 
           mv domain.new domain
           mv non_ip.new non_ip
           mv ip.new ip
 
 
+          echo ""
+          echo "Stash iOS rules replaced successfully."
+
+
       # ==========================================================
-      # 15. Save checksum / report
+      # 16. Save metadata
       # ==========================================================
 
       - name: Save metadata
@@ -816,13 +1115,16 @@ jobs:
         run: |
           set -euo pipefail
 
+
           cp \
             /tmp/sukka-stash/new.sha256 \
             RULES_SHA256SUMS.txt
 
+
           cp \
             /tmp/sukka-stash/new.master \
             RULES_VERSION.sha256
+
 
           cp \
             /tmp/sukka-stash/REPORT.md \
@@ -830,13 +1132,14 @@ jobs:
 
 
       # ==========================================================
-      # 16. README
+      # 17. Update README
       # ==========================================================
 
       - name: Update README
         if: steps.compare.outputs.changed == 'true'
         run: |
           set -euo pipefail
+
 
           DOMAIN=$(
             find domain \
@@ -845,12 +1148,14 @@ jobs:
               | wc -l
           )
 
+
           NON_IP=$(
             find non_ip \
               -type f \
               -name "*.txt" \
               | wc -l
           )
+
 
           IP=$(
             find ip \
@@ -859,17 +1164,26 @@ jobs:
               | wc -l
           )
 
+
           TOTAL=$((DOMAIN + NON_IP + IP))
 
-          VERSION=$(
-            cat RULES_VERSION.sha256
+
+          FILTERED=$(
+            if [ -s /tmp/sukka-stash/ios-filtered.txt ]; then
+              wc -l < /tmp/sukka-stash/ios-filtered.txt
+            else
+              echo 0
+            fi
           )
 
 
-          cat > README.md <<EOF
-          # Sukka Rules for Stash
+          VERSION=$(cat RULES_VERSION.sha256)
 
-          自动将 Sukka Ruleset Server 的通用 List 转换为 Stash Rule Provider。
+
+          cat > README.md <<EOF
+          # Sukka Rules for Stash iOS
+
+          自动将 Sukka Ruleset Server 的通用 List 转换为 iOS Stash 专用 Rule Provider。
 
           ## Upstream
 
@@ -885,11 +1199,26 @@ jobs:
 
           ## Provider Type
 
-          | Directory | Stash behavior | format |
+          | Directory | behavior | format |
           |---|---|---|
           | domain | domain | text |
           | non_ip | classical | text |
           | ip | classical | text |
+
+          ## iOS Optimization
+
+          自动过滤：
+
+          \`\`\`text
+          PROCESS-NAME
+          PROCESS-PATH
+          \`\`\`
+
+          Filtered Rules:
+
+          \`\`\`
+          ${FILTERED}
+          \`\`\`
 
           ## Rule Count
 
@@ -906,7 +1235,7 @@ jobs:
           ${VERSION}
           \`\`\`
 
-          ## Raw Examples
+          ## Raw URL Examples
 
           \`\`\`text
           https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/domain/apple_cdn.txt
@@ -935,42 +1264,151 @@ jobs:
               url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/non_ip/ai.txt
               interval: 86400
 
-            sukka-telegram-ip:
+            sukka-ai-ip:
               type: http
               behavior: classical
               format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ip/telegram.txt
+              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ip/ai.txt
               interval: 86400
 
           rules:
 
             - RULE-SET,sukka-ai,AI
-            - RULE-SET,sukka-telegram-ip,Telegram
+            - RULE-SET,sukka-ai-ip,AI
             - RULE-SET,sukka-apple-cdn,DIRECT
             - MATCH,Proxy
           \`\`\`
 
           ## Features
 
-          - 每 24 小时同步一次
-          - 直接读取 Sukka 通用 List
-          - domainset 自动转换为 Stash domain provider
-          - non_ip 保留 classical 规则语义
-          - ip 保留 IP-CIDR / IP-CIDR6 / IP-ASN / GEOIP
+          - 每 24 小时自动同步
+          - 使用 Sukka 通用 List
+          - iOS 自动过滤 PROCESS-NAME / PROCESS-PATH
+          - domainset 转 Stash domain provider
+          - non_ip 保留 classical
+          - ip 保留 classical
           - 保留 no-resolve
-          - 自动跳过 Deprecated
-          - 规则语法检查
+          - 保留 IP-ASN
+          - 保留 AND / OR / NOT
+          - 不维护容易过时的规则类型白名单
+          - 自动跳过 Deprecated / 空规则
           - SHA256 校验
           - 无变化不 Commit
+          - 自动生成转换报告
 
           ---
 
-          Generated by Sukka List -> Stash V1.0 Final.
+          Generated by Sukka List -> Stash V1.2 iOS Final.
           EOF
 
 
       # ==========================================================
-      # 17. Commit
+      # 18. Final validation
+      # ==========================================================
+
+      - name: Final validation
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+
+          DOMAIN=$(
+            find domain \
+              -type f \
+              -name "*.txt" \
+              | wc -l
+          )
+
+
+          NON_IP=$(
+            find non_ip \
+              -type f \
+              -name "*.txt" \
+              | wc -l
+          )
+
+
+          IP=$(
+            find ip \
+              -type f \
+              -name "*.txt" \
+              | wc -l
+          )
+
+
+          TOTAL=$((DOMAIN + NON_IP + IP))
+
+
+          echo ""
+          echo "===================================="
+          echo " Final Validation"
+          echo "===================================="
+          echo " domain : ${DOMAIN}"
+          echo " non_ip : ${NON_IP}"
+          echo " ip     : ${IP}"
+          echo "------------------------------------"
+          echo " TOTAL  : ${TOTAL}"
+          echo "===================================="
+
+
+          if [ "${TOTAL}" -lt "${MIN_TOTAL_RULES}" ]; then
+
+            echo "ERROR:"
+            echo "Final rule count too low."
+
+            exit 1
+          fi
+
+
+          if [ ! -s RULES_SHA256SUMS.txt ]; then
+
+            echo "ERROR:"
+            echo "RULES_SHA256SUMS.txt missing."
+
+            exit 1
+          fi
+
+
+          if [ ! -s RULES_VERSION.sha256 ]; then
+
+            echo "ERROR:"
+            echo "RULES_VERSION.sha256 missing."
+
+            exit 1
+          fi
+
+
+          if [ ! -s CONVERSION_REPORT.md ]; then
+
+            echo "ERROR:"
+            echo "CONVERSION_REPORT.md missing."
+
+            exit 1
+          fi
+
+
+          # ======================================================
+          # 最终确认没有 iOS PROCESS 规则残留
+          # ======================================================
+
+          if grep -RIE \
+            '^(PROCESS-NAME|PROCESS-PATH),' \
+            non_ip ip \
+            --include="*.txt"; then
+
+            echo "ERROR:"
+            echo "iOS-incompatible process rules remain."
+
+            exit 1
+          fi
+
+
+          echo ""
+          echo "Final validation passed."
+
+
+      # ==========================================================
+      # 19. Commit
       # ==========================================================
 
       - name: Commit changes
@@ -979,6 +1417,7 @@ jobs:
           set -euo pipefail
 
           git add -A
+
 
           if git diff \
             --cached \
@@ -989,24 +1428,26 @@ jobs:
             exit 0
           fi
 
+
           git commit \
-            -m "chore: sync Sukka List rules for Stash"
+            -m "chore: sync Sukka List rules for Stash iOS"
+
 
           git push
 
 
       # ==========================================================
-      # 18. Completed
+      # 20. Completed
       # ==========================================================
 
       - name: Completed
         run: |
           echo ""
           echo "===================================="
-          echo " Sukka List -> Stash V1.0 Final"
+          echo " Sukka List -> Stash V1.2 iOS"
           echo "===================================="
           echo " SOURCE : Sukka List"
-          echo " FORMAT : Stash"
+          echo " FORMAT : Stash iOS"
           echo " SYNC   : 24 hours"
           echo " STATUS : SUCCESS"
           echo "===================================="
