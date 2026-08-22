@@ -1,4 +1,4 @@
-name: Sukka List to Stash V1.4.2 Semantic Integrity Final
+name: Sukka List to Stash V1.4.2.1 Semantic Integrity Bugfix Final
 
 on:
   workflow_dispatch:
@@ -14,14 +14,18 @@ concurrency:
   group: sukka-stash-ios-sync
   cancel-in-progress: false
 
+
 jobs:
+
   sync:
+
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     env:
       SOURCE_BASE: https://ruleset.skk.moe
       MIN_TOTAL_PROVIDERS: 20
+
 
     steps:
 
@@ -231,10 +235,6 @@ jobs:
           TMP = Path("/tmp/sukka-stash")
 
 
-          # ======================================================
-          # Configuration
-          # ======================================================
-
           IOS_UNSUPPORTED = {
               "PROCESS-NAME",
               "PROCESS-PATH",
@@ -263,10 +263,6 @@ jobs:
               ".m4d3.by.5ukk4w.skk.moe"
           )
 
-
-          # ======================================================
-          # Global audit
-          # ======================================================
 
           summary = {
               "source_files": 0,
@@ -306,7 +302,6 @@ jobs:
 
 
           file_audit = []
-
 
           removed_markers = []
           ios_filtered = []
@@ -390,7 +385,6 @@ jobs:
                   return False
 
 
-              # domainset raw form
               if "," not in line:
 
                   clean = (
@@ -554,10 +548,6 @@ jobs:
               cleaned = []
 
 
-              # ----------------------------------------------
-              # Marker + iOS process filter
-              # ----------------------------------------------
-
               for line in lines:
 
                   if is_sukka_marker(line):
@@ -596,10 +586,6 @@ jobs:
 
                   cleaned.append(line)
 
-
-              # ----------------------------------------------
-              # Exact duplicate removal
-              # ----------------------------------------------
 
               cleaned, removed = ordered_dedupe(
                   cleaned
@@ -666,10 +652,6 @@ jobs:
                       output_lines
                   )
 
-
-          # ======================================================
-          # Generic source registration
-          # ======================================================
 
           def load_source(
               category,
@@ -800,13 +782,6 @@ jobs:
                   converted.append(value)
 
 
-              # Conversion may create duplicates:
-              #
-              # .example.com
-              # +.example.com
-              #
-              # -> same Stash rule
-
               converted, removed = ordered_dedupe(
                   converted
               )
@@ -898,12 +873,7 @@ jobs:
                   continue
 
 
-              # ----------------------------------------------
-              # Can this become behavior: domain?
-              # ----------------------------------------------
-
               pure_domain = True
-
               converted = []
 
 
@@ -927,8 +897,6 @@ jobs:
                   )
 
 
-                  # Extra classical parameters:
-                  # keep the whole file classical.
                   if "," in remainder:
 
                       pure_domain = False
@@ -1085,9 +1053,7 @@ jobs:
 
 
               pure_cidr = True
-
               cidrs = []
-
               has_no_resolve = False
 
 
@@ -1151,9 +1117,6 @@ jobs:
 
 
               if pure_cidr and cidrs:
-
-                  # Different source strings may normalize
-                  # into the same network.
 
                   cidrs, removed = ordered_dedupe(
                       cidrs
@@ -1273,10 +1236,6 @@ jobs:
           )
 
 
-          # ======================================================
-          # Global conservation
-          # ======================================================
-
           if summary["unaccounted_rules"] != 0:
 
               raise RuntimeError(
@@ -1288,10 +1247,6 @@ jobs:
                   f"{summary['unaccounted_rules']}"
               )
 
-
-          # ======================================================
-          # Category accounting
-          # ======================================================
 
           for category in category_stats:
 
@@ -1412,7 +1367,7 @@ jobs:
 
               "generator": (
                   "Sukka List -> Stash "
-                  "V1.4.2 Semantic Integrity Final"
+                  "V1.4.2.1 Semantic Integrity Bugfix Final"
               ),
 
               "upstream": (
@@ -1453,7 +1408,7 @@ jobs:
 
           Generator:
 
-          `Sukka List -> Stash V1.4.2 Semantic Integrity Final`
+          `Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final`
 
           ## Global Rule Conservation
 
@@ -1519,13 +1474,9 @@ jobs:
           )
 
 
-          # ======================================================
-          # Console summary
-          # ======================================================
-
           print("")
           print("====================================")
-          print(" V1.4.2 Semantic Integrity Audit")
+          print(" V1.4.2.1 Semantic Integrity Audit")
           print("====================================")
           print(
               f" Source files        : "
@@ -1649,7 +1600,7 @@ jobs:
 
           echo ""
           echo "===================================="
-          echo " V1.4.2 Provider Output"
+          echo " V1.4.2.1 Provider Output"
           echo "===================================="
           echo " domain/domainset : ${DOMAIN_DOMAINSET}"
           echo " domain/non_ip    : ${DOMAIN_NON_IP}"
@@ -1760,10 +1711,6 @@ jobs:
           errors = []
 
 
-          # ======================================================
-          # domain
-          # ======================================================
-
           for folder in (
               ROOT / "domain" / "domainset",
               ROOT / "domain" / "non_ip",
@@ -1794,10 +1741,6 @@ jobs:
                               f"domain provider"
                           )
 
-
-          # ======================================================
-          # ipcidr
-          # ======================================================
 
           for file in (
               ROOT / "ipcidr"
@@ -1844,10 +1787,6 @@ jobs:
                           f"invalid CIDR: {line}"
                       )
 
-
-          # ======================================================
-          # classical
-          # ======================================================
 
           for folder in (
               ROOT / "classical" / "non_ip",
@@ -2023,7 +1962,7 @@ jobs:
           set -euo pipefail
 
           {
-            echo "# Sukka -> Stash V1.4.2 Conversion Report"
+            echo "# Sukka -> Stash V1.4.2.1 Conversion Report"
             echo ""
 
             echo "## Upstream"
@@ -2170,14 +2109,7 @@ jobs:
 
 
       # ==========================================================
-      # 14. Generate semantic version fingerprint
-      #
-      # Rules + Semantic audit are both part of the version.
-      #
-      # Therefore:
-      # upstream semantic change
-      # even with identical final rules
-      # can still update the audit metadata.
+      # 14. Generate semantic fingerprint
       # ==========================================================
 
       - name: Generate semantic fingerprint
@@ -2308,7 +2240,7 @@ jobs:
         run: |
           echo ""
           echo "===================================="
-          echo " Sukka -> Stash V1.4.2"
+          echo " Sukka -> Stash V1.4.2.1"
           echo "===================================="
           echo " RULES     : UP TO DATE"
           echo " AUDIT     : UP TO DATE"
@@ -2317,13 +2249,20 @@ jobs:
 
 
       # ==========================================================
-      # 18. Replace output
+      # 18. Replace optimized directories
+      # Bugfix: 正确使用 Bash arithmetic expansion
       # ==========================================================
 
       - name: Replace optimized directories
         if: steps.compare.outputs.changed == 'true'
         run: |
           set -euo pipefail
+
+
+          echo ""
+          echo "===================================="
+          echo " Preparing replacement"
+          echo "===================================="
 
 
           rm -rf domain.new
@@ -2370,11 +2309,687 @@ jobs:
           )
 
 
-          TOTAL=$(
-            (
-              DOMAIN_COUNT
-              + IPCIDR_COUNT
-              + CLASSICAL_COUNT
-            )
+          # 正确算术写法
+          TOTAL=$((DOMAIN_COUNT + IPCIDR_COUNT + CLASSICAL_COUNT))
+
+
+          echo ""
+          echo "===================================="
+          echo " Replacement Provider Audit"
+          echo "===================================="
+          echo " domain    : ${DOMAIN_COUNT}"
+          echo " ipcidr    : ${IPCIDR_COUNT}"
+          echo " classical : ${CLASSICAL_COUNT}"
+          echo "------------------------------------"
+          echo " TOTAL     : ${TOTAL}"
+          echo "===================================="
+
+
+          if [ "${TOTAL}" -lt "${MIN_TOTAL_PROVIDERS}" ]; then
+
+            echo "ERROR:"
+            echo "Replacement provider count too low."
+
+            exit 1
+          fi
+
+
+          if [ ! -d domain.new ]; then
+            echo "ERROR: domain.new missing."
+            exit 1
+          fi
+
+          if [ ! -d ipcidr.new ]; then
+            echo "ERROR: ipcidr.new missing."
+            exit 1
+          fi
+
+          if [ ! -d classical.new ]; then
+            echo "ERROR: classical.new missing."
+            exit 1
+          fi
+
+
+          # 只有全部验证通过后才替换正式目录
+
+          rm -rf domain
+          rm -rf ipcidr
+          rm -rf classical
+
+
+          # 清理旧结构
+
+          rm -rf non_ip
+          rm -rf ip
+
+
+          mv domain.new domain
+          mv ipcidr.new ipcidr
+          mv classical.new classical
+
+
+          FINAL_DOMAIN_COUNT=$(
+            find domain \
+              -type f \
+              -name "*.txt" \
+              | wc -l
           )
+
+
+          FINAL_IPCIDR_COUNT=$(
+            find ipcidr \
+              -type f \
+              -name "*.txt" \
+              | wc -l
+          )
+
+
+          FINAL_CLASSICAL_COUNT=$(
+            find classical \
+              -type f \
+              -name "*.txt" \
+              | wc -l
+          )
+
+
+          FINAL_TOTAL=$((FINAL_DOMAIN_COUNT + FINAL_IPCIDR_COUNT + FINAL_CLASSICAL_COUNT))
+
+
+          echo ""
+          echo "===================================="
+          echo " Replacement Complete"
+          echo "===================================="
+          echo " domain    : ${FINAL_DOMAIN_COUNT}"
+          echo " ipcidr    : ${FINAL_IPCIDR_COUNT}"
+          echo " classical : ${FINAL_CLASSICAL_COUNT}"
+          echo "------------------------------------"
+          echo " TOTAL     : ${FINAL_TOTAL}"
+          echo "===================================="
+
+
+          if [ "${FINAL_TOTAL}" -ne "${TOTAL}" ]; then
+
+            echo "ERROR:"
+            echo "Provider count changed during replacement."
+
+            echo "Before: ${TOTAL}"
+            echo "After : ${FINAL_TOTAL}"
+
+            exit 1
+          fi
+
+
+          echo ""
+          echo "Optimized directories replaced successfully."
+
+
+      # ==========================================================
+      # 19. Save metadata
+      # ==========================================================
+
+      - name: Save metadata
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+
+          cp \
+            /tmp/sukka-stash/new-rules.sha256 \
+            RULES_SHA256SUMS.txt
+
+
+          cp \
+            /tmp/sukka-stash/new.master \
+            RULES_VERSION.sha256
+
+
+          cp \
+            /tmp/sukka-stash/REPORT.md \
+            CONVERSION_REPORT.md
+
+
+          cp \
+            /tmp/sukka-stash/SEMANTIC_AUDIT.json \
+            SEMANTIC_AUDIT.json
+
+
+          cp \
+            /tmp/sukka-stash/SEMANTIC_AUDIT.md \
+            SEMANTIC_AUDIT.md
+
+
+          if [ -s /tmp/sukka-stash/no-resolve-ipcidr.txt ]; then
+
+            cp \
+              /tmp/sukka-stash/no-resolve-ipcidr.txt \
+              IPCIDR_NO_RESOLVE.txt
+
+          else
+
+            rm -f IPCIDR_NO_RESOLVE.txt
+
+          fi
+
+
+          if [ -s /tmp/sukka-stash/removed-markers.txt ]; then
+
+            cp \
+              /tmp/sukka-stash/removed-markers.txt \
+              REMOVED_SUKKA_MARKERS.txt
+
+          else
+
+            rm -f REMOVED_SUKKA_MARKERS.txt
+
+          fi
+
+
+      # ==========================================================
+      # 20. Update README
+      # ==========================================================
+
+      - name: Update README
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+
+          python3 <<'PY'
+          from pathlib import Path
+          import json
+
+
+          audit = json.loads(
+              Path(
+                  "SEMANTIC_AUDIT.json"
+              ).read_text(
+                  encoding="utf-8"
+              )
+          )
+
+
+          s = audit["summary"]
+
+
+          version = (
+              Path("RULES_VERSION.sha256")
+              .read_text(
+                  encoding="utf-8"
+              )
+              .strip()
+          )
+
+
+          readme = f"""# Sukka Rules for Stash iOS
+
+          Sukka 通用 List 自动转换为 Stash iOS 高性能规则。
+
+          ## Version
+
+          `V1.4.2.1 Semantic Integrity Bugfix Final`
+
+          ## Upstream
+
+          https://ruleset.skk.moe/
+
+          ## Processing Pipeline
+
+          ```text
+          Sukka List
+              ↓
+          Remove comments / blank lines
+              ↓
+          Detect + remove Sukka Marker
+              ↓
+          Filter iOS PROCESS rules
+              ↓
+          Analyze rule behavior
+              ↓
+          domain / ipcidr / classical
+              ↓
+          Normalize
+              ↓
+          Deduplicate
+              ↓
+          Semantic integrity audit
+              ↓
+          Stash semantic validation
+              ↓
+          Output
+          ```
+
+          ## Output
+
+          ```text
+          domain/
+          ├── domainset/
+          └── non_ip/
+
+          ipcidr/
+
+          classical/
+          ├── non_ip/
+          └── ip/
+          ```
+
+          ## Provider Mapping
+
+          | Directory | behavior | format |
+          |---|---|---|
+          | domain/* | domain | text |
+          | ipcidr/* | ipcidr | text |
+          | classical/* | classical | text |
+
+          ## Semantic Integrity
+
+          | Metric | Count |
+          |---|---:|
+          | Source files | {s['source_files']} |
+          | Source rules | {s['source_rules_total']} |
+          | Deprecated rules | {s['deprecated_source_rules']} |
+          | Markers removed | {s['markers_removed']} |
+          | iOS PROCESS filtered | {s['ios_process_filtered']} |
+          | Duplicates removed | {s['duplicates_removed']} |
+          | Final rules | {s['output_rules']} |
+          | Unaccounted rules | {s['unaccounted_rules']} |
+
+          ## Provider Count
+
+          | Behavior | Providers | Rules |
+          |---|---:|---:|
+          | domain | {s['domain_providers']} | {s['domain_rules']} |
+          | ipcidr | {s['ipcidr_providers']} | {s['ipcidr_rules']} |
+          | classical | {s['classical_providers']} | {s['classical_rules']} |
+
+          ## Rule Conservation
+
+          ```text
+          Source Rules
+          =
+          Deprecated
+          + Markers
+          + iOS PROCESS
+          + Duplicates
+          + Final Output
+          ```
+
+          Current result:
+
+          ```text
+          Unaccounted Rules = {s['unaccounted_rules']}
+          ```
+
+          A healthy build must always be:
+
+          ```text
+          Unaccounted Rules = 0
+          ```
+
+          ## Audit Files
+
+          ```text
+          SEMANTIC_AUDIT.json
+          SEMANTIC_AUDIT.md
+          CONVERSION_REPORT.md
+          REMOVED_SUKKA_MARKERS.txt
+          IPCIDR_NO_RESOLVE.txt
+          ```
+
+          ## Raw URL Examples
+
+          ### Apple CDN
+
+          ```text
+          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
+          ```
+
+          ### China IP
+
+          ```text
+          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
+          ```
+
+          ### AI
+
+          ```text
+          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
+          ```
+
+          ### Telegram ASN
+
+          ```text
+          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
+          ```
+
+          ## Stash Example
+
+          ```yaml
+          rule-providers:
+
+            apple-cdn:
+              type: http
+              behavior: domain
+              format: text
+              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
+              interval: 86400
+
+            china-ip:
+              type: http
+              behavior: ipcidr
+              format: text
+              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
+              interval: 86400
+
+            ai:
+              type: http
+              behavior: classical
+              format: text
+              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
+              interval: 86400
+
+            telegram-asn:
+              type: http
+              behavior: classical
+              format: text
+              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
+              interval: 86400
+
+          rules:
+
+            - RULE-SET,ai,AI
+            - RULE-SET,china-ip,DIRECT,no-resolve
+            - RULE-SET,telegram-asn,Telegram
+            - RULE-SET,apple-cdn,DIRECT
+            - MATCH,Proxy
+          ```
+
+          ## Current Semantic Version
+
+          ```text
+          {version}
+          ```
+
+          ---
+
+          Generated by Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final.
+          """
+
+
+          Path("README.md").write_text(
+              "\n".join(
+                  line.strip()
+                  for line in readme.splitlines()
+              ) + "\n",
+              encoding="utf-8"
+          )
+
+          PY
+
+
+      # ==========================================================
+      # 21. Final repository audit
+      # ==========================================================
+
+      - name: Final validation
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+
+          python3 <<'PY'
+          from pathlib import Path
+          import json
+          import ipaddress
+
+
+          audit = json.loads(
+              Path(
+                  "SEMANTIC_AUDIT.json"
+              ).read_text(
+                  encoding="utf-8"
+              )
+          )
+
+
+          s = audit["summary"]
+
+
+          if s["unaccounted_rules"] != 0:
+
+              raise RuntimeError(
+                  "Final semantic integrity "
+                  "audit failed."
+              )
+
+
+          marker_suffix = (
+              ".m4d3.by.5ukk4w.skk.moe"
+          )
+
+
+          for root_name in (
+              "domain",
+              "ipcidr",
+              "classical",
+          ):
+
+              root = Path(root_name)
+
+
+              for file in root.rglob("*.txt"):
+
+                  for lineno, raw in enumerate(
+                      file.read_text(
+                          encoding="utf-8",
+                          errors="ignore"
+                      ).splitlines(),
+                      1
+                  ):
+
+                      if (
+                          marker_suffix
+                          in raw.lower()
+                      ):
+
+                          raise RuntimeError(
+                              f"{file}:{lineno}: "
+                              f"Sukka Marker remained"
+                          )
+
+
+          for file in Path(
+              "classical"
+          ).rglob("*.txt"):
+
+              for lineno, raw in enumerate(
+                  file.read_text(
+                      encoding="utf-8",
+                      errors="ignore"
+                  ).splitlines(),
+                  1
+              ):
+
+                  rule_type = (
+                      raw
+                      .split(",", 1)[0]
+                      .strip()
+                      .upper()
+                  )
+
+
+                  if rule_type in {
+                      "PROCESS-NAME",
+                      "PROCESS-PATH",
+                  }:
+
+                      raise RuntimeError(
+                          f"{file}:{lineno}: "
+                          f"PROCESS rule remained"
+                      )
+
+
+          for file in Path(
+              "ipcidr"
+          ).glob("*.txt"):
+
+              for lineno, raw in enumerate(
+                  file.read_text(
+                      encoding="utf-8",
+                      errors="ignore"
+                  ).splitlines(),
+                  1
+              ):
+
+                  line = raw.strip()
+
+
+                  if not line:
+                      continue
+
+
+                  try:
+
+                      ipaddress.ip_network(
+                          line,
+                          strict=False
+                      )
+
+
+                  except ValueError as exc:
+
+                      raise RuntimeError(
+                          f"{file}:{lineno}: "
+                          f"invalid CIDR {line}"
+                      ) from exc
+
+
+          required = [
+              "RULES_SHA256SUMS.txt",
+              "RULES_VERSION.sha256",
+              "CONVERSION_REPORT.md",
+              "SEMANTIC_AUDIT.json",
+              "SEMANTIC_AUDIT.md",
+          ]
+
+
+          for filename in required:
+
+              path = Path(filename)
+
+              if not path.is_file():
+
+                  raise RuntimeError(
+                      f"Missing {filename}"
+                  )
+
+
+              if path.stat().st_size == 0:
+
+                  raise RuntimeError(
+                      f"Empty {filename}"
+                  )
+
+
+          print("")
+          print("====================================")
+          print(" Final Repository Audit")
+          print("====================================")
+          print(
+              f" Source rules : "
+              f"{s['source_rules_total']}"
+          )
+          print(
+              f" Output rules : "
+              f"{s['output_rules']}"
+          )
+          print(
+              f" Unaccounted  : "
+              f"{s['unaccounted_rules']}"
+          )
+          print("====================================")
+          print("")
+          print("Final validation passed.")
+
+          PY
+
+
+      # ==========================================================
+      # 22. Sync remote before commit
+      # ==========================================================
+
+      - name: Sync remote before commit
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+
+          git pull \
+            --rebase \
+            --autostash \
+            origin \
+            "${GITHUB_REF_NAME}"
+
+
+      # ==========================================================
+      # 23. Commit changes
+      # ==========================================================
+
+      - name: Commit changes
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+
+          git add -A
+
+
+          if git diff \
+            --cached \
+            --quiet; then
+
+            echo "No effective changes."
+            exit 0
+          fi
+
+
+          git commit \
+            -m "chore: sync Sukka Stash V1.4.2.1 semantic audit"
+
+
+      # ==========================================================
+      # 24. Push
+      # ==========================================================
+
+      - name: Push changes
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+
+          git push \
+            origin \
+            "HEAD:${GITHUB_REF_NAME}"
+
+
+      # ==========================================================
+      # 25. Completed
+      # ==========================================================
+
+      - name: Completed
+        run: |
+          echo ""
+          echo "===================================="
+          echo " Sukka -> Stash V1.4.2.1"
+          echo "===================================="
+          echo " Marker Audit   : ENABLED"
+          echo " iOS Filter     : ENABLED"
+          echo " Dedupe Audit   : ENABLED"
+          echo " Rule Accounting: ENABLED"
+          echo " domain         : OPTIMIZED"
+          echo " ipcidr         : OPTIMIZED"
+          echo " classical      : FALLBACK"
+          echo " Bash arithmetic: FIXED"
+          echo " sync           : 24 HOURS"
+          echo " status         : SUCCESS"
+          echo "===================================="
 
