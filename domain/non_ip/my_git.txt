@@ -1,0 +1,7 @@
+github.com
+github.dev
+api.github.com
++.huggingface.co
+alive.github.com
++.githubcopilot.com
+android.googlesource.com

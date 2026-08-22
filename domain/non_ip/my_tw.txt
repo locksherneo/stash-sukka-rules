@@ -1,0 +1,13 @@
+javdb.com
+mhgui.com
+avbebe.com
+hanime1.me
+yymanhua.com
++.cdn.hinet.net
+av.jkforum.net
+www.yymanhua.com
+www.manhuagui.com
+*.ffzy-online?.com
+*.ffzy-play?.com
+*.lz-cdn?.com
+*.lz-cdn??.com

@@ -1,65 +1,142 @@
 # Sukka Rules for Stash iOS
 
-自动将 Sukka Ruleset Server 的通用 List 转换为 iOS Stash 专用 Rule Provider。
+Sukka 通用 List 自动转换为 Stash iOS 高性能规则。
+
+## Version
+
+`V1.4.2.1 Semantic Integrity Bugfix Final`
 
 ## Upstream
 
 https://ruleset.skk.moe/
 
-## Mapping
+## Processing Pipeline
 
 ```text
-List/domainset -> domain/
-List/non_ip    -> non_ip/
-List/ip        -> ip/
+Sukka List
+↓
+Remove comments / blank lines
+↓
+Detect + remove Sukka Marker
+↓
+Filter iOS PROCESS rules
+↓
+Analyze rule behavior
+↓
+domain / ipcidr / classical
+↓
+Normalize
+↓
+Deduplicate
+↓
+Semantic integrity audit
+↓
+Stash semantic validation
+↓
+Output
 ```
 
-## Provider Type
+## Output
+
+```text
+domain/
+├── domainset/
+└── non_ip/
+
+ipcidr/
+
+classical/
+├── non_ip/
+└── ip/
+```
+
+## Provider Mapping
 
 | Directory | behavior | format |
 |---|---|---|
-| domain | domain | text |
-| non_ip | classical | text |
-| ip | classical | text |
+| domain/* | domain | text |
+| ipcidr/* | ipcidr | text |
+| classical/* | classical | text |
 
-## iOS Optimization
+## Semantic Integrity
 
-自动过滤：
+| Metric | Count |
+|---|---:|
+| Source files | 68 |
+| Source rules | 378504 |
+| Deprecated rules | 77364 |
+| Markers removed | 62 |
+| iOS PROCESS filtered | 75 |
+| Duplicates removed | 0 |
+| Final rules | 301003 |
+| Unaccounted rules | 0 |
+
+## Provider Count
+
+| Behavior | Providers | Rules |
+|---|---:|---:|
+| domain | 20 | 291174 |
+| ipcidr | 11 | 5264 |
+| classical | 26 | 4565 |
+
+## Rule Conservation
 
 ```text
-PROCESS-NAME
-PROCESS-PATH
+Source Rules
+=
+Deprecated
++ Markers
++ iOS PROCESS
++ Duplicates
++ Final Output
 ```
 
-Filtered Rules:
+Current result:
 
+```text
+Unaccounted Rules = 0
 ```
-74
+
+A healthy build must always be:
+
+```text
+Unaccounted Rules = 0
 ```
 
-## Rule Count
+## Audit Files
 
-| Type | Count |
-|---|---:|
-| domain | 7 |
-| non_ip | 36 |
-| ip | 20 |
-| Total | 63 |
-
-## Version
-
-```
-9b5ef94751ef76505c072833a840750fcb2c852f726bb8a4ce0e9e3c852e2762
+```text
+SEMANTIC_AUDIT.json
+SEMANTIC_AUDIT.md
+CONVERSION_REPORT.md
+REMOVED_SUKKA_MARKERS.txt
+IPCIDR_NO_RESOLVE.txt
 ```
 
 ## Raw URL Examples
 
+### Apple CDN
+
 ```text
-https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/domain/apple_cdn.txt
+https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
+```
 
-https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/non_ip/ai.txt
+### China IP
 
-https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ip/telegram.txt
+```text
+https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
+```
+
+### AI
+
+```text
+https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
+```
+
+### Telegram ASN
+
+```text
+https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
 ```
 
 ## Stash Example
@@ -67,52 +144,49 @@ https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ip/telegram
 ```yaml
 rule-providers:
 
-  sukka-apple-cdn:
-    type: http
-    behavior: domain
-    format: text
-    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/domain/apple_cdn.txt
-    interval: 86400
+apple-cdn:
+type: http
+behavior: domain
+format: text
+url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
+interval: 86400
 
-  sukka-ai:
-    type: http
-    behavior: classical
-    format: text
-    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/non_ip/ai.txt
-    interval: 86400
+china-ip:
+type: http
+behavior: ipcidr
+format: text
+url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
+interval: 86400
 
-  sukka-ai-ip:
-    type: http
-    behavior: classical
-    format: text
-    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ip/ai.txt
-    interval: 86400
+ai:
+type: http
+behavior: classical
+format: text
+url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
+interval: 86400
+
+telegram-asn:
+type: http
+behavior: classical
+format: text
+url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
+interval: 86400
 
 rules:
 
-  - RULE-SET,sukka-ai,AI
-  - RULE-SET,sukka-ai-ip,AI
-  - RULE-SET,sukka-apple-cdn,DIRECT
-  - MATCH,Proxy
+- RULE-SET,ai,AI
+- RULE-SET,china-ip,DIRECT,no-resolve
+- RULE-SET,telegram-asn,Telegram
+- RULE-SET,apple-cdn,DIRECT
+- MATCH,Proxy
 ```
 
-## Features
+## Current Semantic Version
 
-- 每 24 小时自动同步
-- 使用 Sukka 通用 List
-- iOS 自动过滤 PROCESS-NAME / PROCESS-PATH
-- domainset 转 Stash domain provider
-- non_ip 保留 classical
-- ip 保留 classical
-- 保留 no-resolve
-- 保留 IP-ASN
-- 保留 AND / OR / NOT
-- 不维护容易过时的规则类型白名单
-- 自动跳过 Deprecated / 空规则
-- SHA256 校验
-- 无变化不 Commit
-- 自动生成转换报告
+```text
+4f3979a6719785d581ef88a25209e9cc3065f62a75761f9e270c5d2bddfc160a
+```
 
 ---
 
-Generated by Sukka List -> Stash V1.2 iOS Final.
+Generated by Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final.

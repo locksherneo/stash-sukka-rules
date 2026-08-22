@@ -1,16 +1,154 @@
-# Sukka -> Stash iOS Conversion Report
+# Sukka -> Stash V1.4.2.1 Conversion Report
 
-Source:
+## Upstream
 
 https://ruleset.skk.moe/
 
-## Mapping
+## Pipeline
 
-- List/domainset -> domain/
-- List/non_ip -> non_ip/
-- List/ip -> ip/
+```text
+Sukka List
+ -> Remove comments / blank lines
+ -> Detect Sukka Marker
+ -> Remove Marker
+ -> Filter iOS PROCESS rules
+ -> Analyze provider behavior
+ -> Convert / normalize
+ -> Deduplicate
+ -> Rule conservation audit
+ -> Stash semantic validation
+ -> Output
+```
 
-## iOS filtered rules
+## Semantic Integrity
+
+# Semantic Integrity Audit
+
+Generator:
+
+`Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final`
+
+## Global Rule Conservation
+
+| Metric | Count |
+|---|---:|
+| Source files | 68 |
+| Active files | 63 |
+| Deprecated files | 5 |
+| Source rules total | 378504 |
+| Deprecated source rules | 77364 |
+| Sukka Markers removed | 62 |
+| iOS PROCESS rules filtered | 75 |
+| Duplicates removed | 0 |
+| Final output rules | 301003 |
+| Unaccounted rules | 0 |
+
+## Output
+
+| Behavior | Providers | Rules |
+|---|---:|---:|
+| domain | 20 | 291174 |
+| ipcidr | 11 | 5264 |
+| classical | 26 | 4565 |
+
+## Conservation Equation
+
+```text
+source_rules_total
+=
+deprecated_source_rules
++ markers_removed
++ ios_process_filtered
++ duplicates_removed
++ output_rules
+```
+
+```text
+378504
+=
+77364
++ 62
++ 75
++ 0
++ 301003
+```
+
+## Result
+
+```text
+unaccounted_rules = 0
+```
+
+`0` means every source rule has been accounted for.
+
+## Removed Sukka Markers
+
+```text
+domainset/apple_cdn.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+domainset/cdn.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+domainset/game-download.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+domainset/icloud_private_relay.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+domainset/reject.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+domainset/reject_phishing.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+domainset/speedtest.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+domainset/speedtest.conf: 7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/ai.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/apple_cn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/apple_intelligence.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/apple_services.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/cdn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/cloudmounter.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/direct.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/domestic.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/download.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/gitlab.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/global.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/lan.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/microsoft.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/microsoft_cdn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/my_direct.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/my_git.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/my_plus.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/my_proxy.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/my_reject.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/my_tw.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/my_us.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/neteasemusic.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/reject-drop.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/reject-no-drop.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/reject-url-regex.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/reject.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/sogouinput.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/stream.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/stream_eu.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/stream_hk.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/stream_jp.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/stream_kr.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/stream_tw.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/stream_us.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/telegram.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/ai.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/apple_services.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/cdn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/china_ip.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/china_ip_ipv6.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/domestic.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/download.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/lan.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/neteasemusic.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/reject.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/stream.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/stream_eu.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/stream_hk.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/stream_jp.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/stream_kr.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/stream_tw.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/stream_us.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/telegram.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/telegram_asn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+```
+
+## iOS PROCESS Rules Filtered
 
 ```text
 non_ip/apple_services.conf: PROCESS-NAME,com.apple.geod
@@ -87,12 +225,66 @@ non_ip/stream_hk.conf: PROCESS-NAME,com.vuclip.viu
 non_ip/stream_hk.conf: PROCESS-NAME,com.hktve.viutv
 non_ip/stream_hk.conf: PROCESS-NAME,com.bstar.intl
 non_ip/stream_tw.conf: PROCESS-NAME,com.linecorp.linetv
-non_ip/stream_us.conf: PROCESS-NAME,com.hulu.plus```
+non_ip/stream_us.conf: PROCESS-NAME,com.hulu.plus
+```
 
-## Skipped source files
+## non_ip Promoted to domain
+
+- domainset/apple_cdn.conf
+- domainset/cdn.conf
+- domainset/game-download.conf
+- domainset/icloud_private_relay.conf
+- domainset/reject.conf
+- domainset/reject_phishing.conf
+- domainset/speedtest.conf
+- non_ip/apple_cn.conf
+- non_ip/apple_intelligence.conf
+- non_ip/gitlab.conf
+- non_ip/lan.conf
+- non_ip/my_direct.conf
+- non_ip/my_git.conf
+- non_ip/my_plus.conf
+- non_ip/my_proxy.conf
+- non_ip/my_tw.conf
+- non_ip/my_us.conf
+- non_ip/reject-drop.conf
+- non_ip/stream_biliintl.conf
+- non_ip/telegram.conf
+
+## IP Promoted to ipcidr
+
+- ai
+- apple_services
+- cdn
+- china_ip
+- china_ip_ipv6
+- domestic
+- download
+- lan
+- neteasemusic
+- stream
+- telegram
+
+## ipcidr Providers Requiring no-resolve
+
+- ai
+- apple_services
+- domestic
+- download
+- neteasemusic
+- stream
+- telegram
+
+## Skipped Sources
 
 - DEPRECATED: domainset/download.conf
 - DEPRECATED: domainset/reject_extra.conf
 - DEPRECATED: domainset/reject_sukka.conf
 - DEPRECATED: non_ip/apple_cdn.conf
 - DEPRECATED: non_ip/global_plus.conf
+- EMPTY AFTER CLEAN: ip/stream_eu.conf
+- EMPTY AFTER CLEAN: ip/stream_hk.conf
+- EMPTY AFTER CLEAN: ip/stream_jp.conf
+- EMPTY AFTER CLEAN: ip/stream_kr.conf
+- EMPTY AFTER CLEAN: ip/stream_tw.conf
+- EMPTY AFTER CLEAN: ip/stream_us.conf
