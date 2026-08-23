@@ -11,21 +11,21 @@ Generator:
 | Source files | 68 |
 | Active files | 63 |
 | Deprecated files | 5 |
-| Source rules total | 378504 |
-| Deprecated source rules | 77364 |
+| Source rules total | 378917 |
+| Deprecated source rules | 77577 |
 | Sukka Markers removed | 62 |
 | iOS PROCESS rules filtered | 75 |
 | Duplicates removed | 0 |
-| Final output rules | 301003 |
+| Final output rules | 301203 |
 | Unaccounted rules | 0 |
 
 ## Output
 
 | Behavior | Providers | Rules |
 |---|---:|---:|
-| domain | 20 | 291174 |
-| ipcidr | 11 | 5264 |
-| classical | 26 | 4565 |
+| domain | 20 | 291372 |
+| ipcidr | 11 | 5262 |
+| classical | 26 | 4569 |
 
 ## Conservation Equation
 
@@ -40,13 +40,13 @@ deprecated_source_rules
 ```
 
 ```text
-378504
+378917
 =
-77364
+77577
 + 62
 + 75
 + 0
-+ 301003
++ 301203
 ```
 
 ## Result
