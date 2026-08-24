@@ -1,0 +1,6 @@
+DOMAIN-KEYWORD,bahoom
+DOMAIN-KEYWORD,-flv.meituan.net
+DOMAIN-KEYWORD,-live.meituan.net
+DOMAIN-KEYWORD,-fin.meituan.com
+DST-PORT,7680
+AND,((DOMAIN-KEYWORD,genuine), (DOMAIN-KEYWORD,autodesk))

@@ -1,58 +1,20 @@
-# Semantic Integrity Audit
+# Sukka to Stash semantic conversion report
 
-Generator:
+- Source files: 68
+- Active source rules: 300631
+- Full conserved output rules: 300484
+- Optimized domain rules: 293789
+- Optimized ipcidr rules: 6075
+- Classical remainder rules: 620
+- Split source files: 23
+- Mixed no-resolve sources: 1
+- iOS Lite omitted rules: 183
+- MRS providers: 112
+- Reused identical MRS conversions: 56
+- MRS bytes: 5749448
+- Removed Sukka markers: 62
+- Filtered iOS process rules: 85
+- Duplicates removed: 0
+- Unaccounted rules: 0
 
-`Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final`
-
-## Global Rule Conservation
-
-| Metric | Count |
-|---|---:|
-| Source files | 68 |
-| Active files | 63 |
-| Deprecated files | 5 |
-| Source rules total | 378988 |
-| Deprecated source rules | 77761 |
-| Sukka Markers removed | 62 |
-| iOS PROCESS rules filtered | 75 |
-| Duplicates removed | 0 |
-| Final output rules | 301090 |
-| Unaccounted rules | 0 |
-
-## Output
-
-| Behavior | Providers | Rules |
-|---|---:|---:|
-| domain | 20 | 291257 |
-| ipcidr | 11 | 5261 |
-| classical | 26 | 4572 |
-
-## Conservation Equation
-
-```text
-source_rules_total
-=
-deprecated_source_rules
-+ markers_removed
-+ ios_process_filtered
-+ duplicates_removed
-+ output_rules
-```
-
-```text
-378988
-=
-77761
-+ 62
-+ 75
-+ 0
-+ 301090
-```
-
-## Result
-
-```text
-unaccounted_rules = 0
-```
-
-`0` means every source rule has been accounted for.
+Full source-by-source details: SEMANTIC_AUDIT.json.

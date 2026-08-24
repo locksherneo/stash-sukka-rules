@@ -1,192 +1,51 @@
-# Sukka Rules for Stash iOS
+# Sukka List for Stash iOS
 
-Sukka 通用 List 自动转换为 Stash iOS 高性能规则。
+V1.5.1 preserves existing provider URLs while adding rule-by-rule optimized
+Full and Lite profiles. Only reference one profile for a given source.
 
-## Version
+| Output | Compatibility | Behavior |
+| --- | --- | --- |
+| domain/, ipcidr/, classical/ | Existing V1.4.2.1 URLs | Legacy-compatible |
+| ios/domain/, ios/ipcidr/ | New Full profile | Optimized domain and CIDR |
+| ios/classical/ | New Full profile | Unsupported-for-promotion remainder |
+| lite/ | iOS Lite profile | Omits only explicitly audited expensive rules |
+| mrs/ios/, mrs/lite/ | Optional MRS mirrors | domain/ipcidr only |
 
-`V1.4.2.1 Semantic Integrity Bugfix Final`
+Mihomo MRS files are Zstandard-compressed; their MRSv1 magic appears
+inside the decompressed payload, not at the start of the binary file.
 
-## Upstream
+## Semantic guarantees
 
-https://ruleset.skk.moe/
+- Full profile conserves every non-marker, iOS-supported upstream rule.
+- DOMAIN and DOMAIN-SUFFIX become domain providers.
+- DOMAIN-WILDCARD remains classical because routing glob semantics
+  are not equivalent to domain/MRS provider label wildcards.
+- IP-CIDR and IP-CIDR6 become ipcidr providers.
+- Mixed resolving/no-resolve CIDRs use separate provider files.
+- DOMAIN-KEYWORD, DOMAIN-REGEX, ASN and other supported special rules
+  remain in small classical providers.
+- Existing root-level provider URLs retain their historical contents.
+- Lite omissions are listed in IOS_LITE_OMISSIONS.json and
+  IOS_LITE_OMITTED_RULES.txt; Full never silently discards those rules.
 
-## Processing Pipeline
+## Stash configuration
 
-```text
-Sukka List
-↓
-Remove comments / blank lines
-↓
-Detect + remove Sukka Marker
-↓
-Filter iOS PROCESS rules
-↓
-Analyze rule behavior
-↓
-domain / ipcidr / classical
-↓
-Normalize
-↓
-Deduplicate
-↓
-Semantic integrity audit
-↓
-Stash semantic validation
-↓
-Output
-```
+Start with STASH_PROVIDERS_FULL_MRS.yaml or
+STASH_PROVIDERS_LITE_MRS.yaml when MRS is enabled; TEXT variants are
+always available. Copy only the providers you actually reference.
 
-## Output
-
-```text
-domain/
-├── domainset/
-└── non_ip/
-
-ipcidr/
-
-classical/
-├── non_ip/
-└── ip/
-```
-
-## Provider Mapping
-
-| Directory | behavior | format |
-|---|---|---|
-| domain/* | domain | text |
-| ipcidr/* | ipcidr | text |
-| classical/* | classical | text |
-
-## Semantic Integrity
-
-| Metric | Count |
-|---|---:|
-| Source files | 68 |
-| Source rules | 378988 |
-| Deprecated rules | 77761 |
-| Markers removed | 62 |
-| iOS PROCESS filtered | 75 |
-| Duplicates removed | 0 |
-| Final rules | 301090 |
-| Unaccounted rules | 0 |
-
-## Provider Count
-
-| Behavior | Providers | Rules |
-|---|---:|---:|
-| domain | 20 | 291257 |
-| ipcidr | 11 | 5261 |
-| classical | 26 | 4572 |
-
-## Rule Conservation
-
-```text
-Source Rules
-=
-Deprecated
-+ Markers
-+ iOS PROCESS
-+ Duplicates
-+ Final Output
-```
-
-Current result:
-
-```text
-Unaccounted Rules = 0
-```
-
-A healthy build must always be:
-
-```text
-Unaccounted Rules = 0
-```
-
-## Audit Files
-
-```text
-SEMANTIC_AUDIT.json
-SEMANTIC_AUDIT.md
-CONVERSION_REPORT.md
-REMOVED_SUKKA_MARKERS.txt
-IPCIDR_NO_RESOLVE.txt
-```
-
-## Raw URL Examples
-
-### Apple CDN
-
-```text
-https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
-```
-
-### China IP
-
-```text
-https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
-```
-
-### AI
-
-```text
-https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
-```
-
-### Telegram ASN
-
-```text
-https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
-```
-
-## Stash Example
+Providers split from the same source must be adjacent and use the same
+policy. Preserve the order in PROVIDER_MANIFEST.json. For example:
 
 ```yaml
-rule-providers:
-
-apple-cdn:
-type: http
-behavior: domain
-format: text
-url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
-interval: 86400
-
-china-ip:
-type: http
-behavior: ipcidr
-format: text
-url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
-interval: 86400
-
-ai:
-type: http
-behavior: classical
-format: text
-url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
-interval: 86400
-
-telegram-asn:
-type: http
-behavior: classical
-format: text
-url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
-interval: 86400
-
 rules:
-
-- RULE-SET,ai,AI
-- RULE-SET,china-ip,DIRECT,no-resolve
-- RULE-SET,telegram-asn,Telegram
-- RULE-SET,apple-cdn,DIRECT
-- MATCH,Proxy
+  - RULE-SET,sukka-ios-non-ip-ai-domain,PROXY
+  - RULE-SET,sukka-ios-non-ip-ai-classical,PROXY
 ```
 
-## Current Semantic Version
+Add no-resolve only to RULE-SET references whose ipcidr manifest
+entry has no_resolve=true. Classical GEOIP/IP-ASN entries preserve
+their inline no-resolve option.
 
-```text
-d3545cd2561b8cfc4825f985fc0a54e2c6d6d7c8c1eb3eff5f6a104b10ad75b1
-```
-
----
-
-Generated by Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final.
+On iOS, keep DNS upstreams to one or two and avoid loading both Full
+and Lite or both legacy and optimized versions of the same rule set.

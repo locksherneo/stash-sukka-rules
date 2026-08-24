@@ -1,0 +1,3820 @@
+{
+  "generator": "Sukka List to Stash V1.5.1",
+  "lite_excluded_rule_types": [
+    "SCRIPT",
+    "URL-REGEX"
+  ],
+  "profiles": [
+    "ios",
+    "lite"
+  ],
+  "providers": [
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-domainset-apple-cdn-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 158,
+      "source": "domainset/apple_cdn.conf",
+      "text_path": "domain/domainset/apple_cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/domainset/apple_cdn.mrs",
+      "name": "sukka-ios-domainset-apple-cdn-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 158,
+      "source": "domainset/apple_cdn.conf",
+      "text_path": "ios/domain/domainset/apple_cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/domainset/apple_cdn.mrs",
+      "name": "sukka-lite-domainset-apple-cdn-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 158,
+      "source": "domainset/apple_cdn.conf",
+      "text_path": "lite/domain/domainset/apple_cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-domainset-cdn-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 4631,
+      "source": "domainset/cdn.conf",
+      "text_path": "domain/domainset/cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/domainset/cdn.mrs",
+      "name": "sukka-ios-domainset-cdn-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 4631,
+      "source": "domainset/cdn.conf",
+      "text_path": "ios/domain/domainset/cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/domainset/cdn.mrs",
+      "name": "sukka-lite-domainset-cdn-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 4631,
+      "source": "domainset/cdn.conf",
+      "text_path": "lite/domain/domainset/cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-domainset-game-download-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 52,
+      "source": "domainset/game-download.conf",
+      "text_path": "domain/domainset/game-download.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/domainset/game-download.mrs",
+      "name": "sukka-ios-domainset-game-download-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 52,
+      "source": "domainset/game-download.conf",
+      "text_path": "ios/domain/domainset/game-download.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/domainset/game-download.mrs",
+      "name": "sukka-lite-domainset-game-download-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 52,
+      "source": "domainset/game-download.conf",
+      "text_path": "lite/domain/domainset/game-download.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-domainset-icloud-private-relay-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 6,
+      "source": "domainset/icloud_private_relay.conf",
+      "text_path": "domain/domainset/icloud_private_relay.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/domainset/icloud_private_relay.mrs",
+      "name": "sukka-ios-domainset-icloud-private-relay-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 6,
+      "source": "domainset/icloud_private_relay.conf",
+      "text_path": "ios/domain/domainset/icloud_private_relay.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/domainset/icloud_private_relay.mrs",
+      "name": "sukka-lite-domainset-icloud-private-relay-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 6,
+      "source": "domainset/icloud_private_relay.conf",
+      "text_path": "lite/domain/domainset/icloud_private_relay.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-domainset-reject-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 134888,
+      "source": "domainset/reject.conf",
+      "text_path": "domain/domainset/reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/domainset/reject.mrs",
+      "name": "sukka-ios-domainset-reject-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 134888,
+      "source": "domainset/reject.conf",
+      "text_path": "ios/domain/domainset/reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/domainset/reject.mrs",
+      "name": "sukka-lite-domainset-reject-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 134888,
+      "source": "domainset/reject.conf",
+      "text_path": "lite/domain/domainset/reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-domainset-reject-phishing-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 147408,
+      "source": "domainset/reject_phishing.conf",
+      "text_path": "domain/domainset/reject_phishing.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/domainset/reject_phishing.mrs",
+      "name": "sukka-ios-domainset-reject-phishing-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 147408,
+      "source": "domainset/reject_phishing.conf",
+      "text_path": "ios/domain/domainset/reject_phishing.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/domainset/reject_phishing.mrs",
+      "name": "sukka-lite-domainset-reject-phishing-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 147408,
+      "source": "domainset/reject_phishing.conf",
+      "text_path": "lite/domain/domainset/reject_phishing.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-domainset-speedtest-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 3348,
+      "source": "domainset/speedtest.conf",
+      "text_path": "domain/domainset/speedtest.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/domainset/speedtest.mrs",
+      "name": "sukka-ios-domainset-speedtest-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 3348,
+      "source": "domainset/speedtest.conf",
+      "text_path": "ios/domain/domainset/speedtest.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "domainset",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/domainset/speedtest.mrs",
+      "name": "sukka-lite-domainset-speedtest-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 3348,
+      "source": "domainset/speedtest.conf",
+      "text_path": "lite/domain/domainset/speedtest.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-ai-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 50,
+      "source": "non_ip/ai.conf",
+      "text_path": "classical/non_ip/ai.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/ai.mrs",
+      "name": "sukka-ios-non-ip-ai-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 47,
+      "source": "non_ip/ai.conf",
+      "text_path": "ios/domain/non_ip/ai.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 48,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-ai-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 3,
+      "source": "non_ip/ai.conf",
+      "text_path": "ios/classical/non_ip/ai.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/ai.mrs",
+      "name": "sukka-lite-non-ip-ai-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 47,
+      "source": "non_ip/ai.conf",
+      "text_path": "lite/domain/non_ip/ai.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 48,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-ai-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 2,
+      "source": "non_ip/ai.conf",
+      "text_path": "lite/classical/non_ip/ai.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-apple-cn-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 9,
+      "source": "non_ip/apple_cn.conf",
+      "text_path": "domain/non_ip/apple_cn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/apple_cn.mrs",
+      "name": "sukka-ios-non-ip-apple-cn-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 9,
+      "source": "non_ip/apple_cn.conf",
+      "text_path": "ios/domain/non_ip/apple_cn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/apple_cn.mrs",
+      "name": "sukka-lite-non-ip-apple-cn-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 9,
+      "source": "non_ip/apple_cn.conf",
+      "text_path": "lite/domain/non_ip/apple_cn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-apple-intelligence-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 5,
+      "source": "non_ip/apple_intelligence.conf",
+      "text_path": "domain/non_ip/apple_intelligence.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/apple_intelligence.mrs",
+      "name": "sukka-ios-non-ip-apple-intelligence-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 5,
+      "source": "non_ip/apple_intelligence.conf",
+      "text_path": "ios/domain/non_ip/apple_intelligence.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/apple_intelligence.mrs",
+      "name": "sukka-lite-non-ip-apple-intelligence-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 5,
+      "source": "non_ip/apple_intelligence.conf",
+      "text_path": "lite/domain/non_ip/apple_intelligence.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-apple-services-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 17,
+      "source": "non_ip/apple_services.conf",
+      "text_path": "classical/non_ip/apple_services.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/apple_services.mrs",
+      "name": "sukka-ios-non-ip-apple-services-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 16,
+      "source": "non_ip/apple_services.conf",
+      "text_path": "ios/domain/non_ip/apple_services.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "non_ip",
+      "first_source_index": 25,
+      "mrs_path": "mrs/ios/ipcidr/non_ip/apple_services.mrs",
+      "name": "sukka-ios-non-ip-apple-services-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 1,
+      "source": "non_ip/apple_services.conf",
+      "text_path": "ios/ipcidr/non_ip/apple_services.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/apple_services.mrs",
+      "name": "sukka-lite-non-ip-apple-services-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 16,
+      "source": "non_ip/apple_services.conf",
+      "text_path": "lite/domain/non_ip/apple_services.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "non_ip",
+      "first_source_index": 25,
+      "mrs_path": "mrs/lite/ipcidr/non_ip/apple_services.mrs",
+      "name": "sukka-lite-non-ip-apple-services-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 1,
+      "source": "non_ip/apple_services.conf",
+      "text_path": "lite/ipcidr/non_ip/apple_services.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-cdn-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 83,
+      "source": "non_ip/cdn.conf",
+      "text_path": "classical/non_ip/cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/cdn.mrs",
+      "name": "sukka-ios-non-ip-cdn-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 4,
+      "source": "non_ip/cdn.conf",
+      "text_path": "ios/domain/non_ip/cdn.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 5,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-cdn-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 79,
+      "source": "non_ip/cdn.conf",
+      "text_path": "ios/classical/non_ip/cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/cdn.mrs",
+      "name": "sukka-lite-non-ip-cdn-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 4,
+      "source": "non_ip/cdn.conf",
+      "text_path": "lite/domain/non_ip/cdn.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 5,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-cdn-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 79,
+      "source": "non_ip/cdn.conf",
+      "text_path": "lite/classical/non_ip/cdn.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 2,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-cloudmounter-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 30,
+      "source": "non_ip/cloudmounter.conf",
+      "text_path": "classical/non_ip/cloudmounter.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 2,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-cloudmounter-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 30,
+      "source": "non_ip/cloudmounter.conf",
+      "text_path": "ios/classical/non_ip/cloudmounter.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 2,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-cloudmounter-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 30,
+      "source": "non_ip/cloudmounter.conf",
+      "text_path": "lite/classical/non_ip/cloudmounter.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-direct-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 182,
+      "source": "non_ip/direct.conf",
+      "text_path": "classical/non_ip/direct.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/direct.mrs",
+      "name": "sukka-ios-non-ip-direct-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 172,
+      "source": "non_ip/direct.conf",
+      "text_path": "ios/domain/non_ip/direct.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 173,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-direct-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 10,
+      "source": "non_ip/direct.conf",
+      "text_path": "ios/classical/non_ip/direct.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/direct.mrs",
+      "name": "sukka-lite-non-ip-direct-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 172,
+      "source": "non_ip/direct.conf",
+      "text_path": "lite/domain/non_ip/direct.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 173,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-direct-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 10,
+      "source": "non_ip/direct.conf",
+      "text_path": "lite/classical/non_ip/direct.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-domestic-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 868,
+      "source": "non_ip/domestic.conf",
+      "text_path": "classical/non_ip/domestic.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/domestic.mrs",
+      "name": "sukka-ios-non-ip-domestic-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 864,
+      "source": "non_ip/domestic.conf",
+      "text_path": "ios/domain/non_ip/domestic.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 865,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-domestic-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 4,
+      "source": "non_ip/domestic.conf",
+      "text_path": "ios/classical/non_ip/domestic.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/domestic.mrs",
+      "name": "sukka-lite-non-ip-domestic-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 864,
+      "source": "non_ip/domestic.conf",
+      "text_path": "lite/domain/non_ip/domestic.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 865,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-domestic-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 4,
+      "source": "non_ip/domestic.conf",
+      "text_path": "lite/classical/non_ip/domestic.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-download-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 10,
+      "source": "non_ip/download.conf",
+      "text_path": "classical/non_ip/download.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-download-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 10,
+      "source": "non_ip/download.conf",
+      "text_path": "ios/classical/non_ip/download.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-download-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 9,
+      "source": "non_ip/download.conf",
+      "text_path": "lite/classical/non_ip/download.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-gitlab-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 1,
+      "source": "non_ip/gitlab.conf",
+      "text_path": "domain/non_ip/gitlab.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/gitlab.mrs",
+      "name": "sukka-ios-non-ip-gitlab-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 1,
+      "source": "non_ip/gitlab.conf",
+      "text_path": "ios/domain/non_ip/gitlab.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/gitlab.mrs",
+      "name": "sukka-lite-non-ip-gitlab-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 1,
+      "source": "non_ip/gitlab.conf",
+      "text_path": "lite/domain/non_ip/gitlab.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-global-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 1269,
+      "source": "non_ip/global.conf",
+      "text_path": "classical/non_ip/global.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/global.mrs",
+      "name": "sukka-ios-non-ip-global-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 1259,
+      "source": "non_ip/global.conf",
+      "text_path": "ios/domain/non_ip/global.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1260,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-global-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 10,
+      "source": "non_ip/global.conf",
+      "text_path": "ios/classical/non_ip/global.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/global.mrs",
+      "name": "sukka-lite-non-ip-global-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 1259,
+      "source": "non_ip/global.conf",
+      "text_path": "lite/domain/non_ip/global.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1260,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-global-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 10,
+      "source": "non_ip/global.conf",
+      "text_path": "lite/classical/non_ip/global.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-lan-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 49,
+      "source": "non_ip/lan.conf",
+      "text_path": "domain/non_ip/lan.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/lan.mrs",
+      "name": "sukka-ios-non-ip-lan-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 49,
+      "source": "non_ip/lan.conf",
+      "text_path": "ios/domain/non_ip/lan.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/lan.mrs",
+      "name": "sukka-lite-non-ip-lan-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 49,
+      "source": "non_ip/lan.conf",
+      "text_path": "lite/domain/non_ip/lan.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-microsoft-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 83,
+      "source": "non_ip/microsoft.conf",
+      "text_path": "classical/non_ip/microsoft.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/microsoft.mrs",
+      "name": "sukka-ios-non-ip-microsoft-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 80,
+      "source": "non_ip/microsoft.conf",
+      "text_path": "ios/domain/non_ip/microsoft.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 81,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-microsoft-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 3,
+      "source": "non_ip/microsoft.conf",
+      "text_path": "ios/classical/non_ip/microsoft.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/microsoft.mrs",
+      "name": "sukka-lite-non-ip-microsoft-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 80,
+      "source": "non_ip/microsoft.conf",
+      "text_path": "lite/domain/non_ip/microsoft.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 81,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-microsoft-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 3,
+      "source": "non_ip/microsoft.conf",
+      "text_path": "lite/classical/non_ip/microsoft.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-microsoft-cdn-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 54,
+      "source": "non_ip/microsoft_cdn.conf",
+      "text_path": "classical/non_ip/microsoft_cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/microsoft_cdn.mrs",
+      "name": "sukka-ios-non-ip-microsoft-cdn-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 52,
+      "source": "non_ip/microsoft_cdn.conf",
+      "text_path": "ios/domain/non_ip/microsoft_cdn.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 53,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-microsoft-cdn-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 2,
+      "source": "non_ip/microsoft_cdn.conf",
+      "text_path": "ios/classical/non_ip/microsoft_cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/microsoft_cdn.mrs",
+      "name": "sukka-lite-non-ip-microsoft-cdn-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 52,
+      "source": "non_ip/microsoft_cdn.conf",
+      "text_path": "lite/domain/non_ip/microsoft_cdn.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-my-direct-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 1,
+      "source": "non_ip/my_direct.conf",
+      "text_path": "domain/non_ip/my_direct.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/my_direct.mrs",
+      "name": "sukka-ios-non-ip-my-direct-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 1,
+      "source": "non_ip/my_direct.conf",
+      "text_path": "ios/domain/non_ip/my_direct.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/my_direct.mrs",
+      "name": "sukka-lite-non-ip-my-direct-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 1,
+      "source": "non_ip/my_direct.conf",
+      "text_path": "lite/domain/non_ip/my_direct.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-my-git-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 7,
+      "source": "non_ip/my_git.conf",
+      "text_path": "domain/non_ip/my_git.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/my_git.mrs",
+      "name": "sukka-ios-non-ip-my-git-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 7,
+      "source": "non_ip/my_git.conf",
+      "text_path": "ios/domain/non_ip/my_git.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/my_git.mrs",
+      "name": "sukka-lite-non-ip-my-git-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 7,
+      "source": "non_ip/my_git.conf",
+      "text_path": "lite/domain/non_ip/my_git.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-my-plus-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 14,
+      "source": "non_ip/my_plus.conf",
+      "text_path": "domain/non_ip/my_plus.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/my_plus.mrs",
+      "name": "sukka-ios-non-ip-my-plus-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 14,
+      "source": "non_ip/my_plus.conf",
+      "text_path": "ios/domain/non_ip/my_plus.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/my_plus.mrs",
+      "name": "sukka-lite-non-ip-my-plus-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 14,
+      "source": "non_ip/my_plus.conf",
+      "text_path": "lite/domain/non_ip/my_plus.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-my-proxy-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 16,
+      "source": "non_ip/my_proxy.conf",
+      "text_path": "domain/non_ip/my_proxy.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/my_proxy.mrs",
+      "name": "sukka-ios-non-ip-my-proxy-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 16,
+      "source": "non_ip/my_proxy.conf",
+      "text_path": "ios/domain/non_ip/my_proxy.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/my_proxy.mrs",
+      "name": "sukka-lite-non-ip-my-proxy-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 16,
+      "source": "non_ip/my_proxy.conf",
+      "text_path": "lite/domain/non_ip/my_proxy.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-my-reject-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 47,
+      "source": "non_ip/my_reject.conf",
+      "text_path": "classical/non_ip/my_reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/my_reject.mrs",
+      "name": "sukka-ios-non-ip-my-reject-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 41,
+      "source": "non_ip/my_reject.conf",
+      "text_path": "ios/domain/non_ip/my_reject.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 42,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-my-reject-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 6,
+      "source": "non_ip/my_reject.conf",
+      "text_path": "ios/classical/non_ip/my_reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/my_reject.mrs",
+      "name": "sukka-lite-non-ip-my-reject-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 41,
+      "source": "non_ip/my_reject.conf",
+      "text_path": "lite/domain/non_ip/my_reject.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 42,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-my-reject-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 6,
+      "source": "non_ip/my_reject.conf",
+      "text_path": "lite/classical/non_ip/my_reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-my-tw-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 13,
+      "source": "non_ip/my_tw.conf",
+      "text_path": "domain/non_ip/my_tw.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/my_tw.mrs",
+      "name": "sukka-ios-non-ip-my-tw-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 9,
+      "source": "non_ip/my_tw.conf",
+      "text_path": "ios/domain/non_ip/my_tw.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 10,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-my-tw-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 4,
+      "source": "non_ip/my_tw.conf",
+      "text_path": "ios/classical/non_ip/my_tw.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/my_tw.mrs",
+      "name": "sukka-lite-non-ip-my-tw-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 9,
+      "source": "non_ip/my_tw.conf",
+      "text_path": "lite/domain/non_ip/my_tw.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 10,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-my-tw-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 4,
+      "source": "non_ip/my_tw.conf",
+      "text_path": "lite/classical/non_ip/my_tw.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-my-us-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 6,
+      "source": "non_ip/my_us.conf",
+      "text_path": "domain/non_ip/my_us.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/my_us.mrs",
+      "name": "sukka-ios-non-ip-my-us-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 6,
+      "source": "non_ip/my_us.conf",
+      "text_path": "ios/domain/non_ip/my_us.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/my_us.mrs",
+      "name": "sukka-lite-non-ip-my-us-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 6,
+      "source": "non_ip/my_us.conf",
+      "text_path": "lite/domain/non_ip/my_us.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-neteasemusic-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 4,
+      "source": "non_ip/neteasemusic.conf",
+      "text_path": "classical/non_ip/neteasemusic.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/neteasemusic.mrs",
+      "name": "sukka-ios-non-ip-neteasemusic-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 2,
+      "source": "non_ip/neteasemusic.conf",
+      "text_path": "ios/domain/non_ip/neteasemusic.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 3,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-neteasemusic-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 2,
+      "source": "non_ip/neteasemusic.conf",
+      "text_path": "ios/classical/non_ip/neteasemusic.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/neteasemusic.mrs",
+      "name": "sukka-lite-non-ip-neteasemusic-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 2,
+      "source": "non_ip/neteasemusic.conf",
+      "text_path": "lite/domain/non_ip/neteasemusic.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 3,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-neteasemusic-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 2,
+      "source": "non_ip/neteasemusic.conf",
+      "text_path": "lite/classical/non_ip/neteasemusic.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-reject-drop-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 27,
+      "source": "non_ip/reject-drop.conf",
+      "text_path": "domain/non_ip/reject-drop.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/reject-drop.mrs",
+      "name": "sukka-ios-non-ip-reject-drop-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 26,
+      "source": "non_ip/reject-drop.conf",
+      "text_path": "ios/domain/non_ip/reject-drop.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 27,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-reject-drop-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 1,
+      "source": "non_ip/reject-drop.conf",
+      "text_path": "ios/classical/non_ip/reject-drop.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/reject-drop.mrs",
+      "name": "sukka-lite-non-ip-reject-drop-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 26,
+      "source": "non_ip/reject-drop.conf",
+      "text_path": "lite/domain/non_ip/reject-drop.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 27,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-reject-drop-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 1,
+      "source": "non_ip/reject-drop.conf",
+      "text_path": "lite/classical/non_ip/reject-drop.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-reject-no-drop-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 44,
+      "source": "non_ip/reject-no-drop.conf",
+      "text_path": "classical/non_ip/reject-no-drop.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/reject-no-drop.mrs",
+      "name": "sukka-ios-non-ip-reject-no-drop-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 35,
+      "source": "non_ip/reject-no-drop.conf",
+      "text_path": "ios/domain/non_ip/reject-no-drop.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 36,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-reject-no-drop-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 9,
+      "source": "non_ip/reject-no-drop.conf",
+      "text_path": "ios/classical/non_ip/reject-no-drop.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/reject-no-drop.mrs",
+      "name": "sukka-lite-non-ip-reject-no-drop-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 35,
+      "source": "non_ip/reject-no-drop.conf",
+      "text_path": "lite/domain/non_ip/reject-no-drop.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 36,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-reject-no-drop-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 9,
+      "source": "non_ip/reject-no-drop.conf",
+      "text_path": "lite/classical/non_ip/reject-no-drop.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-reject-url-regex-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 176,
+      "source": "non_ip/reject-url-regex.conf",
+      "text_path": "classical/non_ip/reject-url-regex.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-reject-url-regex-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 176,
+      "source": "non_ip/reject-url-regex.conf",
+      "text_path": "ios/classical/non_ip/reject-url-regex.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-reject-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 369,
+      "source": "non_ip/reject.conf",
+      "text_path": "classical/non_ip/reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/reject.mrs",
+      "name": "sukka-ios-non-ip-reject-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 160,
+      "source": "non_ip/reject.conf",
+      "text_path": "ios/domain/non_ip/reject.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 161,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-reject-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 162,
+      "source": "non_ip/reject.conf",
+      "text_path": "ios/classical/non_ip/reject.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "non_ip",
+      "first_source_index": 323,
+      "mrs_path": "mrs/ios/ipcidr/non_ip/reject.mrs",
+      "name": "sukka-ios-non-ip-reject-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 47,
+      "source": "non_ip/reject.conf",
+      "text_path": "ios/ipcidr/non_ip/reject.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/reject.mrs",
+      "name": "sukka-lite-non-ip-reject-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 160,
+      "source": "non_ip/reject.conf",
+      "text_path": "lite/domain/non_ip/reject.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 161,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-reject-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 159,
+      "source": "non_ip/reject.conf",
+      "text_path": "lite/classical/non_ip/reject.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "non_ip",
+      "first_source_index": 323,
+      "mrs_path": "mrs/lite/ipcidr/non_ip/reject.mrs",
+      "name": "sukka-lite-non-ip-reject-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 47,
+      "source": "non_ip/reject.conf",
+      "text_path": "lite/ipcidr/non_ip/reject.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-sogouinput-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 11,
+      "source": "non_ip/sogouinput.conf",
+      "text_path": "classical/non_ip/sogouinput.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/sogouinput.mrs",
+      "name": "sukka-ios-non-ip-sogouinput-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 9,
+      "source": "non_ip/sogouinput.conf",
+      "text_path": "ios/domain/non_ip/sogouinput.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 10,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-sogouinput-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 2,
+      "source": "non_ip/sogouinput.conf",
+      "text_path": "ios/classical/non_ip/sogouinput.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/sogouinput.mrs",
+      "name": "sukka-lite-non-ip-sogouinput-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 9,
+      "source": "non_ip/sogouinput.conf",
+      "text_path": "lite/domain/non_ip/sogouinput.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 10,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-sogouinput-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 2,
+      "source": "non_ip/sogouinput.conf",
+      "text_path": "lite/classical/non_ip/sogouinput.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 321,
+      "source": "non_ip/stream.conf",
+      "text_path": "classical/non_ip/stream.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/stream.mrs",
+      "name": "sukka-ios-non-ip-stream-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 258,
+      "source": "non_ip/stream.conf",
+      "text_path": "ios/domain/non_ip/stream.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 259,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-stream-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 63,
+      "source": "non_ip/stream.conf",
+      "text_path": "ios/classical/non_ip/stream.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/stream.mrs",
+      "name": "sukka-lite-non-ip-stream-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 258,
+      "source": "non_ip/stream.conf",
+      "text_path": "lite/domain/non_ip/stream.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 259,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-stream-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 63,
+      "source": "non_ip/stream.conf",
+      "text_path": "lite/classical/non_ip/stream.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 0,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-biliintl-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 6,
+      "source": "non_ip/stream_biliintl.conf",
+      "text_path": "domain/non_ip/stream_biliintl.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 0,
+      "mrs_path": "mrs/ios/domain/non_ip/stream_biliintl.mrs",
+      "name": "sukka-ios-non-ip-stream-biliintl-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 6,
+      "source": "non_ip/stream_biliintl.conf",
+      "text_path": "ios/domain/non_ip/stream_biliintl.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 0,
+      "mrs_path": "mrs/lite/domain/non_ip/stream_biliintl.mrs",
+      "name": "sukka-lite-non-ip-stream-biliintl-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 6,
+      "source": "non_ip/stream_biliintl.conf",
+      "text_path": "lite/domain/non_ip/stream_biliintl.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-eu-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 10,
+      "source": "non_ip/stream_eu.conf",
+      "text_path": "classical/non_ip/stream_eu.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/stream_eu.mrs",
+      "name": "sukka-ios-non-ip-stream-eu-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 6,
+      "source": "non_ip/stream_eu.conf",
+      "text_path": "ios/domain/non_ip/stream_eu.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 7,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-stream-eu-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 4,
+      "source": "non_ip/stream_eu.conf",
+      "text_path": "ios/classical/non_ip/stream_eu.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/stream_eu.mrs",
+      "name": "sukka-lite-non-ip-stream-eu-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 6,
+      "source": "non_ip/stream_eu.conf",
+      "text_path": "lite/domain/non_ip/stream_eu.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 7,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-stream-eu-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 4,
+      "source": "non_ip/stream_eu.conf",
+      "text_path": "lite/classical/non_ip/stream_eu.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-hk-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 31,
+      "source": "non_ip/stream_hk.conf",
+      "text_path": "classical/non_ip/stream_hk.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/stream_hk.mrs",
+      "name": "sukka-ios-non-ip-stream-hk-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 27,
+      "source": "non_ip/stream_hk.conf",
+      "text_path": "ios/domain/non_ip/stream_hk.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 28,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-stream-hk-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 4,
+      "source": "non_ip/stream_hk.conf",
+      "text_path": "ios/classical/non_ip/stream_hk.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/stream_hk.mrs",
+      "name": "sukka-lite-non-ip-stream-hk-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 27,
+      "source": "non_ip/stream_hk.conf",
+      "text_path": "lite/domain/non_ip/stream_hk.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 28,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-stream-hk-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 4,
+      "source": "non_ip/stream_hk.conf",
+      "text_path": "lite/classical/non_ip/stream_hk.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-jp-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 27,
+      "source": "non_ip/stream_jp.conf",
+      "text_path": "classical/non_ip/stream_jp.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/stream_jp.mrs",
+      "name": "sukka-ios-non-ip-stream-jp-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 25,
+      "source": "non_ip/stream_jp.conf",
+      "text_path": "ios/domain/non_ip/stream_jp.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 26,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-stream-jp-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 2,
+      "source": "non_ip/stream_jp.conf",
+      "text_path": "ios/classical/non_ip/stream_jp.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/stream_jp.mrs",
+      "name": "sukka-lite-non-ip-stream-jp-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 25,
+      "source": "non_ip/stream_jp.conf",
+      "text_path": "lite/domain/non_ip/stream_jp.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 26,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-stream-jp-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 2,
+      "source": "non_ip/stream_jp.conf",
+      "text_path": "lite/classical/non_ip/stream_jp.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-kr-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 3,
+      "source": "non_ip/stream_kr.conf",
+      "text_path": "classical/non_ip/stream_kr.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/stream_kr.mrs",
+      "name": "sukka-ios-non-ip-stream-kr-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 2,
+      "source": "non_ip/stream_kr.conf",
+      "text_path": "ios/domain/non_ip/stream_kr.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 3,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-stream-kr-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 1,
+      "source": "non_ip/stream_kr.conf",
+      "text_path": "ios/classical/non_ip/stream_kr.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/stream_kr.mrs",
+      "name": "sukka-lite-non-ip-stream-kr-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 2,
+      "source": "non_ip/stream_kr.conf",
+      "text_path": "lite/domain/non_ip/stream_kr.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 3,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-stream-kr-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 1,
+      "source": "non_ip/stream_kr.conf",
+      "text_path": "lite/classical/non_ip/stream_kr.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-tw-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 37,
+      "source": "non_ip/stream_tw.conf",
+      "text_path": "classical/non_ip/stream_tw.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/stream_tw.mrs",
+      "name": "sukka-ios-non-ip-stream-tw-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 33,
+      "source": "non_ip/stream_tw.conf",
+      "text_path": "ios/domain/non_ip/stream_tw.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 34,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-stream-tw-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 4,
+      "source": "non_ip/stream_tw.conf",
+      "text_path": "ios/classical/non_ip/stream_tw.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/stream_tw.mrs",
+      "name": "sukka-lite-non-ip-stream-tw-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 33,
+      "source": "non_ip/stream_tw.conf",
+      "text_path": "lite/domain/non_ip/stream_tw.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 34,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-stream-tw-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 4,
+      "source": "non_ip/stream_tw.conf",
+      "text_path": "lite/classical/non_ip/stream_tw.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-stream-us-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 51,
+      "source": "non_ip/stream_us.conf",
+      "text_path": "classical/non_ip/stream_us.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/stream_us.mrs",
+      "name": "sukka-ios-non-ip-stream-us-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 42,
+      "source": "non_ip/stream_us.conf",
+      "text_path": "ios/domain/non_ip/stream_us.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 43,
+      "mrs_path": null,
+      "name": "sukka-ios-non-ip-stream-us-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 9,
+      "source": "non_ip/stream_us.conf",
+      "text_path": "ios/classical/non_ip/stream_us.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/stream_us.mrs",
+      "name": "sukka-lite-non-ip-stream-us-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 42,
+      "source": "non_ip/stream_us.conf",
+      "text_path": "lite/domain/non_ip/stream_us.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "non_ip",
+      "first_source_index": 43,
+      "mrs_path": null,
+      "name": "sukka-lite-non-ip-stream-us-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 9,
+      "source": "non_ip/stream_us.conf",
+      "text_path": "lite/classical/non_ip/stream_us.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-non-ip-telegram-domain",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 14,
+      "source": "non_ip/telegram.conf",
+      "text_path": "domain/non_ip/telegram.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/domain/non_ip/telegram.mrs",
+      "name": "sukka-ios-non-ip-telegram-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 14,
+      "source": "non_ip/telegram.conf",
+      "text_path": "ios/domain/non_ip/telegram.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "non_ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/domain/non_ip/telegram.mrs",
+      "name": "sukka-lite-non-ip-telegram-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 14,
+      "source": "non_ip/telegram.conf",
+      "text_path": "lite/domain/non_ip/telegram.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-ai-ipcidr",
+      "no_resolve": true,
+      "profile": "legacy",
+      "rule_count": 23,
+      "source": "ip/ai.conf",
+      "text_path": "ipcidr/ai.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/ai.mrs",
+      "name": "sukka-ios-ip-ai-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 23,
+      "source": "ip/ai.conf",
+      "text_path": "ios/ipcidr/ip/ai.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/ai.mrs",
+      "name": "sukka-lite-ip-ai-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 23,
+      "source": "ip/ai.conf",
+      "text_path": "lite/ipcidr/ip/ai.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-apple-services-ipcidr",
+      "no_resolve": true,
+      "profile": "legacy",
+      "rule_count": 10,
+      "source": "ip/apple_services.conf",
+      "text_path": "ipcidr/apple_services.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/apple_services.mrs",
+      "name": "sukka-ios-ip-apple-services-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 10,
+      "source": "ip/apple_services.conf",
+      "text_path": "ios/ipcidr/ip/apple_services.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/apple_services.mrs",
+      "name": "sukka-lite-ip-apple-services-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 10,
+      "source": "ip/apple_services.conf",
+      "text_path": "lite/ipcidr/ip/apple_services.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-cdn-ipcidr",
+      "no_resolve": false,
+      "profile": "legacy",
+      "rule_count": 3,
+      "source": "ip/cdn.conf",
+      "text_path": "ipcidr/cdn.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/cdn.mrs",
+      "name": "sukka-ios-ip-cdn-ipcidr",
+      "no_resolve": false,
+      "profile": "ios",
+      "rule_count": 3,
+      "source": "ip/cdn.conf",
+      "text_path": "ios/ipcidr/ip/cdn.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/cdn.mrs",
+      "name": "sukka-lite-ip-cdn-ipcidr",
+      "no_resolve": false,
+      "profile": "lite",
+      "rule_count": 3,
+      "source": "ip/cdn.conf",
+      "text_path": "lite/ipcidr/ip/cdn.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-china-ip-ipcidr",
+      "no_resolve": false,
+      "profile": "legacy",
+      "rule_count": 3918,
+      "source": "ip/china_ip.conf",
+      "text_path": "ipcidr/china_ip.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/china_ip.mrs",
+      "name": "sukka-ios-ip-china-ip-ipcidr",
+      "no_resolve": false,
+      "profile": "ios",
+      "rule_count": 3918,
+      "source": "ip/china_ip.conf",
+      "text_path": "ios/ipcidr/ip/china_ip.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/china_ip.mrs",
+      "name": "sukka-lite-ip-china-ip-ipcidr",
+      "no_resolve": false,
+      "profile": "lite",
+      "rule_count": 3918,
+      "source": "ip/china_ip.conf",
+      "text_path": "lite/ipcidr/ip/china_ip.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-china-ip-ipv6-ipcidr",
+      "no_resolve": false,
+      "profile": "legacy",
+      "rule_count": 1235,
+      "source": "ip/china_ip_ipv6.conf",
+      "text_path": "ipcidr/china_ip_ipv6.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/china_ip_ipv6.mrs",
+      "name": "sukka-ios-ip-china-ip-ipv6-ipcidr",
+      "no_resolve": false,
+      "profile": "ios",
+      "rule_count": 1235,
+      "source": "ip/china_ip_ipv6.conf",
+      "text_path": "ios/ipcidr/ip/china_ip_ipv6.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/china_ip_ipv6.mrs",
+      "name": "sukka-lite-ip-china-ip-ipv6-ipcidr",
+      "no_resolve": false,
+      "profile": "lite",
+      "rule_count": 1235,
+      "source": "ip/china_ip_ipv6.conf",
+      "text_path": "lite/ipcidr/ip/china_ip_ipv6.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-domestic-ipcidr",
+      "no_resolve": true,
+      "profile": "legacy",
+      "rule_count": 2,
+      "source": "ip/domestic.conf",
+      "text_path": "ipcidr/domestic.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/domestic.mrs",
+      "name": "sukka-ios-ip-domestic-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 2,
+      "source": "ip/domestic.conf",
+      "text_path": "ios/ipcidr/ip/domestic.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/domestic.mrs",
+      "name": "sukka-lite-ip-domestic-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 2,
+      "source": "ip/domestic.conf",
+      "text_path": "lite/ipcidr/ip/domestic.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-download-ipcidr",
+      "no_resolve": true,
+      "profile": "legacy",
+      "rule_count": 11,
+      "source": "ip/download.conf",
+      "text_path": "ipcidr/download.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/download.mrs",
+      "name": "sukka-ios-ip-download-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 11,
+      "source": "ip/download.conf",
+      "text_path": "ios/ipcidr/ip/download.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/download.mrs",
+      "name": "sukka-lite-ip-download-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 11,
+      "source": "ip/download.conf",
+      "text_path": "lite/ipcidr/ip/download.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-lan-ipcidr",
+      "no_resolve": false,
+      "profile": "legacy",
+      "rule_count": 11,
+      "source": "ip/lan.conf",
+      "text_path": "ipcidr/lan.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/lan.mrs",
+      "name": "sukka-ios-ip-lan-ipcidr",
+      "no_resolve": false,
+      "profile": "ios",
+      "rule_count": 11,
+      "source": "ip/lan.conf",
+      "text_path": "ios/ipcidr/ip/lan.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/lan.mrs",
+      "name": "sukka-lite-ip-lan-ipcidr",
+      "no_resolve": false,
+      "profile": "lite",
+      "rule_count": 11,
+      "source": "ip/lan.conf",
+      "text_path": "lite/ipcidr/ip/lan.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-neteasemusic-ipcidr",
+      "no_resolve": true,
+      "profile": "legacy",
+      "rule_count": 17,
+      "source": "ip/neteasemusic.conf",
+      "text_path": "ipcidr/neteasemusic.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/neteasemusic.mrs",
+      "name": "sukka-ios-ip-neteasemusic-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 17,
+      "source": "ip/neteasemusic.conf",
+      "text_path": "ios/ipcidr/ip/neteasemusic.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/neteasemusic.mrs",
+      "name": "sukka-lite-ip-neteasemusic-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 17,
+      "source": "ip/neteasemusic.conf",
+      "text_path": "lite/ipcidr/ip/neteasemusic.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-reject-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 779,
+      "source": "ip/reject.conf",
+      "text_path": "classical/ip/reject.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/reject.no_resolve.mrs",
+      "name": "sukka-ios-ip-reject-ipcidr-no-resolve",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 42,
+      "source": "ip/reject.conf",
+      "text_path": "ios/ipcidr/ip/reject.no_resolve.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 43,
+      "mrs_path": "mrs/ios/ipcidr/ip/reject.resolve.mrs",
+      "name": "sukka-ios-ip-reject-ipcidr-resolve",
+      "no_resolve": false,
+      "profile": "ios",
+      "rule_count": 722,
+      "source": "ip/reject.conf",
+      "text_path": "ios/ipcidr/ip/reject.resolve.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "ip",
+      "first_source_index": 765,
+      "mrs_path": null,
+      "name": "sukka-ios-ip-reject-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 15,
+      "source": "ip/reject.conf",
+      "text_path": "ios/classical/ip/reject.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/reject.no_resolve.mrs",
+      "name": "sukka-lite-ip-reject-ipcidr-no-resolve",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 42,
+      "source": "ip/reject.conf",
+      "text_path": "lite/ipcidr/ip/reject.no_resolve.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 43,
+      "mrs_path": "mrs/lite/ipcidr/ip/reject.resolve.mrs",
+      "name": "sukka-lite-ip-reject-ipcidr-resolve",
+      "no_resolve": false,
+      "profile": "lite",
+      "rule_count": 722,
+      "source": "ip/reject.conf",
+      "text_path": "lite/ipcidr/ip/reject.resolve.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "ip",
+      "first_source_index": 765,
+      "mrs_path": null,
+      "name": "sukka-lite-ip-reject-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 15,
+      "source": "ip/reject.conf",
+      "text_path": "lite/classical/ip/reject.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-stream-ipcidr",
+      "no_resolve": true,
+      "profile": "legacy",
+      "rule_count": 19,
+      "source": "ip/stream.conf",
+      "text_path": "ipcidr/stream.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/stream.mrs",
+      "name": "sukka-ios-ip-stream-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 19,
+      "source": "ip/stream.conf",
+      "text_path": "ios/ipcidr/ip/stream.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/stream.mrs",
+      "name": "sukka-lite-ip-stream-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 19,
+      "source": "ip/stream.conf",
+      "text_path": "lite/ipcidr/ip/stream.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "ip",
+      "first_source_index": 0,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-stream-biliintl-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 1,
+      "source": "ip/stream_biliintl.conf",
+      "text_path": "classical/ip/stream_biliintl.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "ip",
+      "first_source_index": 0,
+      "mrs_path": "mrs/ios/domain/ip/stream_biliintl.mrs",
+      "name": "sukka-ios-ip-stream-biliintl-domain",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 1,
+      "source": "ip/stream_biliintl.conf",
+      "text_path": "ios/domain/ip/stream_biliintl.txt"
+    },
+    {
+      "behavior": "domain",
+      "category": "ip",
+      "first_source_index": 0,
+      "mrs_path": "mrs/lite/domain/ip/stream_biliintl.mrs",
+      "name": "sukka-lite-ip-stream-biliintl-domain",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 1,
+      "source": "ip/stream_biliintl.conf",
+      "text_path": "lite/domain/ip/stream_biliintl.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-telegram-ipcidr",
+      "no_resolve": true,
+      "profile": "legacy",
+      "rule_count": 14,
+      "source": "ip/telegram.conf",
+      "text_path": "ipcidr/telegram.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/ios/ipcidr/ip/telegram.mrs",
+      "name": "sukka-ios-ip-telegram-ipcidr",
+      "no_resolve": true,
+      "profile": "ios",
+      "rule_count": 14,
+      "source": "ip/telegram.conf",
+      "text_path": "ios/ipcidr/ip/telegram.txt"
+    },
+    {
+      "behavior": "ipcidr",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": "mrs/lite/ipcidr/ip/telegram.mrs",
+      "name": "sukka-lite-ip-telegram-ipcidr",
+      "no_resolve": true,
+      "profile": "lite",
+      "rule_count": 14,
+      "source": "ip/telegram.conf",
+      "text_path": "lite/ipcidr/ip/telegram.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-legacy-ip-telegram-asn-classical",
+      "no_resolve": null,
+      "profile": "legacy",
+      "rule_count": 5,
+      "source": "ip/telegram_asn.conf",
+      "text_path": "classical/ip/telegram_asn.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-ios-ip-telegram-asn-classical",
+      "no_resolve": null,
+      "profile": "ios",
+      "rule_count": 5,
+      "source": "ip/telegram_asn.conf",
+      "text_path": "ios/classical/ip/telegram_asn.txt"
+    },
+    {
+      "behavior": "classical",
+      "category": "ip",
+      "first_source_index": 1,
+      "mrs_path": null,
+      "name": "sukka-lite-ip-telegram-asn-classical",
+      "no_resolve": null,
+      "profile": "lite",
+      "rule_count": 5,
+      "source": "ip/telegram_asn.conf",
+      "text_path": "lite/classical/ip/telegram_asn.txt"
+    }
+  ],
+  "raw_base_url": "https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main",
+  "schema": "sukka-stash-provider-manifest/v1",
+  "source_provider_order": {
+    "domainset/apple_cdn.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-domainset-apple-cdn-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-domainset-apple-cdn-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "domainset/cdn.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-domainset-cdn-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-domainset-cdn-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "domainset/game-download.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-domainset-game-download-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-domainset-game-download-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "domainset/icloud_private_relay.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-domainset-icloud-private-relay-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-domainset-icloud-private-relay-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "domainset/reject.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-domainset-reject-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-domainset-reject-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "domainset/reject_phishing.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-domainset-reject-phishing-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-domainset-reject-phishing-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "domainset/speedtest.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-domainset-speedtest-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-domainset-speedtest-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "ip/ai.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-ai-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-ai-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "ip/apple_services.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-apple-services-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-apple-services-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "ip/cdn.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-cdn-ipcidr",
+          "no_resolve": false
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-cdn-ipcidr",
+          "no_resolve": false
+        }
+      ]
+    },
+    "ip/china_ip.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-china-ip-ipcidr",
+          "no_resolve": false
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-china-ip-ipcidr",
+          "no_resolve": false
+        }
+      ]
+    },
+    "ip/china_ip_ipv6.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-china-ip-ipv6-ipcidr",
+          "no_resolve": false
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-china-ip-ipv6-ipcidr",
+          "no_resolve": false
+        }
+      ]
+    },
+    "ip/domestic.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-domestic-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-domestic-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "ip/download.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-download-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-download-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "ip/lan.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-lan-ipcidr",
+          "no_resolve": false
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-lan-ipcidr",
+          "no_resolve": false
+        }
+      ]
+    },
+    "ip/neteasemusic.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-neteasemusic-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-neteasemusic-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "ip/reject.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-reject-ipcidr-no-resolve",
+          "no_resolve": true
+        },
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-reject-ipcidr-resolve",
+          "no_resolve": false
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-ip-reject-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-reject-ipcidr-no-resolve",
+          "no_resolve": true
+        },
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-reject-ipcidr-resolve",
+          "no_resolve": false
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-ip-reject-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "ip/stream.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-stream-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-stream-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "ip/stream_biliintl.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-ip-stream-biliintl-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-ip-stream-biliintl-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "ip/stream_eu.conf": {
+      "ios": [],
+      "lite": []
+    },
+    "ip/stream_hk.conf": {
+      "ios": [],
+      "lite": []
+    },
+    "ip/stream_jp.conf": {
+      "ios": [],
+      "lite": []
+    },
+    "ip/stream_kr.conf": {
+      "ios": [],
+      "lite": []
+    },
+    "ip/stream_tw.conf": {
+      "ios": [],
+      "lite": []
+    },
+    "ip/stream_us.conf": {
+      "ios": [],
+      "lite": []
+    },
+    "ip/telegram.conf": {
+      "ios": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-ip-telegram-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-ip-telegram-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "ip/telegram_asn.conf": {
+      "ios": [
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-ip-telegram-asn-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-ip-telegram-asn-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/ai.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-ai-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-ai-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-ai-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-ai-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/apple_cn.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-apple-cn-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-apple-cn-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/apple_intelligence.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-apple-intelligence-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-apple-intelligence-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/apple_services.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-apple-services-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-non-ip-apple-services-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-apple-services-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-non-ip-apple-services-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "non_ip/cdn.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-cdn-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-cdn-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-cdn-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-cdn-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/cloudmounter.conf": {
+      "ios": [
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-cloudmounter-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-cloudmounter-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/direct.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-direct-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-direct-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-direct-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-direct-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/domestic.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-domestic-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-domestic-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-domestic-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-domestic-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/download.conf": {
+      "ios": [
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-download-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-download-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/gitlab.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-gitlab-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-gitlab-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/global.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-global-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-global-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-global-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-global-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/lan.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-lan-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-lan-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/microsoft.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-microsoft-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-microsoft-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-microsoft-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-microsoft-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/microsoft_cdn.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-microsoft-cdn-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-microsoft-cdn-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-microsoft-cdn-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/my_direct.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-my-direct-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-my-direct-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/my_git.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-my-git-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-my-git-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/my_plus.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-my-plus-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-my-plus-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/my_proxy.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-my-proxy-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-my-proxy-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/my_reject.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-my-reject-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-my-reject-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-my-reject-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-my-reject-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/my_tw.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-my-tw-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-my-tw-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-my-tw-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-my-tw-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/my_us.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-my-us-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-my-us-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/neteasemusic.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-neteasemusic-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-neteasemusic-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-neteasemusic-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-neteasemusic-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/reject-drop.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-reject-drop-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-reject-drop-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-reject-drop-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-reject-drop-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/reject-no-drop.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-reject-no-drop-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-reject-no-drop-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-reject-no-drop-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-reject-no-drop-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/reject-url-regex.conf": {
+      "ios": [
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-reject-url-regex-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": []
+    },
+    "non_ip/reject.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-reject-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-reject-classical",
+          "no_resolve": null
+        },
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-ios-non-ip-reject-ipcidr",
+          "no_resolve": true
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-reject-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-reject-classical",
+          "no_resolve": null
+        },
+        {
+          "behavior": "ipcidr",
+          "name": "sukka-lite-non-ip-reject-ipcidr",
+          "no_resolve": true
+        }
+      ]
+    },
+    "non_ip/sogouinput.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-sogouinput-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-sogouinput-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-sogouinput-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-sogouinput-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-stream-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-stream-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream_biliintl.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-biliintl-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-biliintl-domain",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream_eu.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-eu-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-stream-eu-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-eu-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-stream-eu-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream_hk.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-hk-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-stream-hk-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-hk-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-stream-hk-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream_jp.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-jp-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-stream-jp-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-jp-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-stream-jp-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream_kr.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-kr-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-stream-kr-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-kr-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-stream-kr-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream_tw.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-tw-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-stream-tw-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-tw-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-stream-tw-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/stream_us.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-stream-us-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-ios-non-ip-stream-us-classical",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-stream-us-domain",
+          "no_resolve": null
+        },
+        {
+          "behavior": "classical",
+          "name": "sukka-lite-non-ip-stream-us-classical",
+          "no_resolve": null
+        }
+      ]
+    },
+    "non_ip/telegram.conf": {
+      "ios": [
+        {
+          "behavior": "domain",
+          "name": "sukka-ios-non-ip-telegram-domain",
+          "no_resolve": null
+        }
+      ],
+      "lite": [
+        {
+          "behavior": "domain",
+          "name": "sukka-lite-non-ip-telegram-domain",
+          "no_resolve": null
+        }
+      ]
+    }
+  }
+}

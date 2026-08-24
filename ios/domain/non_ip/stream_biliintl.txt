@@ -1,0 +1,6 @@
+this_ruleset_is_made_by_sukkaw.ruleset.skk.moe
++.bilibili.tv
++.biliintl.com
+apm-misaka.biliapi.net
+upos-bstar-mirrorakam.akamaized.net
+upos-bstar1-mirrorakam.akamaized.net

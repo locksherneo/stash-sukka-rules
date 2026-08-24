@@ -1,0 +1,11 @@
+{
+  "counts": {
+    "URL-REGEX": 183
+  },
+  "enabled": true,
+  "excluded_rule_types": [
+    "SCRIPT",
+    "URL-REGEX"
+  ],
+  "total": 183
+}

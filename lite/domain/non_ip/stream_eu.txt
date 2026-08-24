@@ -1,0 +1,6 @@
++.itv.com
++.bbc.co.uk
++.bbci.co.uk
+bbc.mp-pxcdn.com
++.tvlicensing.co.uk
+itvpnpmobile-a.akamaihd.net

@@ -1,0 +1,406 @@
+# Stash LITE provider declarations; attach your own policies.
+# All providers generated from the same source must use the same policy.
+rule-providers:
+  sukka-lite-domainset-apple-cdn-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/domainset/apple_cdn.txt
+    interval: 86400
+  sukka-lite-domainset-cdn-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/domainset/cdn.txt
+    interval: 86400
+  sukka-lite-domainset-game-download-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/domainset/game-download.txt
+    interval: 86400
+  sukka-lite-domainset-icloud-private-relay-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/domainset/icloud_private_relay.txt
+    interval: 86400
+  sukka-lite-domainset-reject-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/domainset/reject.txt
+    interval: 86400
+  sukka-lite-domainset-reject-phishing-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/domainset/reject_phishing.txt
+    interval: 86400
+  sukka-lite-domainset-speedtest-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/domainset/speedtest.txt
+    interval: 86400
+  sukka-lite-non-ip-ai-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/ai.txt
+    interval: 86400
+  sukka-lite-non-ip-ai-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/ai.txt
+    interval: 86400
+  sukka-lite-non-ip-apple-cn-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/apple_cn.txt
+    interval: 86400
+  sukka-lite-non-ip-apple-intelligence-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/apple_intelligence.txt
+    interval: 86400
+  sukka-lite-non-ip-apple-services-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/apple_services.txt
+    interval: 86400
+  sukka-lite-non-ip-apple-services-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/non_ip/apple_services.txt
+    interval: 86400
+  sukka-lite-non-ip-cdn-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/cdn.txt
+    interval: 86400
+  sukka-lite-non-ip-cdn-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/cdn.txt
+    interval: 86400
+  sukka-lite-non-ip-cloudmounter-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/cloudmounter.txt
+    interval: 86400
+  sukka-lite-non-ip-direct-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/direct.txt
+    interval: 86400
+  sukka-lite-non-ip-direct-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/direct.txt
+    interval: 86400
+  sukka-lite-non-ip-domestic-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/domestic.txt
+    interval: 86400
+  sukka-lite-non-ip-domestic-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/domestic.txt
+    interval: 86400
+  sukka-lite-non-ip-download-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/download.txt
+    interval: 86400
+  sukka-lite-non-ip-gitlab-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/gitlab.txt
+    interval: 86400
+  sukka-lite-non-ip-global-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/global.txt
+    interval: 86400
+  sukka-lite-non-ip-global-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/global.txt
+    interval: 86400
+  sukka-lite-non-ip-lan-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/lan.txt
+    interval: 86400
+  sukka-lite-non-ip-microsoft-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/microsoft.txt
+    interval: 86400
+  sukka-lite-non-ip-microsoft-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/microsoft.txt
+    interval: 86400
+  sukka-lite-non-ip-microsoft-cdn-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/microsoft_cdn.txt
+    interval: 86400
+  sukka-lite-non-ip-my-direct-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/my_direct.txt
+    interval: 86400
+  sukka-lite-non-ip-my-git-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/my_git.txt
+    interval: 86400
+  sukka-lite-non-ip-my-plus-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/my_plus.txt
+    interval: 86400
+  sukka-lite-non-ip-my-proxy-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/my_proxy.txt
+    interval: 86400
+  sukka-lite-non-ip-my-reject-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/my_reject.txt
+    interval: 86400
+  sukka-lite-non-ip-my-reject-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/my_reject.txt
+    interval: 86400
+  sukka-lite-non-ip-my-tw-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/my_tw.txt
+    interval: 86400
+  sukka-lite-non-ip-my-tw-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/my_tw.txt
+    interval: 86400
+  sukka-lite-non-ip-my-us-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/my_us.txt
+    interval: 86400
+  sukka-lite-non-ip-neteasemusic-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/neteasemusic.txt
+    interval: 86400
+  sukka-lite-non-ip-neteasemusic-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/neteasemusic.txt
+    interval: 86400
+  sukka-lite-non-ip-reject-drop-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/reject-drop.txt
+    interval: 86400
+  sukka-lite-non-ip-reject-drop-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/reject-drop.txt
+    interval: 86400
+  sukka-lite-non-ip-reject-no-drop-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/reject-no-drop.txt
+    interval: 86400
+  sukka-lite-non-ip-reject-no-drop-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/reject-no-drop.txt
+    interval: 86400
+  sukka-lite-non-ip-reject-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/reject.txt
+    interval: 86400
+  sukka-lite-non-ip-reject-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/reject.txt
+    interval: 86400
+  sukka-lite-non-ip-reject-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/non_ip/reject.txt
+    interval: 86400
+  sukka-lite-non-ip-sogouinput-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/sogouinput.txt
+    interval: 86400
+  sukka-lite-non-ip-sogouinput-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/sogouinput.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/stream.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-biliintl-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream_biliintl.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-eu-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream_eu.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-eu-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/stream_eu.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-hk-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream_hk.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-hk-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/stream_hk.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-jp-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream_jp.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-jp-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/stream_jp.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-kr-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream_kr.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-kr-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/stream_kr.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-tw-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream_tw.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-tw-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/stream_tw.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-us-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/stream_us.txt
+    interval: 86400
+  sukka-lite-non-ip-stream-us-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/stream_us.txt
+    interval: 86400
+  sukka-lite-non-ip-telegram-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/non_ip/telegram.txt
+    interval: 86400
+  sukka-lite-ip-ai-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/ai.txt
+    interval: 86400
+  sukka-lite-ip-apple-services-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/apple_services.txt
+    interval: 86400
+  sukka-lite-ip-cdn-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/cdn.txt
+    interval: 86400
+  sukka-lite-ip-china-ip-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/china_ip.txt
+    interval: 86400
+  sukka-lite-ip-china-ip-ipv6-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/china_ip_ipv6.txt
+    interval: 86400
+  sukka-lite-ip-domestic-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/domestic.txt
+    interval: 86400
+  sukka-lite-ip-download-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/download.txt
+    interval: 86400
+  sukka-lite-ip-lan-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/lan.txt
+    interval: 86400
+  sukka-lite-ip-neteasemusic-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/neteasemusic.txt
+    interval: 86400
+  sukka-lite-ip-reject-ipcidr-no-resolve:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/reject.no_resolve.txt
+    interval: 86400
+  sukka-lite-ip-reject-ipcidr-resolve:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/reject.resolve.txt
+    interval: 86400
+  sukka-lite-ip-reject-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/ip/reject.txt
+    interval: 86400
+  sukka-lite-ip-stream-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/stream.txt
+    interval: 86400
+  sukka-lite-ip-stream-biliintl-domain:
+    behavior: domain
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/domain/ip/stream_biliintl.txt
+    interval: 86400
+  sukka-lite-ip-telegram-ipcidr:
+    behavior: ipcidr
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/telegram.txt
+    interval: 86400
+  sukka-lite-ip-telegram-asn-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/ip/telegram_asn.txt
+    interval: 86400
+
+# Keep each source's provider order from PROVIDER_MANIFEST.json.
+# Add ,no-resolve only when the manifest marks an ipcidr provider.

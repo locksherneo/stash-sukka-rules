@@ -1,0 +1,3 @@
+DOMAIN-KEYWORD,openai
+DOMAIN-KEYWORD,alkalimakersuite-pa.clients6.google.com
+URL-REGEX,https://www\.google\.com/.*continue=https://gemini\.google\.com.+

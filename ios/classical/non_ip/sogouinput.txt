@@ -1,0 +1,2 @@
+USER-AGENT,SogouInput
+USER-AGENT,com.sogou.sogouinput.BaseKeyboard

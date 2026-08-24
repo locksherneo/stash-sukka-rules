@@ -1,0 +1,16 @@
+ip.cn
++.ip.sb
++.ipwho.is
++.db-ip.com
++.ipdata.co
++.ip-api.com
++.nextdns.io
++.ipstack.com
++.ipregistry.co
+fonts.gstatic.cn
++.ipgeolocation.io
+sglong.wechat.com
+sgshort.wechat.com
+fonts.googleapis.cn
++.services.googleapis.cn
+sgminorshort.wechat.com

@@ -1,0 +1,4 @@
+USER-AGENT,com.kktv.ios.kktv*
+USER-AGENT,KKTV*
+USER-AGENT,LINE TV*
+USER-AGENT,Anime*
