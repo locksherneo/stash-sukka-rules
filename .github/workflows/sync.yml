@@ -1,4 +1,4 @@
-name: Sukka List to Stash V1.5 iOS Hybrid MRS Semantic Final
+name: Sukka List to Stash V1.5.1 iOS Hybrid MRS Zstd Hotfix Final
 
 on:
   workflow_dispatch:
@@ -69,7 +69,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          work_root="$(mktemp -d "$RUNNER_TEMP/sukka-stash-v1.5.XXXXXXXX")"
+          work_root="$(mktemp -d "$RUNNER_TEMP/sukka-stash-v1.5.1.XXXXXXXX")"
           mkdir -p "$work_root/source/domainset" \
             "$work_root/source/non_ip" \
             "$work_root/source/ip" \
@@ -97,7 +97,7 @@ jobs:
           source_base = os.environ["SOURCE_BASE"].rstrip("/")
           minimum = int(os.environ["MIN_TOTAL_SOURCE_FILES"])
           workers = max(1, min(16, int(os.environ["DOWNLOAD_WORKERS"])))
-          user_agent = "Sukka-Stash-iOS-Sync/1.5 (+GitHub Actions)"
+          user_agent = "Sukka-Stash-iOS-Sync/1.5.1 (+GitHub Actions)"
 
           def fetch(url: str, *, attempts: int = 5) -> bytes:
               last_error = None
@@ -208,7 +208,7 @@ jobs:
           api_headers = {
               "Accept": "application/vnd.github+json",
               "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
-              "User-Agent": "Sukka-Stash-iOS-Sync/1.5",
+              "User-Agent": "Sukka-Stash-iOS-Sync/1.5.1",
               "X-GitHub-Api-Version": "2022-11-28",
           }
           def github_json(url: str) -> dict | list:
@@ -268,7 +268,7 @@ jobs:
           digest = hashlib.sha256()
           request = urllib.request.Request(
               asset["browser_download_url"],
-              headers={"User-Agent": "Sukka-Stash-iOS-Sync/1.5"},
+              headers={"User-Agent": "Sukka-Stash-iOS-Sync/1.5.1"},
           )
           with urllib.request.urlopen(request, timeout=120) as response:
               with archive.open("wb") as handle:
@@ -328,6 +328,7 @@ jobs:
               for part in os.getenv("LITE_EXCLUDED_TYPES", "URL-REGEX,SCRIPT").split(",")
               if part.strip()
           }
+          MRS_ZSTD_MAGIC = bytes.fromhex("28b52ffd")
           MARKER_SUFFIX = ".m4d3.by.5ukk4w.skk.moe"
           MARKER_EXACT = {"7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe"}
           IOS_UNSUPPORTED = {"PROCESS-NAME", "PROCESS-PATH"}
@@ -632,8 +633,12 @@ jobs:
                   if not mrs_path.is_file() or mrs_path.stat().st_size < 5:
                       raise RuntimeError(f"MRS converter created an empty file: {mrs_path}")
                   with mrs_path.open("rb") as handle:
-                      if handle.read(4) != b"MRS\x01":
-                          raise RuntimeError(f"Invalid MRS magic header: {mrs_path}")
+                      frame_header = handle.read(len(MRS_ZSTD_MAGIC))
+                  if frame_header != MRS_ZSTD_MAGIC:
+                      raise RuntimeError(
+                          f"Invalid MRS Zstandard frame header: {mrs_path}; "
+                          f"expected={MRS_ZSTD_MAGIC.hex()}, actual={frame_header.hex()}"
+                      )
                   mrs_cache.setdefault(cache_key, mrs_path)
                   record["mrs_path"] = mrs_path.relative_to(OUTPUT).as_posix()
                   mrs_total_bytes += mrs_path.stat().st_size
@@ -1018,7 +1023,7 @@ jobs:
 
           manifest = {
               "schema": "sukka-stash-provider-manifest/v1",
-              "generator": "Sukka List to Stash V1.5",
+              "generator": "Sukka List to Stash V1.5.1",
               "raw_base_url": raw_base,
               "profiles": list(PROFILES),
               "lite_excluded_rule_types": sorted(LITE_EXCLUDED) if BUILD_LITE else [],
@@ -1042,7 +1047,7 @@ jobs:
               },
           }
           audit_document = {
-              "schema": "sukka-stash-semantic-audit/v1.5",
+              "schema": "sukka-stash-semantic-audit/v1.5.1",
               "summary": dict(sorted(summary.items())),
               "categories": {
                   category: dict(sorted(per_category[category].items()))
@@ -1104,7 +1109,7 @@ jobs:
           readme = [
               "# Sukka List for Stash iOS",
               "",
-              "V1.5 preserves existing provider URLs while adding rule-by-rule optimized",
+              "V1.5.1 preserves existing provider URLs while adding rule-by-rule optimized",
               "Full and Lite profiles. Only reference one profile for a given source.",
               "",
               "| Output | Compatibility | Behavior |",
@@ -1114,6 +1119,9 @@ jobs:
               "| ios/classical/ | New Full profile | Unsupported-for-promotion remainder |",
               "| lite/ | iOS Lite profile | Omits only explicitly audited expensive rules |",
               "| mrs/ios/, mrs/lite/ | Optional MRS mirrors | domain/ipcidr only |",
+              "",
+              "Mihomo MRS files are Zstandard-compressed; their MRSv1 magic appears",
+              "inside the decompressed payload, not at the start of the binary file.",
               "",
               "## Semantic guarantees",
               "",
@@ -1233,6 +1241,7 @@ jobs:
           import json
           import os
 
+          MRS_ZSTD_MAGIC = bytes.fromhex("28b52ffd")
           output = Path(os.environ["WORK_ROOT"]) / "output"
           manifest = json.loads((output / "PROVIDER_MANIFEST.json").read_text("utf-8"))
           audit = json.loads((output / "SEMANTIC_AUDIT.json").read_text("utf-8"))
@@ -1273,8 +1282,12 @@ jobs:
                       raise RuntimeError("Classical providers cannot use the MRS format")
                   mrs = output / provider["mrs_path"]
                   with mrs.open("rb") as handle:
-                      if handle.read(4) != b"MRS\x01":
-                          raise RuntimeError(f"Invalid MRS provider: {mrs}")
+                      frame_header = handle.read(len(MRS_ZSTD_MAGIC))
+                  if frame_header != MRS_ZSTD_MAGIC:
+                      raise RuntimeError(
+                          f"Invalid MRS Zstandard frame header: {mrs}; "
+                          f"expected={MRS_ZSTD_MAGIC.hex()}, actual={frame_header.hex()}"
+                      )
 
           duplicates = [name for name, count in names.items() if count != 1]
           if duplicates:
