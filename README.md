@@ -63,21 +63,21 @@ classical/
 | Metric | Count |
 |---|---:|
 | Source files | 68 |
-| Source rules | 378917 |
-| Deprecated rules | 77577 |
+| Source rules | 378988 |
+| Deprecated rules | 77761 |
 | Markers removed | 62 |
 | iOS PROCESS filtered | 75 |
 | Duplicates removed | 0 |
-| Final rules | 301203 |
+| Final rules | 301090 |
 | Unaccounted rules | 0 |
 
 ## Provider Count
 
 | Behavior | Providers | Rules |
 |---|---:|---:|
-| domain | 20 | 291372 |
-| ipcidr | 11 | 5262 |
-| classical | 26 | 4569 |
+| domain | 20 | 291257 |
+| ipcidr | 11 | 5261 |
+| classical | 26 | 4572 |
 
 ## Rule Conservation
 
@@ -184,7 +184,7 @@ rules:
 ## Current Semantic Version
 
 ```text
-9203b2705c06a877f9cb887a9731e592c9f6295591f2dc49bde68d55a245caef
+d3545cd2561b8cfc4825f985fc0a54e2c6d6d7c8c1eb3eff5f6a104b10ad75b1
 ```
 
 ---
