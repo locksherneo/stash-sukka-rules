@@ -1,10 +1,24 @@
-name: Sukka List to Stash V1.4.2.1 Semantic Integrity Bugfix Final
+name: Sukka List to Stash V1.5 iOS Hybrid MRS Semantic Final
 
 on:
   workflow_dispatch:
-
+    inputs:
+      build_mrs:
+        description: Build verified domain/ipcidr MRS rule sets
+        required: true
+        default: true
+        type: boolean
+      build_ios_lite:
+        description: Build iOS Lite without URL-REGEX or SCRIPT rules
+        required: true
+        default: true
+        type: boolean
+      allow_large_drop:
+        description: Allow an exceptional upstream rule-count reduction
+        required: true
+        default: false
+        type: boolean
   schedule:
-    # 每天 UTC 06:20 自动检查一次
     - cron: "20 6 * * *"
 
 permissions:
@@ -14,2982 +28,1388 @@ concurrency:
   group: sukka-stash-ios-sync
   cancel-in-progress: false
 
-
 jobs:
-
   sync:
-
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     env:
       SOURCE_BASE: https://ruleset.skk.moe
-      MIN_TOTAL_PROVIDERS: 20
-
+      MIHOMO_TAG: v1.19.30
+      DOWNLOAD_WORKERS: "8"
+      MIN_TOTAL_SOURCE_FILES: "20"
+      MIN_TOTAL_PROVIDERS: "20"
+      MIN_TOTAL_RULES: "1000"
+      MAX_RULE_DROP_PERCENT: "25"
+      PROVIDER_INTERVAL: "86400"
+      LITE_EXCLUDED_TYPES: URL-REGEX,SCRIPT
+      REQUIRED_SOURCES: domainset/reject.conf,non_ip/ai.conf,ip/china_ip.conf,ip/telegram.conf
+      BUILD_MRS: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.build_mrs == 'true' }}
+      BUILD_IOS_LITE: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.build_ios_lite == 'true' }}
+      ALLOW_LARGE_DROP: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.allow_large_drop == 'true' }}
 
     steps:
-
-      # ==========================================================
-      # 1. Checkout
-      # ==========================================================
-
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-
-      # ==========================================================
-      # 2. Configure Git
-      # ==========================================================
-
-      - name: Configure Git
+      - name: Synchronize branch before generation
+        shell: bash
         run: |
           set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --no-tags origin "$GITHUB_REF_NAME"
+          git merge --ff-only "origin/$GITHUB_REF_NAME"
+          printf 'Validated base commit: %s\n' "$(git rev-parse HEAD)"
 
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
-
-
-      # ==========================================================
-      # 3. Prepare workspace
-      # ==========================================================
-
-      - name: Prepare workspace
+      - name: Prepare isolated staging directory
+        id: staging
+        shell: bash
         run: |
           set -euo pipefail
+          work_root="$(mktemp -d "$RUNNER_TEMP/sukka-stash-v1.5.XXXXXXXX")"
+          mkdir -p "$work_root/source/domainset" \
+            "$work_root/source/non_ip" \
+            "$work_root/source/ip" \
+            "$work_root/output"
+          printf 'WORK_ROOT=%s\n' "$work_root" >> "$GITHUB_ENV"
+          printf 'work_root=%s\n' "$work_root" >> "$GITHUB_OUTPUT"
 
-          rm -rf /tmp/sukka-stash
-
-          mkdir -p /tmp/sukka-stash/source/domainset
-          mkdir -p /tmp/sukka-stash/source/non_ip
-          mkdir -p /tmp/sukka-stash/source/ip
-
-          mkdir -p /tmp/sukka-stash/output/domain/domainset
-          mkdir -p /tmp/sukka-stash/output/domain/non_ip
-          mkdir -p /tmp/sukka-stash/output/ipcidr
-          mkdir -p /tmp/sukka-stash/output/classical/non_ip
-          mkdir -p /tmp/sukka-stash/output/classical/ip
-
-
-      # ==========================================================
-      # 4. Fetch Sukka index
-      # ==========================================================
-
-      - name: Fetch Sukka index
+      - name: Discover and download Sukka source rules concurrently
+        shell: bash
         run: |
           set -euo pipefail
+          python3 <<'PY'
+          from collections import Counter
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from html import unescape
+          from pathlib import Path
+          from urllib.parse import quote
+          import os
+          import re
+          import time
+          import urllib.error
+          import urllib.request
 
-          echo "Fetching Sukka index..."
+          root = Path(os.environ["WORK_ROOT"])
+          source_base = os.environ["SOURCE_BASE"].rstrip("/")
+          minimum = int(os.environ["MIN_TOTAL_SOURCE_FILES"])
+          workers = max(1, min(16, int(os.environ["DOWNLOAD_WORKERS"])))
+          user_agent = "Sukka-Stash-iOS-Sync/1.5 (+GitHub Actions)"
 
-          curl \
-            --fail \
-            --location \
-            --silent \
-            --show-error \
-            --retry 5 \
-            --retry-delay 3 \
-            --retry-all-errors \
-            --connect-timeout 15 \
-            --max-time 60 \
-            "${SOURCE_BASE}/" \
-            -o /tmp/sukka-stash/index.html
+          def fetch(url: str, *, attempts: int = 5) -> bytes:
+              last_error = None
+              for attempt in range(1, attempts + 1):
+                  try:
+                      request = urllib.request.Request(
+                          url,
+                          headers={"User-Agent": user_agent, "Accept": "*/*"},
+                      )
+                      with urllib.request.urlopen(request, timeout=60) as response:
+                          body = response.read()
+                      if not body:
+                          raise ValueError("upstream returned an empty response")
+                      return body
+                  except (OSError, ValueError, urllib.error.URLError) as error:
+                      last_error = error
+                      if attempt < attempts:
+                          time.sleep(min(attempt * 2, 8))
+              raise RuntimeError(f"{url}: {last_error}") from last_error
 
-          if [ ! -s /tmp/sukka-stash/index.html ]; then
-            echo "ERROR: Sukka index is empty."
-            exit 1
-          fi
+          index = fetch(source_base + "/")
+          if len(index) < 500:
+              raise SystemExit("Sukka index is unexpectedly small")
 
-          SIZE=$(wc -c < /tmp/sukka-stash/index.html)
+          text = unescape(index.decode("utf-8", errors="strict"))
+          pattern = re.compile(
+              r"List/(?:domainset|non_ip|ip)/[A-Za-z0-9_.@+-]+[.]conf"
+          )
+          discovered = sorted({match.group(0) for match in pattern.finditer(text)})
+          categories = Counter(path.split("/")[1] for path in discovered)
 
-          echo "Index size: ${SIZE} bytes"
+          if len(discovered) < minimum:
+              raise SystemExit(
+                  f"Only {len(discovered)} source files discovered; minimum={minimum}"
+              )
+          if any(categories[name] == 0 for name in ("domainset", "non_ip", "ip")):
+              raise SystemExit(f"An upstream source category is empty: {dict(categories)}")
 
-          if [ "${SIZE}" -lt 500 ]; then
-            echo "ERROR: Sukka index looks abnormal."
-            exit 1
-          fi
+          required = {
+              item.strip()
+              for item in os.getenv("REQUIRED_SOURCES", "").split(",")
+              if item.strip()
+          }
+          present = {path.removeprefix("List/") for path in discovered}
+          missing = sorted(required - present)
+          if missing:
+              raise SystemExit(f"Critical Sukka source files are missing: {missing}")
 
-
-      # ==========================================================
-      # 5. Discover Sukka List
-      # ==========================================================
-
-      - name: Discover Sukka List rules
-        run: |
-          set -euo pipefail
-
-          grep -oE \
-            'List/(domainset|non_ip|ip)/[^"<> ]+\.conf' \
-            /tmp/sukka-stash/index.html \
-            | sort -u \
-            > /tmp/sukka-stash/files.txt
-
-          TOTAL=$(wc -l < /tmp/sukka-stash/files.txt)
-
-          DOMAINSET=$(
-            grep -c '^List/domainset/' \
-            /tmp/sukka-stash/files.txt || true
+          (root / "files.txt").write_text(
+              "\n".join(discovered) + "\n",
+              encoding="utf-8",
           )
 
-          NON_IP=$(
-            grep -c '^List/non_ip/' \
-            /tmp/sukka-stash/files.txt || true
+          def download(relative: str) -> tuple[str, int]:
+              safe_relative = quote(relative, safe="/@+.-_")
+              payload = fetch(source_base + "/" + safe_relative)
+              destination = root / "source" / relative.removeprefix("List/")
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              destination.write_bytes(payload)
+              return relative, len(payload)
+
+          failures = []
+          with ThreadPoolExecutor(max_workers=workers) as executor:
+              futures = {
+                  executor.submit(download, relative): relative
+                  for relative in discovered
+              }
+              for future in as_completed(futures):
+                  relative = futures[future]
+                  try:
+                      name, size = future.result()
+                      print(f"Downloaded {name}: {size:,} bytes")
+                  except Exception as error:
+                      failures.append(f"{relative}: {error}")
+
+          if failures:
+              raise SystemExit(
+                  "One or more upstream downloads failed:\n" + "\n".join(sorted(failures))
+              )
+          print(
+              "Sukka discovery complete: "
+              f"files={len(discovered)}, categories={dict(categories)}, workers={workers}"
           )
+          PY
 
-          IP=$(
-            grep -c '^List/ip/' \
-            /tmp/sukka-stash/files.txt || true
-          )
-
-          echo ""
-          echo "===================================="
-          echo " Sukka List Discovery"
-          echo "===================================="
-          echo " domainset : ${DOMAINSET}"
-          echo " non_ip    : ${NON_IP}"
-          echo " ip        : ${IP}"
-          echo "------------------------------------"
-          echo " TOTAL     : ${TOTAL}"
-          echo "===================================="
-
-          if [ "${TOTAL}" -lt "${MIN_TOTAL_PROVIDERS}" ]; then
-            echo "ERROR: Too few Sukka rule files."
-            exit 1
-          fi
-
-          if [ "${DOMAINSET}" -eq 0 ] || \
-             [ "${NON_IP}" -eq 0 ] || \
-             [ "${IP}" -eq 0 ]; then
-
-            echo "ERROR: Missing Sukka List category."
-            exit 1
-          fi
-
-
-      # ==========================================================
-      # 6. Download Sukka List
-      # ==========================================================
-
-      - name: Download Sukka List rules
+      - name: Install checksum-verified pinned Mihomo binary
+        if: env.BUILD_MRS == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-
-          SUCCESS=0
-
-          while IFS= read -r FILE; do
-
-            [ -z "${FILE}" ] && continue
-
-            RELATIVE="${FILE#List/}"
-
-            DEST="/tmp/sukka-stash/source/${RELATIVE}"
-
-            mkdir -p "$(dirname "${DEST}")"
-
-            echo "↓ ${FILE}"
-
-            curl \
-              --fail \
-              --location \
-              --silent \
-              --show-error \
-              --retry 5 \
-              --retry-delay 3 \
-              --retry-all-errors \
-              --connect-timeout 15 \
-              --max-time 120 \
-              "${SOURCE_BASE}/${FILE}" \
-              -o "${DEST}"
-
-            if [ ! -s "${DEST}" ]; then
-              echo "ERROR: Empty source file: ${FILE}"
-              exit 1
-            fi
-
-            SUCCESS=$((SUCCESS + 1))
-
-          done < /tmp/sukka-stash/files.txt
-
-          echo ""
-          echo "Downloaded ${SUCCESS} source files."
-
-
-      # ==========================================================
-      # 7. Convert + Semantic Integrity Accounting
-      # ==========================================================
-
-      - name: Convert and audit Stash iOS rules
-        run: |
-          set -euo pipefail
-
           python3 <<'PY'
           from pathlib import Path
-          from collections import Counter
+          import gzip
+          import hashlib
+          import json
+          import os
+          import shutil
+          import stat
+          import urllib.error
+          import urllib.request
+
+          root = Path(os.environ["WORK_ROOT"])
+          tag = os.environ["MIHOMO_TAG"]
+          asset_name = f"mihomo-linux-amd64-{tag}.gz"
+          api_url = f"https://api.github.com/repos/MetaCubeX/mihomo/releases/tags/{tag}"
+          api_headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+              "User-Agent": "Sukka-Stash-iOS-Sync/1.5",
+              "X-GitHub-Api-Version": "2022-11-28",
+          }
+          def github_json(url: str) -> dict | list:
+              request = urllib.request.Request(url, headers=api_headers)
+              try:
+                  with urllib.request.urlopen(request, timeout=45) as response:
+                      return json.load(response)
+              except urllib.error.HTTPError as error:
+                  if error.code not in {401, 403, 404}:
+                      raise
+                  public_headers = {
+                      key: value
+                      for key, value in api_headers.items()
+                      if key != "Authorization"
+                  }
+                  public_request = urllib.request.Request(url, headers=public_headers)
+                  with urllib.request.urlopen(public_request, timeout=45) as response:
+                      return json.load(response)
+
+          release = github_json(api_url)
+          if not isinstance(release, dict) or release.get("tag_name") != tag:
+              raise SystemExit(f"GitHub returned unexpected metadata for pinned tag {tag}")
+
+          asset = next(
+              (item for item in release.get("assets", []) if item.get("name") == asset_name),
+              None,
+          )
+          if asset is None:
+              assets_url = release.get("assets_url")
+              if not assets_url:
+                  raise SystemExit("Pinned Mihomo release does not expose an assets endpoint")
+              for page in range(1, 11):
+                  page_assets = github_json(f"{assets_url}?per_page=100&page={page}")
+                  if not isinstance(page_assets, list):
+                      raise SystemExit("GitHub returned an invalid release asset page")
+                  asset = next(
+                      (item for item in page_assets if item.get("name") == asset_name),
+                      None,
+                  )
+                  if asset is not None or len(page_assets) < 100:
+                      break
+          if asset is None:
+              raise SystemExit(f"Pinned Mihomo release asset is unavailable: {asset_name}")
+
+          expected = asset.get("digest") or ""
+          if not expected and asset.get("url"):
+              detailed_asset = github_json(asset["url"])
+              if isinstance(detailed_asset, dict):
+                  asset = detailed_asset
+                  expected = asset.get("digest") or ""
+          if not expected.startswith("sha256:") or len(expected) != 71:
+              raise SystemExit(
+                  f"Official release metadata lacks a valid SHA-256 digest: {asset_name}"
+              )
+
+          archive = root / asset_name
+          digest = hashlib.sha256()
+          request = urllib.request.Request(
+              asset["browser_download_url"],
+              headers={"User-Agent": "Sukka-Stash-iOS-Sync/1.5"},
+          )
+          with urllib.request.urlopen(request, timeout=120) as response:
+              with archive.open("wb") as handle:
+                  while chunk := response.read(1024 * 1024):
+                      digest.update(chunk)
+                      handle.write(chunk)
+
+          actual = "sha256:" + digest.hexdigest()
+          if actual != expected:
+              raise SystemExit(
+                  f"Mihomo checksum mismatch: expected={expected}, actual={actual}"
+              )
+
+          binary = root / "mihomo"
+          with gzip.open(archive, "rb") as compressed:
+              with binary.open("wb") as executable:
+                  shutil.copyfileobj(compressed, executable)
+          binary.chmod(binary.stat().st_mode | stat.S_IXUSR)
+
+          with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as github_env:
+              github_env.write(f"MIHOMO_BIN={binary}\n")
+
+          print(f"Installed verified Mihomo {tag}; release digest={actual}")
+          PY
+
+      - name: Convert, partition and audit Stash iOS rule sets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from collections import Counter, defaultdict
+          from dataclasses import dataclass
+          from pathlib import Path
+          import hashlib
           import ipaddress
           import json
+          import os
+          import re
+          import shutil
+          import subprocess
+          import sys
 
-
-          SRC = Path("/tmp/sukka-stash/source")
-          OUT = Path("/tmp/sukka-stash/output")
-          TMP = Path("/tmp/sukka-stash")
-
-
-          IOS_UNSUPPORTED = {
-              "PROCESS-NAME",
-              "PROCESS-PATH",
+          ROOT = Path(os.environ["WORK_ROOT"]).resolve()
+          SOURCE = ROOT / "source"
+          OUTPUT = ROOT / "output"
+          REPO = Path(os.getenv("GITHUB_WORKSPACE", os.getcwd())).resolve()
+          BUILD_MRS = os.getenv("BUILD_MRS", "true").lower() == "true"
+          BUILD_LITE = os.getenv("BUILD_IOS_LITE", "true").lower() == "true"
+          ALLOW_DROP = os.getenv("ALLOW_LARGE_DROP", "false").lower() == "true"
+          MIN_SOURCES = int(os.getenv("MIN_TOTAL_SOURCE_FILES", "20"))
+          MIN_PROVIDERS = int(os.getenv("MIN_TOTAL_PROVIDERS", "20"))
+          MIN_RULES = int(os.getenv("MIN_TOTAL_RULES", "1000"))
+          MAX_DROP = float(os.getenv("MAX_RULE_DROP_PERCENT", "25"))
+          INTERVAL = int(os.getenv("PROVIDER_INTERVAL", "86400"))
+          LITE_EXCLUDED = {
+              part.strip().upper()
+              for part in os.getenv("LITE_EXCLUDED_TYPES", "URL-REGEX,SCRIPT").split(",")
+              if part.strip()
           }
-
-
-          CIDR_TYPES = {
-              "IP-CIDR",
-              "IP-CIDR6",
+          MARKER_SUFFIX = ".m4d3.by.5ukk4w.skk.moe"
+          MARKER_EXACT = {"7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe"}
+          IOS_UNSUPPORTED = {"PROCESS-NAME", "PROCESS-PATH"}
+          ALIASES = {"ASN": "IP-ASN", "DEST-PORT": "DST-PORT"}
+          DOMAIN_TYPES = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-WILDCARD"}
+          CIDR_TYPES = {"IP-CIDR", "IP-CIDR6"}
+          STASH_TYPES = DOMAIN_TYPES | CIDR_TYPES | {
+              "DOMAIN-KEYWORD",
+              "DOMAIN-REGEX",
+              "GEOIP",
+              "IP-ASN",
+              "NETWORK",
+              "PROTOCOL",
+              "DST-PORT",
+              "GEOSITE",
+              "SCRIPT",
+              "AND",
+              "OR",
+              "NOT",
+              "USER-AGENT",
+              "URL-REGEX",
           }
+          KNOWN_PROTOCOLS = {"TCP", "UDP", "HTTP", "TLS", "QUIC", "STUN"}
+          CATEGORIES = ("domainset", "non_ip", "ip")
+          PROFILES = ("ios", "lite") if BUILD_LITE else ("ios",)
 
-
-          DOMAIN_PROVIDER_TYPES = {
-              "DOMAIN",
-              "DOMAIN-SUFFIX",
-              "DOMAIN-WILDCARD",
-          }
-
-
-          KNOWN_SUKKA_MARKERS = {
-              "7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe",
-          }
-
-
-          SUKKA_MARKER_SUFFIX = (
-              ".m4d3.by.5ukk4w.skk.moe"
-          )
-
-
-          summary = {
-              "source_files": 0,
-              "active_files": 0,
-              "deprecated_files": 0,
-
-              "source_rules_total": 0,
-              "active_source_rules": 0,
-              "deprecated_source_rules": 0,
-
-              "markers_removed": 0,
-              "ios_process_filtered": 0,
-              "duplicates_removed": 0,
-
-              "output_rules": 0,
-              "output_providers": 0,
-
-              "domain_rules": 0,
-              "ipcidr_rules": 0,
-              "classical_rules": 0,
-
-              "domain_providers": 0,
-              "ipcidr_providers": 0,
-              "classical_providers": 0,
-
-              "no_resolve_ipcidr_providers": 0,
-
-              "unaccounted_rules": 0,
-          }
-
-
-          category_stats = {
-              "domainset": Counter(),
-              "non_ip": Counter(),
-              "ip": Counter(),
-          }
-
-
+          summary = Counter()
+          per_category = defaultdict(Counter)
+          rule_types = Counter()
+          alias_conversions = Counter()
+          lite_omissions = Counter()
           file_audit = []
-
+          providers = []
           removed_markers = []
-          ios_filtered = []
-          skipped_files = []
+          filtered_process_rules = []
+          omitted_lite_rules = []
+          deprecated_files = []
+          mixed_no_resolve_sources = []
+          legacy_no_resolve = []
+          mrs_cache = {}
+          mrs_total_bytes = 0
 
-          promoted_domain = []
-          kept_classical_non_ip = []
+          @dataclass(frozen=True)
+          class Rule:
+              kind: str
+              classical: str
+              optimized: str
+              behavior: str
+              no_resolve: bool | None
+              original_index: int
 
-          promoted_ipcidr = []
-          kept_classical_ip = []
+          def write_lines(path: Path, lines: list[str]) -> None:
+              if not lines:
+                  raise ValueError(f"Refusing to create empty rule provider: {path}")
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
-          no_resolve_ipcidr = []
-
-
-          # ======================================================
-          # Helpers
-          # ======================================================
-
-          def is_deprecated(text: str) -> bool:
-
-              low = text.lower()
-
-              return (
-                  "deprecated" in low
-                  or "has been merged with" in low
-                  or "has been merged into" in low
+          def write_json(path: Path, value: object) -> None:
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text(
+                  json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                  encoding="utf-8",
+                  newline="\n",
               )
 
+          def marker_domain(value: str) -> bool:
+              normalized = (
+                  value.strip()
+                  .removeprefix("+.")
+                  .removeprefix("*.")
+                  .lstrip(".")
+                  .replace("?", "")
+                  .rstrip(".")
+                  .casefold()
+              )
+              return normalized in MARKER_EXACT or normalized.endswith(MARKER_SUFFIX)
 
-          def meaningful_lines(text: str):
+          def source_is_deprecated(text: str) -> bool:
+              lowered = text.casefold()
+              return (
+                  "deprecated" in lowered
+                  or "has been merged with" in lowered
+                  or "has been merged into" in lowered
+              )
 
-              result = []
+          def normalize_domain(value: str, *, wildcard: bool = False) -> str:
+              normalized = value.strip().rstrip(".").casefold()
+              if not normalized or normalized in {".", "+.", "*", "*."}:
+                  raise ValueError(f"Empty or invalid domain: {value!r}")
+              if any(character.isspace() for character in normalized):
+                  raise ValueError(f"Whitespace is not valid in a domain: {value!r}")
+              if any(character in normalized for character in (",", "/", "\\", "#")):
+                  raise ValueError(f"Invalid domain character: {value!r}")
+              if not wildcard and any(character in normalized for character in ("*", "?")):
+                  raise ValueError(f"Wildcard is not valid for this domain type: {value!r}")
+              if ".." in normalized or normalized.startswith("."):
+                  raise ValueError(f"Invalid empty domain label: {value!r}")
+              if len(normalized) > 253:
+                  raise ValueError(f"Domain exceeds 253 characters: {value!r}")
+              return normalized
 
-              for raw in text.splitlines():
+          def normalize_domainset(line: str, index: int) -> Rule:
+              original = line.strip()
+              suffix = original.startswith(".") or original.startswith("+.")
+              raw = original.removeprefix("+.").lstrip(".") if suffix else original
+              wildcard = "*" in raw or "?" in raw
+              value = normalize_domain(raw, wildcard=wildcard)
+              if suffix:
+                  return Rule(
+                      "DOMAIN-SUFFIX",
+                      f"DOMAIN-SUFFIX,{value}",
+                      f"+.{value}",
+                      "domain",
+                      None,
+                      index,
+                  )
+              kind = "DOMAIN-WILDCARD" if wildcard else "DOMAIN"
+              return Rule(kind, f"{kind},{value}", value, "domain", None, index)
 
-                  line = raw.strip()
+          def no_resolve_operand(remainder: str, kind: str) -> tuple[str, bool]:
+              parts = [part.strip() for part in remainder.split(",")]
+              if len(parts) > 2 or not parts[0]:
+                  raise ValueError(f"Invalid {kind} operand/options: {remainder!r}")
+              if len(parts) == 2 and parts[1].casefold() != "no-resolve":
+                  raise ValueError(f"Unsupported {kind} rule option: {parts[1]!r}")
+              return parts[0], len(parts) == 2
 
-                  if not line:
-                      continue
-
-                  if line.startswith("#"):
-                      continue
-
-                  result.append(line)
-
-              return result
-
-
-          def normalize_domain(value: str):
-
-              value = value.strip()
-
-              if value.startswith("+."):
-                  value = value[2:]
-
-              value = value.lstrip(".")
-
-              return value.lower().rstrip(".")
-
-
-          def is_marker_domain(value: str):
-
-              domain = normalize_domain(value)
-
-              if domain in KNOWN_SUKKA_MARKERS:
-                  return True
-
-              if domain.endswith(
-                  SUKKA_MARKER_SUFFIX
-              ):
-                  return True
-
-              return False
-
-
-          def is_sukka_marker(line: str):
-
-              line = line.strip()
-
-              if not line:
-                  return False
-
-
+          def normalize_rule(line: str, index: int, source_name: str) -> Rule:
               if "," not in line:
+                  raise ValueError(f"{source_name}: missing rule-type separator: {line!r}")
+              raw_kind, remainder = line.split(",", 1)
+              original_kind = raw_kind.strip().upper()
+              kind = ALIASES.get(original_kind, original_kind)
+              if kind != original_kind:
+                  alias_conversions[f"{original_kind}->{kind}"] += 1
+              if kind not in STASH_TYPES:
+                  raise ValueError(f"{source_name}: unsupported Stash rule type {kind!r}")
+              remainder = remainder.strip()
+              if not remainder:
+                  raise ValueError(f"{source_name}: empty operand for {kind}")
 
-                  clean = (
-                      line
-                      .replace("*.", "")
-                      .replace("?", "")
+              if kind in DOMAIN_TYPES:
+                  if "," in remainder:
+                      raise ValueError(f"{source_name}: unexpected domain rule option")
+                  value = normalize_domain(
+                      remainder.lstrip(".") if kind == "DOMAIN-SUFFIX" else remainder,
+                      wildcard=kind == "DOMAIN-WILDCARD",
+                  )
+                  optimized = "+." + value if kind == "DOMAIN-SUFFIX" else value
+                  # Routing DOMAIN-WILDCARD is glob syntax, while domain/MRS
+                  # providers use Clash label wildcards. They are not equivalent.
+                  behavior = "classical" if kind == "DOMAIN-WILDCARD" else "domain"
+                  return Rule(
+                      kind,
+                      f"{kind},{value}",
+                      optimized,
+                      behavior,
+                      None,
+                      index,
                   )
 
-                  return is_marker_domain(clean)
+              if kind in CIDR_TYPES:
+                  operand, no_resolve = no_resolve_operand(remainder, kind)
+                  try:
+                      network = ipaddress.ip_network(operand, strict=False)
+                  except ValueError as error:
+                      raise ValueError(
+                          f"{source_name}: invalid {kind} CIDR {operand!r}"
+                      ) from error
+                  expected_version = 4 if kind == "IP-CIDR" else 6
+                  if network.version != expected_version:
+                      raise ValueError(
+                          f"{source_name}: {kind} does not accept IPv{network.version}"
+                      )
+                  value = str(network)
+                  option = ",no-resolve" if no_resolve else ""
+                  return Rule(
+                      kind,
+                      f"{kind},{value}{option}",
+                      value,
+                      "ipcidr",
+                      no_resolve,
+                      index,
+                  )
 
+              if kind == "IP-ASN":
+                  operand, no_resolve = no_resolve_operand(remainder, kind)
+                  if not operand.isdecimal() or not (0 <= int(operand) <= 4294967295):
+                      raise ValueError(f"{source_name}: invalid autonomous system {operand!r}")
+                  value = str(int(operand))
+                  option = ",no-resolve" if no_resolve else ""
+                  classical = f"{kind},{value}{option}"
+                  return Rule(kind, classical, classical, "classical", None, index)
 
-              rule_type, remainder = (
-                  line.split(",", 1)
+              if kind == "GEOIP":
+                  operand, no_resolve = no_resolve_operand(remainder, kind)
+                  value = operand.upper()
+                  if not re.fullmatch(r"[A-Z]{2}|LAN", value):
+                      raise ValueError(f"{source_name}: invalid GEOIP code {operand!r}")
+                  option = ",no-resolve" if no_resolve else ""
+                  classical = f"{kind},{value}{option}"
+                  return Rule(kind, classical, classical, "classical", None, index)
+
+              if kind == "DST-PORT":
+                  if not re.fullmatch(r"\d{1,5}(?:-\d{1,5})?", remainder):
+                      raise ValueError(f"{source_name}: invalid destination port {remainder!r}")
+                  bounds = [int(part) for part in remainder.split("-")]
+                  if any(value > 65535 for value in bounds) or bounds != sorted(bounds):
+                      raise ValueError(f"{source_name}: invalid destination port {remainder!r}")
+
+              if kind == "NETWORK":
+                  remainder = remainder.casefold()
+                  if remainder not in {"tcp", "udp"}:
+                      raise ValueError(f"{source_name}: invalid network type {remainder!r}")
+
+              if kind == "PROTOCOL":
+                  remainder = remainder.upper()
+                  if remainder not in KNOWN_PROTOCOLS:
+                      raise ValueError(f"{source_name}: invalid protocol {remainder!r}")
+
+              if kind in {"AND", "OR", "NOT"}:
+                  if not remainder.startswith("(") or not remainder.endswith(")"):
+                      raise ValueError(f"{source_name}: malformed logical rule {line!r}")
+                  if remainder.count("(") != remainder.count(")"):
+                      raise ValueError(f"{source_name}: unbalanced logical rule {line!r}")
+
+              classical = f"{kind},{remainder}"
+              return Rule(kind, classical, classical, "classical", None, index)
+
+          def register_provider(
+              *,
+              profile: str,
+              category: str,
+              stem: str,
+              source_name: str,
+              behavior: str,
+              rules: list[Rule],
+              path: Path,
+              no_resolve: bool | None = None,
+              mixed_flags: bool = False,
+          ) -> dict:
+              global mrs_total_bytes
+              lines = [
+                  rule.classical if behavior == "classical" else rule.optimized
+                  for rule in rules
+              ]
+              write_lines(path, lines)
+              relative = path.relative_to(OUTPUT).as_posix()
+              suffix = (
+                  "-no-resolve" if mixed_flags and no_resolve is True
+                  else "-resolve" if mixed_flags and no_resolve is False
+                  else ""
               )
-
-
-              rule_type = (
-                  rule_type
-                  .strip()
-                  .upper()
+              provider_name = (
+                  f"sukka-{profile}-{category}-{stem}-{behavior}{suffix}"
+                  .replace("_", "-")
               )
-
-
-              if rule_type not in {
-                  "DOMAIN",
-                  "DOMAIN-SUFFIX",
-                  "DOMAIN-WILDCARD",
-              }:
-
-                  return False
-
-
-              value = (
-                  remainder
-                  .split(",", 1)[0]
-                  .strip()
-              )
-
-
-              clean = (
-                  value
-                  .replace("*.", "")
-                  .replace("?", "")
-              )
-
-
-              return is_marker_domain(clean)
-
-
-          def ordered_dedupe(lines):
-
-              seen = set()
-              output = []
-              removed = 0
-
-              for line in lines:
-
-                  if line in seen:
-
-                      removed += 1
-                      continue
-
-                  seen.add(line)
-                  output.append(line)
-
-              return output, removed
-
-
-          def write_lines(path: Path, lines):
-
-              path.parent.mkdir(
-                  parents=True,
-                  exist_ok=True
-              )
-
-              path.write_text(
-                  "\n".join(lines) + "\n",
-                  encoding="utf-8"
-              )
-
-
-          def new_file_record(
-              category,
-              src,
-              source_count,
-          ):
-
-              return {
-                  "source": f"{category}/{src.name}",
+              record = {
+                  "profile": profile,
+                  "source": source_name,
                   "category": category,
-
-                  "deprecated": False,
-
-                  "source_rules": source_count,
-
-                  "markers_removed": 0,
-                  "ios_process_filtered": 0,
-                  "duplicates_removed": 0,
-
-                  "output_rules": 0,
-
-                  "target_behavior": None,
-                  "target_path": None,
-
-                  "no_resolve": False,
-
-                  "accounted_rules": 0,
-                  "unaccounted_rules": 0,
+                  "behavior": behavior,
+                  "name": provider_name,
+                  "text_path": relative,
+                  "mrs_path": None,
+                  "rule_count": len(rules),
+                  "no_resolve": no_resolve,
+                  "first_source_index": min(rule.original_index for rule in rules),
               }
 
-
-          def finish_record(record):
-
-              if record["deprecated"]:
-
-                  accounted = (
-                      record["source_rules"]
-                  )
-
-              else:
-
-                  accounted = (
-                      record["markers_removed"]
-                      + record["ios_process_filtered"]
-                      + record["duplicates_removed"]
-                      + record["output_rules"]
-                  )
-
-
-              record["accounted_rules"] = accounted
-
-              record["unaccounted_rules"] = (
-                  record["source_rules"]
-                  - accounted
-              )
-
-
-              if record["unaccounted_rules"] != 0:
-
-                  raise RuntimeError(
-                      "RULE CONSERVATION FAILURE: "
-                      f"{record['source']} "
-                      f"source={record['source_rules']} "
-                      f"accounted={accounted} "
-                      f"unaccounted="
-                      f"{record['unaccounted_rules']}"
-                  )
-
-
-              file_audit.append(record)
-
-
-          def process_common(
-              lines,
-              category,
-              src,
-              record,
-              process_filter,
-          ):
-
-              cleaned = []
-
-
-              for line in lines:
-
-                  if is_sukka_marker(line):
-
-                      record["markers_removed"] += 1
-
-                      removed_markers.append(
-                          f"{category}/{src.name}: {line}"
+              if BUILD_MRS and profile in PROFILES and behavior in {"domain", "ipcidr"}:
+                  binary = os.getenv("MIHOMO_BIN")
+                  if not binary:
+                      raise RuntimeError("BUILD_MRS=true but MIHOMO_BIN is not configured")
+                  mrs_path = OUTPUT / "mrs" / path.relative_to(OUTPUT).with_suffix(".mrs")
+                  mrs_path.parent.mkdir(parents=True, exist_ok=True)
+                  cache_key = (behavior, hashlib.sha256(path.read_bytes()).hexdigest())
+                  cached_mrs = mrs_cache.get(cache_key)
+                  if cached_mrs is not None:
+                      shutil.copyfile(cached_mrs, mrs_path)
+                      summary["mrs_cache_hits"] += 1
+                  else:
+                      completed = subprocess.run(
+                          [
+                              binary,
+                              "convert-ruleset",
+                              behavior,
+                              "text",
+                              str(path),
+                              str(mrs_path),
+                          ],
+                          capture_output=True,
+                          check=False,
+                          text=True,
+                          timeout=120,
                       )
+                      if completed.returncode != 0:
+                          raise RuntimeError(
+                              f"MRS conversion failed for {relative}: "
+                              f"{completed.stderr.strip() or completed.stdout.strip()}"
+                          )
+                  if not mrs_path.is_file() or mrs_path.stat().st_size < 5:
+                      raise RuntimeError(f"MRS converter created an empty file: {mrs_path}")
+                  with mrs_path.open("rb") as handle:
+                      if handle.read(4) != b"MRS\x01":
+                          raise RuntimeError(f"Invalid MRS magic header: {mrs_path}")
+                  mrs_cache.setdefault(cache_key, mrs_path)
+                  record["mrs_path"] = mrs_path.relative_to(OUTPUT).as_posix()
+                  mrs_total_bytes += mrs_path.stat().st_size
+                  summary["mrs_providers"] += 1
 
+              providers.append(record)
+              return record
+
+          def create_legacy(
+              category: str,
+              stem: str,
+              source_name: str,
+              rules: list[Rule],
+              audit: dict,
+          ) -> None:
+              if not rules:
+                  return
+              if category == "domainset" or (
+                  category == "non_ip" and all(rule.kind in DOMAIN_TYPES for rule in rules)
+              ):
+                  behavior = "domain"
+                  path = OUTPUT / "domain" / category / f"{stem}.txt"
+                  no_resolve = None
+              elif category == "ip" and all(rule.behavior == "ipcidr" for rule in rules):
+                  behavior = "ipcidr"
+                  path = OUTPUT / "ipcidr" / f"{stem}.txt"
+                  flags = {rule.no_resolve for rule in rules}
+                  no_resolve = True if True in flags else False
+                  if flags == {True, False}:
+                      audit["legacy_mixed_no_resolve_warning"] = True
+                  if no_resolve:
+                      legacy_no_resolve.append(stem)
+              else:
+                  behavior = "classical"
+                  path = OUTPUT / "classical" / category / f"{stem}.txt"
+                  no_resolve = None
+
+              legacy_rules = rules
+              if behavior in {"domain", "ipcidr"}:
+                  seen_legacy = set()
+                  legacy_rules = []
+                  for rule in rules:
+                      if rule.optimized in seen_legacy:
+                          continue
+                      seen_legacy.add(rule.optimized)
+                      legacy_rules.append(rule)
+                  audit["legacy_collapsed_entries"] = len(rules) - len(legacy_rules)
+
+              provider = register_provider(
+                  profile="legacy",
+                  category=category,
+                  stem=stem,
+                  source_name=source_name,
+                  behavior=behavior,
+                  rules=legacy_rules,
+                  path=path,
+                  no_resolve=no_resolve,
+              )
+              audit["legacy_provider"] = provider["text_path"]
+              audit["legacy_behavior"] = behavior
+
+          def create_optimized(
+              profile: str,
+              category: str,
+              stem: str,
+              source_name: str,
+              rules: list[Rule],
+              audit: dict,
+          ) -> None:
+              eligible = []
+              for rule in rules:
+                  if profile == "lite" and rule.kind in LITE_EXCLUDED:
+                      lite_omissions[rule.kind] += 1
+                      omitted_lite_rules.append(f"{source_name}: {rule.classical}")
+                      continue
+                  eligible.append(rule)
+
+              groups: dict[tuple[str, bool | None], list[Rule]] = defaultdict(list)
+              cidr_flags = {
+                  rule.no_resolve
+                  for rule in eligible
+                  if rule.behavior == "ipcidr"
+              }
+              mixed_flags = cidr_flags == {True, False}
+              for rule in eligible:
+                  key = (
+                      rule.behavior,
+                      rule.no_resolve if rule.behavior == "ipcidr" else None,
+                  )
+                  groups[key].append(rule)
+
+              ordered = sorted(
+                  groups.items(),
+                  key=lambda item: min(rule.original_index for rule in item[1]),
+              )
+              output_records = []
+              for (behavior, flag), grouped in ordered:
+                  filename = stem
+                  if behavior == "ipcidr" and mixed_flags:
+                      filename += ".no_resolve" if flag else ".resolve"
+                  path = OUTPUT / profile / behavior / category / f"{filename}.txt"
+                  provider = register_provider(
+                      profile=profile,
+                      category=category,
+                      stem=stem,
+                      source_name=source_name,
+                      behavior=behavior,
+                      rules=grouped,
+                      path=path,
+                      no_resolve=flag if behavior == "ipcidr" else None,
+                      mixed_flags=mixed_flags,
+                  )
+                  output_records.append(provider)
+                  if profile == "ios":
+                      summary[f"{behavior}_rules"] += len(grouped)
+                      summary[f"{behavior}_providers"] += 1
+
+              audit[f"{profile}_providers"] = [
+                  {
+                      "behavior": record["behavior"],
+                      "text_path": record["text_path"],
+                      "mrs_path": record["mrs_path"],
+                      "rule_count": record["rule_count"],
+                      "no_resolve": record["no_resolve"],
+                      "name": record["name"],
+                  }
+                  for record in output_records
+              ]
+              if profile == "ios" and mixed_flags:
+                  mixed_no_resolve_sources.append(source_name)
+              if profile == "ios" and len(output_records) > 1:
+                  summary["split_source_files"] += 1
+
+          for category in CATEGORIES:
+              for source_path in sorted((SOURCE / category).glob("*.conf")):
+                  source_name = f"{category}/{source_path.name}"
+                  try:
+                      text = source_path.read_text(encoding="utf-8", errors="strict")
+                  except UnicodeDecodeError as error:
+                      raise RuntimeError(f"{source_name}: invalid UTF-8 source encoding") from error
+
+                  lines = [
+                      line.strip()
+                      for line in text.splitlines()
+                      if line.strip() and not line.lstrip().startswith("#")
+                  ]
+                  audit = {
+                      "source": source_name,
+                      "category": category,
+                      "source_rules": len(lines),
+                      "deprecated": source_is_deprecated(text),
+                      "markers_removed": 0,
+                      "ios_process_filtered": 0,
+                      "duplicates_removed": 0,
+                      "output_rules": 0,
+                      "unaccounted_rules": 0,
+                      "legacy_mixed_no_resolve_warning": False,
+                      "ios_providers": [],
+                      "lite_providers": [],
+                  }
+                  summary["source_files"] += 1
+                  summary["source_rules_total"] += len(lines)
+                  per_category[category]["source_files"] += 1
+                  per_category[category]["source_rules"] += len(lines)
+
+                  if audit["deprecated"]:
+                      summary["deprecated_files"] += 1
+                      summary["deprecated_source_rules"] += len(lines)
+                      per_category[category]["deprecated_files"] += 1
+                      deprecated_files.append(source_name)
+                      file_audit.append(audit)
                       continue
 
-
-                  if process_filter and "," in line:
-
-                      rule_type = (
-                          line
-                          .split(",", 1)[0]
-                          .strip()
-                          .upper()
-                      )
-
-
-                      if rule_type in IOS_UNSUPPORTED:
-
-                          record[
-                              "ios_process_filtered"
-                          ] += 1
-
-                          ios_filtered.append(
-                              f"{category}/{src.name}: {line}"
+                  summary["active_files"] += 1
+                  summary["active_source_rules"] += len(lines)
+                  per_category[category]["active_files"] += 1
+                  parsed = []
+                  seen = set()
+                  for index, line in enumerate(lines):
+                      if category == "domainset":
+                          marker_value = line
+                          raw_kind = None
+                      else:
+                          raw_kind = line.split(",", 1)[0].strip().upper()
+                          marker_value = (
+                              line.split(",", 1)[1].split(",", 1)[0]
+                              if "," in line and raw_kind in DOMAIN_TYPES
+                              else ""
                           )
 
+                      if marker_value and marker_domain(marker_value):
+                          audit["markers_removed"] += 1
+                          removed_markers.append(f"{source_name}: {line}")
+                          continue
+                      if raw_kind in IOS_UNSUPPORTED:
+                          audit["ios_process_filtered"] += 1
+                          filtered_process_rules.append(f"{source_name}: {line}")
+                          continue
+                      if raw_kind in {"AND", "OR", "NOT"} and re.search(
+                          r"[(,]\s*PROCESS-(?:NAME|PATH)\s*,",
+                          line,
+                          flags=re.IGNORECASE,
+                      ):
+                          if raw_kind != "AND":
+                              raise ValueError(
+                                  f"{source_name}: iOS-incompatible PROCESS rule inside "
+                                  f"{raw_kind} cannot be removed without changing semantics"
+                              )
+                          audit["ios_process_filtered"] += 1
+                          filtered_process_rules.append(f"{source_name}: {line}")
                           continue
 
+                      rule = (
+                          normalize_domainset(line, index)
+                          if category == "domainset"
+                          else normalize_rule(line, index, source_name)
+                      )
+                      key = (rule.kind, rule.classical)
+                      if key in seen:
+                          audit["duplicates_removed"] += 1
+                          continue
+                      seen.add(key)
+                      parsed.append(rule)
+                      rule_types[rule.kind] += 1
 
-                  cleaned.append(line)
-
-
-              cleaned, removed = ordered_dedupe(
-                  cleaned
-              )
-
-
-              record["duplicates_removed"] += removed
-
-
-              return cleaned
-
-
-          def register_output(
-              record,
-              behavior,
-              path,
-              output_lines,
-              no_resolve=False,
-          ):
-
-              record["target_behavior"] = behavior
-              record["target_path"] = str(
-                  path.relative_to(OUT)
-              )
-
-              record["output_rules"] = len(
-                  output_lines
-              )
-
-              record["no_resolve"] = no_resolve
-
-
-              summary["output_providers"] += 1
-              summary["output_rules"] += len(
-                  output_lines
-              )
-
-
-              if behavior == "domain":
-
-                  summary["domain_providers"] += 1
-
-                  summary["domain_rules"] += len(
-                      output_lines
+                  audit["output_rules"] = len(parsed)
+                  accounted = (
+                      audit["markers_removed"]
+                      + audit["ios_process_filtered"]
+                      + audit["duplicates_removed"]
+                      + audit["output_rules"]
                   )
-
-
-              elif behavior == "ipcidr":
-
-                  summary["ipcidr_providers"] += 1
-
-                  summary["ipcidr_rules"] += len(
-                      output_lines
-                  )
-
-
-              else:
-
-                  summary[
-                      "classical_providers"
-                  ] += 1
-
-                  summary["classical_rules"] += len(
-                      output_lines
-                  )
-
-
-          def load_source(
-              category,
-              src,
-          ):
-
-              text = src.read_text(
-                  encoding="utf-8",
-                  errors="ignore"
-              )
-
-
-              lines = meaningful_lines(text)
-
-              count = len(lines)
-
-
-              summary["source_files"] += 1
-              summary["source_rules_total"] += count
-
-
-              category_stats[category][
-                  "source_files"
-              ] += 1
-
-              category_stats[category][
-                  "source_rules"
-              ] += count
-
-
-              record = new_file_record(
-                  category,
-                  src,
-                  count,
-              )
-
-
-              if is_deprecated(text):
-
-                  record["deprecated"] = True
-
-                  summary["deprecated_files"] += 1
-
-                  summary[
-                      "deprecated_source_rules"
-                  ] += count
-
-
-                  category_stats[category][
-                      "deprecated_files"
-                  ] += 1
-
-                  category_stats[category][
-                      "deprecated_rules"
-                  ] += count
-
-
-                  skipped_files.append(
-                      f"DEPRECATED: "
-                      f"{category}/{src.name}"
-                  )
-
-
-                  finish_record(record)
-
-                  return None, record
-
-
-              summary["active_files"] += 1
-              summary["active_source_rules"] += count
-
-
-              category_stats[category][
-                  "active_files"
-              ] += 1
-
-              category_stats[category][
-                  "active_rules"
-              ] += count
-
-
-              return lines, record
-
-
-          # ======================================================
-          # A. domainset
-          # ======================================================
-
-          for src in sorted(
-              (SRC / "domainset").glob("*.conf")
-          ):
-
-              lines, record = load_source(
-                  "domainset",
-                  src,
-              )
-
-
-              if lines is None:
-                  continue
-
-
-              cleaned = process_common(
-                  lines,
-                  "domainset",
-                  src,
-                  record,
-                  process_filter=False,
-              )
-
-
-              converted = []
-
-
-              for line in cleaned:
-
-                  value = line.strip()
-
-
-                  if value.startswith("."):
-
-                      value = (
-                          "+."
-                          + value[1:]
+                  audit["unaccounted_rules"] = audit["source_rules"] - accounted
+                  if audit["unaccounted_rules"] != 0:
+                      raise RuntimeError(
+                          f"Rule conservation failed for {source_name}: "
+                          f"source={audit['source_rules']}, accounted={accounted}"
                       )
 
-
-                  converted.append(value)
-
-
-              converted, removed = ordered_dedupe(
-                  converted
-              )
-
-
-              record[
-                  "duplicates_removed"
-              ] += removed
-
-
-              if not converted:
-
-                  skipped_files.append(
-                      f"EMPTY AFTER CLEAN: "
-                      f"domainset/{src.name}"
-                  )
-
-                  finish_record(record)
-
-                  continue
-
-
-              dst = (
-                  OUT
-                  / "domain"
-                  / "domainset"
-                  / f"{src.stem}.txt"
-              )
-
-
-              write_lines(
-                  dst,
-                  converted,
-              )
-
-
-              register_output(
-                  record,
-                  "domain",
-                  dst,
-                  converted,
-              )
-
-
-              promoted_domain.append(
-                  f"domainset/{src.name}"
-              )
-
-
-              finish_record(record)
-
-
-          # ======================================================
-          # B. non_ip
-          # ======================================================
-
-          for src in sorted(
-              (SRC / "non_ip").glob("*.conf")
-          ):
-
-              lines, record = load_source(
-                  "non_ip",
-                  src,
-              )
-
-
-              if lines is None:
-                  continue
-
-
-              cleaned = process_common(
-                  lines,
-                  "non_ip",
-                  src,
-                  record,
-                  process_filter=True,
-              )
-
-
-              if not cleaned:
-
-                  skipped_files.append(
-                      f"EMPTY AFTER CLEAN: "
-                      f"non_ip/{src.name}"
-                  )
-
-                  finish_record(record)
-
-                  continue
-
-
-              pure_domain = True
-              converted = []
-
-
-              for line in cleaned:
-
-                  if "," not in line:
-
-                      pure_domain = False
-                      break
-
-
-                  rule_type, remainder = (
-                      line.split(",", 1)
-                  )
-
-
-                  rule_type = (
-                      rule_type
-                      .strip()
-                      .upper()
-                  )
-
-
-                  if "," in remainder:
-
-                      pure_domain = False
-                      break
-
-
-                  value = remainder.strip()
-
-
-                  if (
-                      rule_type
-                      not in DOMAIN_PROVIDER_TYPES
+                  for field in (
+                      "markers_removed",
+                      "ios_process_filtered",
+                      "duplicates_removed",
+                      "output_rules",
                   ):
-
-                      pure_domain = False
-                      break
-
-
-                  if not value:
-
-                      pure_domain = False
-                      break
-
-
-                  if rule_type == "DOMAIN":
-
-                      converted.append(
-                          value
-                      )
-
-
-                  elif rule_type == "DOMAIN-SUFFIX":
-
-                      converted.append(
-                          "+."
-                          + value.lstrip(".")
-                      )
-
-
-                  elif rule_type == "DOMAIN-WILDCARD":
-
-                      converted.append(
-                          value
-                      )
-
-
-              if pure_domain and converted:
-
-                  converted, removed = ordered_dedupe(
-                      converted
-                  )
-
-                  record[
-                      "duplicates_removed"
-                  ] += removed
-
-
-                  dst = (
-                      OUT
-                      / "domain"
-                      / "non_ip"
-                      / f"{src.stem}.txt"
-                  )
-
-
-                  write_lines(
-                      dst,
-                      converted,
-                  )
-
-
-                  register_output(
-                      record,
-                      "domain",
-                      dst,
-                      converted,
-                  )
-
-
-                  promoted_domain.append(
-                      f"non_ip/{src.name}"
-                  )
-
-
-              else:
-
-                  dst = (
-                      OUT
-                      / "classical"
-                      / "non_ip"
-                      / f"{src.stem}.txt"
-                  )
-
-
-                  write_lines(
-                      dst,
-                      cleaned,
-                  )
-
-
-                  register_output(
-                      record,
-                      "classical",
-                      dst,
-                      cleaned,
-                  )
-
-
-                  kept_classical_non_ip.append(
-                      src.stem
-                  )
-
-
-              finish_record(record)
-
-
-          # ======================================================
-          # C. ip
-          # ======================================================
-
-          for src in sorted(
-              (SRC / "ip").glob("*.conf")
-          ):
-
-              lines, record = load_source(
-                  "ip",
-                  src,
-              )
-
-
-              if lines is None:
-                  continue
-
-
-              cleaned = process_common(
-                  lines,
-                  "ip",
-                  src,
-                  record,
-                  process_filter=True,
-              )
-
-
-              if not cleaned:
-
-                  skipped_files.append(
-                      f"EMPTY AFTER CLEAN: "
-                      f"ip/{src.name}"
-                  )
-
-                  finish_record(record)
-
-                  continue
-
-
-              pure_cidr = True
-              cidrs = []
-              has_no_resolve = False
-
-
-              for line in cleaned:
-
-                  if "," not in line:
-
-                      pure_cidr = False
-                      break
-
-
-                  rule_type, remainder = (
-                      line.split(",", 1)
-                  )
-
-
-                  rule_type = (
-                      rule_type
-                      .strip()
-                      .upper()
-                  )
-
-
-                  if rule_type not in CIDR_TYPES:
-
-                      pure_cidr = False
-                      break
-
-
-                  value = remainder.strip()
-
-
-                  if value.lower().endswith(
-                      ",no-resolve"
-                  ):
-
-                      has_no_resolve = True
-
-                      value = value[
-                          :-len(",no-resolve")
-                      ].strip()
-
-
-                  try:
-
-                      network = ipaddress.ip_network(
-                          value,
-                          strict=False
-                      )
-
-
-                  except ValueError:
-
-                      pure_cidr = False
-                      break
-
-
-                  cidrs.append(
-                      str(network)
-                  )
-
-
-              if pure_cidr and cidrs:
-
-                  cidrs, removed = ordered_dedupe(
-                      cidrs
-                  )
-
-
-                  record[
-                      "duplicates_removed"
-                  ] += removed
-
-
-                  dst = (
-                      OUT
-                      / "ipcidr"
-                      / f"{src.stem}.txt"
-                  )
-
-
-                  write_lines(
-                      dst,
-                      cidrs,
-                  )
-
-
-                  register_output(
-                      record,
-                      "ipcidr",
-                      dst,
-                      cidrs,
-                      no_resolve=has_no_resolve,
-                  )
-
-
-                  promoted_ipcidr.append(
-                      src.stem
-                  )
-
-
-                  if has_no_resolve:
-
-                      no_resolve_ipcidr.append(
-                          src.stem
-                      )
-
-
-              else:
-
-                  dst = (
-                      OUT
-                      / "classical"
-                      / "ip"
-                      / f"{src.stem}.txt"
-                  )
-
-
-                  write_lines(
-                      dst,
-                      cleaned,
-                  )
-
-
-                  register_output(
-                      record,
-                      "classical",
-                      dst,
-                      cleaned,
-                  )
-
-
-                  kept_classical_ip.append(
-                      src.stem
-                  )
-
-
-              finish_record(record)
-
-
-          # ======================================================
-          # Aggregate accounting
-          # ======================================================
-
-          summary["markers_removed"] = sum(
-              item["markers_removed"]
-              for item in file_audit
+                      summary[field] += audit[field]
+                      per_category[category][field] += audit[field]
+
+                  if parsed:
+                      create_legacy(category, source_path.stem, source_name, parsed, audit)
+                      for profile in PROFILES:
+                          create_optimized(
+                              profile,
+                              category,
+                              source_path.stem,
+                              source_name,
+                              parsed,
+                              audit,
+                          )
+                  file_audit.append(audit)
+
+          summary["output_providers"] = sum(
+              1 for provider in providers if provider["profile"] == "ios"
           )
-
-
-          summary["ios_process_filtered"] = sum(
-              item["ios_process_filtered"]
-              for item in file_audit
+          summary["legacy_providers"] = sum(
+              1 for provider in providers if provider["profile"] == "legacy"
           )
-
-
-          summary["duplicates_removed"] = sum(
-              item["duplicates_removed"]
-              for item in file_audit
+          summary["lite_providers"] = sum(
+              1 for provider in providers if provider["profile"] == "lite"
           )
-
-
-          summary[
-              "no_resolve_ipcidr_providers"
-          ] = len(no_resolve_ipcidr)
-
-
-          accounted = (
-              summary["deprecated_source_rules"]
-              + summary["markers_removed"]
-              + summary["ios_process_filtered"]
-              + summary["duplicates_removed"]
-              + summary["output_rules"]
+          summary["lite_rules"] = sum(
+              provider["rule_count"]
+              for provider in providers
+              if provider["profile"] == "lite"
           )
-
-
-          summary["unaccounted_rules"] = (
-              summary["source_rules_total"]
-              - accounted
+          summary["lite_omitted_rules"] = sum(lite_omissions.values())
+          summary["mixed_no_resolve_sources"] = len(mixed_no_resolve_sources)
+          summary["no_resolve_ipcidr_providers"] = sum(
+              1
+              for provider in providers
+              if provider["profile"] == "ios"
+              and provider["behavior"] == "ipcidr"
+              and provider["no_resolve"] is True
           )
+          summary["mrs_bytes"] = mrs_total_bytes
+          summary["unaccounted_rules"] = sum(
+              record["unaccounted_rules"] for record in file_audit
+          )
+          summary["total_physical_providers"] = len(providers)
+          summary["alias_conversions"] = sum(alias_conversions.values())
 
-
-          if summary["unaccounted_rules"] != 0:
-
+          if summary["source_files"] < MIN_SOURCES:
               raise RuntimeError(
-                  "GLOBAL RULE CONSERVATION FAILURE: "
-                  f"source="
-                  f"{summary['source_rules_total']} "
-                  f"accounted={accounted} "
-                  f"unaccounted="
-                  f"{summary['unaccounted_rules']}"
+                  f"Too few source files: {summary['source_files']} < {MIN_SOURCES}"
               )
+          if summary["legacy_providers"] < MIN_PROVIDERS:
+              raise RuntimeError(
+                  f"Too few legacy providers: {summary['legacy_providers']} < {MIN_PROVIDERS}"
+              )
+          if summary["output_rules"] < MIN_RULES:
+              raise RuntimeError(f"Too few audited rules: {summary['output_rules']} < {MIN_RULES}")
+          if any(per_category[name]["source_files"] == 0 for name in CATEGORIES):
+              raise RuntimeError("At least one source category is empty")
+          if (
+              summary["domain_rules"]
+              + summary["ipcidr_rules"]
+              + summary["classical_rules"]
+              != summary["output_rules"]
+          ):
+              raise RuntimeError("Optimized profile does not conserve all Full rules")
+          if BUILD_LITE and (
+              summary["lite_rules"] + summary["lite_omitted_rules"]
+              != summary["output_rules"]
+          ):
+              raise RuntimeError("Lite rules plus explicitly omitted rules are not conserved")
 
+          previous_path = REPO / "SEMANTIC_AUDIT.json"
+          if previous_path.is_file():
+              try:
+                  previous = json.loads(previous_path.read_text(encoding="utf-8"))
+              except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                  raise RuntimeError("Existing SEMANTIC_AUDIT.json is invalid") from error
+              previous_rules = int(previous.get("summary", {}).get("output_rules", 0))
+              if previous_rules > 0:
+                  drop = (previous_rules - summary["output_rules"]) / previous_rules * 100
+                  if drop > MAX_DROP and not ALLOW_DROP:
+                      raise RuntimeError(
+                          f"Upstream rule count dropped by {drop:.2f}% "
+                          f"({previous_rules} -> {summary['output_rules']}); "
+                          "rerun workflow_dispatch with allow_large_drop=true only after review"
+                      )
 
-          for category in category_stats:
+          repository = os.getenv("GITHUB_REPOSITORY", "OWNER/REPOSITORY")
+          branch = os.getenv("GITHUB_REF_NAME", "main")
+          raw_base = f"https://raw.githubusercontent.com/{repository}/{branch}"
 
-              records = [
-                  item
-                  for item in file_audit
-                  if item["category"] == category
+          def provider_fragment(profile: str, *, prefer_mrs: bool) -> str:
+              selected = [
+                  provider
+                  for provider in providers
+                  if provider["profile"] == profile
               ]
+              lines = [
+                  f"# Stash {profile.upper()} provider declarations; attach your own policies.",
+                  "# All providers generated from the same source must use the same policy.",
+                  "rule-providers:",
+              ]
+              for provider in selected:
+                  use_mrs = (
+                      prefer_mrs
+                      and provider["mrs_path"] is not None
+                      and provider["behavior"] in {"domain", "ipcidr"}
+                  )
+                  relative = provider["mrs_path"] if use_mrs else provider["text_path"]
+                  lines.extend(
+                      [
+                          f"  {provider['name']}:",
+                          f"    behavior: {provider['behavior']}",
+                          f"    format: {'mrs' if use_mrs else 'text'}",
+                          f"    url: {raw_base}/{relative}",
+                          f"    interval: {INTERVAL}",
+                      ]
+                  )
+              lines.append("")
+              lines.append("# Keep each source's provider order from PROVIDER_MANIFEST.json.")
+              lines.append("# Add ,no-resolve only when the manifest marks an ipcidr provider.")
+              return "\n".join(lines) + "\n"
 
-
-              cs = category_stats[category]
-
-
-              cs["markers_removed"] = sum(
-                  item["markers_removed"]
-                  for item in records
+          for profile in PROFILES:
+              label = "FULL" if profile == "ios" else "LITE"
+              (OUTPUT / f"STASH_PROVIDERS_{label}_TEXT.yaml").write_text(
+                  provider_fragment(profile, prefer_mrs=False),
+                  encoding="utf-8",
+                  newline="\n",
               )
-
-
-              cs["ios_process_filtered"] = sum(
-                  item["ios_process_filtered"]
-                  for item in records
-              )
-
-
-              cs["duplicates_removed"] = sum(
-                  item["duplicates_removed"]
-                  for item in records
-              )
-
-
-              cs["output_rules"] = sum(
-                  item["output_rules"]
-                  for item in records
-              )
-
-
-              cs["unaccounted_rules"] = sum(
-                  item["unaccounted_rules"]
-                  for item in records
-              )
-
-
-          # ======================================================
-          # Save auxiliary reports
-          # ======================================================
-
-          def save_lines(name, items):
-
-              path = TMP / name
-
-              if items:
-
-                  path.write_text(
-                      "\n".join(items) + "\n",
-                      encoding="utf-8"
+              if BUILD_MRS:
+                  (OUTPUT / f"STASH_PROVIDERS_{label}_MRS.yaml").write_text(
+                      provider_fragment(profile, prefer_mrs=True),
+                      encoding="utf-8",
+                      newline="\n",
                   )
 
-              elif path.exists():
-
-                  path.unlink()
-
-
-          save_lines(
-              "removed-markers.txt",
-              removed_markers
-          )
-
-
-          save_lines(
-              "ios-filtered.txt",
-              ios_filtered
-          )
-
-
-          save_lines(
-              "promoted-domain.txt",
-              promoted_domain
-          )
-
-
-          save_lines(
-              "classical-non-ip.txt",
-              kept_classical_non_ip
-          )
-
-
-          save_lines(
-              "promoted-ipcidr.txt",
-              promoted_ipcidr
-          )
-
-
-          save_lines(
-              "classical-ip.txt",
-              kept_classical_ip
-          )
-
-
-          save_lines(
-              "no-resolve-ipcidr.txt",
-              no_resolve_ipcidr
-          )
-
-
-          save_lines(
-              "skipped.txt",
-              skipped_files
-          )
-
-
-          # ======================================================
-          # Semantic audit JSON
-          # ======================================================
-
-          audit = {
-              "schema_version": 1,
-
-              "generator": (
-                  "Sukka List -> Stash "
-                  "V1.4.2.1 Semantic Integrity Bugfix Final"
-              ),
-
-              "upstream": (
-                  "https://ruleset.skk.moe/"
-              ),
-
-              "summary": summary,
-
-              "categories": {
-                  name: dict(stats)
-                  for name, stats
-                  in category_stats.items()
+          manifest = {
+              "schema": "sukka-stash-provider-manifest/v1",
+              "generator": "Sukka List to Stash V1.5",
+              "raw_base_url": raw_base,
+              "profiles": list(PROFILES),
+              "lite_excluded_rule_types": sorted(LITE_EXCLUDED) if BUILD_LITE else [],
+              "providers": providers,
+              "source_provider_order": {
+                  record["source"]: {
+                      profile: [
+                          {
+                              "name": provider["name"],
+                              "behavior": provider["behavior"],
+                              "no_resolve": provider["no_resolve"],
+                          }
+                          for provider in providers
+                          if provider["source"] == record["source"]
+                          and provider["profile"] == profile
+                      ]
+                      for profile in PROFILES
+                  }
+                  for record in file_audit
+                  if not record["deprecated"]
               },
-
+          }
+          audit_document = {
+              "schema": "sukka-stash-semantic-audit/v1.5",
+              "summary": dict(sorted(summary.items())),
+              "categories": {
+                  category: dict(sorted(per_category[category].items()))
+                  for category in CATEGORIES
+              },
+              "rule_types": dict(sorted(rule_types.items())),
+              "alias_conversions": dict(sorted(alias_conversions.items())),
+              "lite_omissions": dict(sorted(lite_omissions.items())),
+              "mixed_no_resolve_sources": sorted(mixed_no_resolve_sources),
               "files": file_audit,
           }
-
-
-          (TMP / "SEMANTIC_AUDIT.json").write_text(
-              json.dumps(
-                  audit,
-                  ensure_ascii=False,
-                  indent=2,
-                  sort_keys=True,
-              ) + "\n",
-              encoding="utf-8"
+          write_json(OUTPUT / "PROVIDER_MANIFEST.json", manifest)
+          write_json(OUTPUT / "SEMANTIC_AUDIT.json", audit_document)
+          write_json(
+              OUTPUT / "IOS_LITE_OMISSIONS.json",
+              {
+                  "enabled": BUILD_LITE,
+                  "excluded_rule_types": sorted(LITE_EXCLUDED) if BUILD_LITE else [],
+                  "counts": dict(sorted(lite_omissions.items())),
+                  "total": summary["lite_omitted_rules"],
+              },
           )
 
-
-          # ======================================================
-          # Semantic audit Markdown
-          # ======================================================
-
-          s = summary
-
-
-          markdown = f"""# Semantic Integrity Audit
-
-          Generator:
-
-          `Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final`
-
-          ## Global Rule Conservation
-
-          | Metric | Count |
-          |---|---:|
-          | Source files | {s['source_files']} |
-          | Active files | {s['active_files']} |
-          | Deprecated files | {s['deprecated_files']} |
-          | Source rules total | {s['source_rules_total']} |
-          | Deprecated source rules | {s['deprecated_source_rules']} |
-          | Sukka Markers removed | {s['markers_removed']} |
-          | iOS PROCESS rules filtered | {s['ios_process_filtered']} |
-          | Duplicates removed | {s['duplicates_removed']} |
-          | Final output rules | {s['output_rules']} |
-          | Unaccounted rules | {s['unaccounted_rules']} |
-
-          ## Output
-
-          | Behavior | Providers | Rules |
-          |---|---:|---:|
-          | domain | {s['domain_providers']} | {s['domain_rules']} |
-          | ipcidr | {s['ipcidr_providers']} | {s['ipcidr_rules']} |
-          | classical | {s['classical_providers']} | {s['classical_rules']} |
-
-          ## Conservation Equation
-
-          ```text
-          source_rules_total
-          =
-          deprecated_source_rules
-          + markers_removed
-          + ios_process_filtered
-          + duplicates_removed
-          + output_rules
-          ```
-
-          ```text
-          {s['source_rules_total']}
-          =
-          {s['deprecated_source_rules']}
-          + {s['markers_removed']}
-          + {s['ios_process_filtered']}
-          + {s['duplicates_removed']}
-          + {s['output_rules']}
-          ```
-
-          ## Result
-
-          ```text
-          unaccounted_rules = {s['unaccounted_rules']}
-          ```
-
-          `0` means every source rule has been accounted for.
-          """
-
-
-          (TMP / "SEMANTIC_AUDIT.md").write_text(
-              "\n".join(
-                  line.strip()
-                  for line in markdown.splitlines()
-              ) + "\n",
-              encoding="utf-8"
-          )
-
-
-          print("")
-          print("====================================")
-          print(" V1.4.2.1 Semantic Integrity Audit")
-          print("====================================")
-          print(
-              f" Source files        : "
-              f"{s['source_files']}"
-          )
-          print(
-              f" Source rules        : "
-              f"{s['source_rules_total']}"
-          )
-          print(
-              f" Deprecated rules    : "
-              f"{s['deprecated_source_rules']}"
-          )
-          print(
-              f" Markers removed     : "
-              f"{s['markers_removed']}"
-          )
-          print(
-              f" PROCESS filtered    : "
-              f"{s['ios_process_filtered']}"
-          )
-          print(
-              f" Duplicates removed  : "
-              f"{s['duplicates_removed']}"
-          )
-          print(
-              f" Output rules        : "
-              f"{s['output_rules']}"
-          )
-          print(
-              f" Unaccounted         : "
-              f"{s['unaccounted_rules']}"
-          )
-          print("------------------------------------")
-          print(
-              f" domain providers    : "
-              f"{s['domain_providers']}"
-          )
-          print(
-              f" ipcidr providers    : "
-              f"{s['ipcidr_providers']}"
-          )
-          print(
-              f" classical providers : "
-              f"{s['classical_providers']}"
-          )
-          print("====================================")
-
-
-          if s["output_providers"] == 0:
-
-              raise RuntimeError(
-                  "No Stash providers generated."
+          text_artifacts = {
+              "REMOVED_SUKKA_MARKERS.txt": sorted(removed_markers),
+              "IOS_FILTERED_PROCESS_RULES.txt": sorted(filtered_process_rules),
+              "IOS_LITE_OMITTED_RULES.txt": sorted(omitted_lite_rules),
+              "IPCIDR_NO_RESOLVE.txt": sorted(legacy_no_resolve),
+              "DEPRECATED_SOURCE_FILES.txt": sorted(deprecated_files),
+          }
+          for filename, values in text_artifacts.items():
+              (OUTPUT / filename).write_text(
+                  "\n".join(values) + ("\n" if values else ""),
+                  encoding="utf-8",
+                  newline="\n",
               )
 
-
-          if s["unaccounted_rules"] != 0:
-
-              raise RuntimeError(
-                  "Semantic integrity audit failed."
-              )
-
-          PY
-
-
-      # ==========================================================
-      # 8. Validate provider counts
-      # ==========================================================
-
-      - name: Validate optimized output
-        run: |
-          set -euo pipefail
-
-          DOMAIN_DOMAINSET=$(
-            find \
-              /tmp/sukka-stash/output/domain/domainset \
-              -type f \
-              -name "*.txt" \
-              | wc -l
+          fence = chr(96) * 3
+          sample = next(
+              (
+                  record
+                  for record in file_audit
+                  if record["source"] == "non_ip/ai.conf"
+              ),
+              None,
           )
-
-          DOMAIN_NON_IP=$(
-            find \
-              /tmp/sukka-stash/output/domain/non_ip \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-          IPCIDR=$(
-            find \
-              /tmp/sukka-stash/output/ipcidr \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-          CLASSICAL_NON_IP=$(
-            find \
-              /tmp/sukka-stash/output/classical/non_ip \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-          CLASSICAL_IP=$(
-            find \
-              /tmp/sukka-stash/output/classical/ip \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          DOMAIN=$((DOMAIN_DOMAINSET + DOMAIN_NON_IP))
-
-          CLASSICAL=$((CLASSICAL_NON_IP + CLASSICAL_IP))
-
-          TOTAL=$((DOMAIN + IPCIDR + CLASSICAL))
-
-
-          echo ""
-          echo "===================================="
-          echo " V1.4.2.1 Provider Output"
-          echo "===================================="
-          echo " domain/domainset : ${DOMAIN_DOMAINSET}"
-          echo " domain/non_ip    : ${DOMAIN_NON_IP}"
-          echo " ipcidr           : ${IPCIDR}"
-          echo " classical/non_ip : ${CLASSICAL_NON_IP}"
-          echo " classical/ip     : ${CLASSICAL_IP}"
-          echo "------------------------------------"
-          echo " TOTAL            : ${TOTAL}"
-          echo "===================================="
-
-
-          if [ "${TOTAL}" -lt "${MIN_TOTAL_PROVIDERS}" ]; then
-
-            echo "ERROR:"
-            echo "Too few providers generated."
-
-            exit 1
-          fi
-
-
-      # ==========================================================
-      # 9. Marker residual audit
-      # ==========================================================
-
-      - name: Audit Sukka Marker removal
-        run: |
-          set -euo pipefail
-
-          python3 <<'PY'
-          from pathlib import Path
-
-
-          ROOT = Path(
-              "/tmp/sukka-stash/output"
-          )
-
-
-          MARKER_SUFFIX = (
-              ".m4d3.by.5ukk4w.skk.moe"
-          )
-
-
-          errors = []
-
-
-          for file in ROOT.rglob("*.txt"):
-
-              for lineno, raw in enumerate(
-                  file.read_text(
-                      encoding="utf-8",
-                      errors="ignore"
-                  ).splitlines(),
-                  1
-              ):
-
-                  line = raw.lower()
-
-
-                  if MARKER_SUFFIX in line:
-
-                      errors.append(
-                          f"{file}:{lineno}: "
-                          f"{raw.strip()}"
-                      )
-
-
-          print(
-              f"Residual Sukka markers: "
-              f"{len(errors)}"
-          )
-
-
-          if errors:
-
-              for item in errors[:100]:
-                  print(item)
-
-              raise RuntimeError(
-                  "Sukka Marker residual audit failed."
-              )
-
-
-          print(
-              "All Sukka Markers were removed."
-          )
-
-          PY
-
-
-      # ==========================================================
-      # 10. Stash semantic validation
-      # ==========================================================
-
-      - name: Validate Stash semantics
-        run: |
-          set -euo pipefail
-
-          python3 <<'PY'
-          from pathlib import Path
-          import ipaddress
-
-
-          ROOT = Path(
-              "/tmp/sukka-stash/output"
-          )
-
-
-          errors = []
-
-
-          for folder in (
-              ROOT / "domain" / "domainset",
-              ROOT / "domain" / "non_ip",
-          ):
-
-              for file in folder.glob("*.txt"):
-
-                  for lineno, raw in enumerate(
-                      file.read_text(
-                          encoding="utf-8",
-                          errors="ignore"
-                      ).splitlines(),
-                      1
-                  ):
-
-                      line = raw.strip()
-
-
-                      if not line:
-                          continue
-
-
-                      if "," in line:
-
-                          errors.append(
-                              f"{file}:{lineno}: "
-                              f"classical syntax in "
-                              f"domain provider"
-                          )
-
-
-          for file in (
-              ROOT / "ipcidr"
-          ).glob("*.txt"):
-
-              for lineno, raw in enumerate(
-                  file.read_text(
-                      encoding="utf-8",
-                      errors="ignore"
-                  ).splitlines(),
-                  1
-              ):
-
-                  line = raw.strip()
-
-
-                  if not line:
-                      continue
-
-
-                  if "," in line:
-
-                      errors.append(
-                          f"{file}:{lineno}: "
-                          f"classical syntax in "
-                          f"ipcidr provider"
-                      )
-
-                      continue
-
-
-                  try:
-
-                      ipaddress.ip_network(
-                          line,
-                          strict=False
-                      )
-
-
-                  except ValueError:
-
-                      errors.append(
-                          f"{file}:{lineno}: "
-                          f"invalid CIDR: {line}"
-                      )
-
-
-          for folder in (
-              ROOT / "classical" / "non_ip",
-              ROOT / "classical" / "ip",
-          ):
-
-              for file in folder.glob("*.txt"):
-
-                  for lineno, raw in enumerate(
-                      file.read_text(
-                          encoding="utf-8",
-                          errors="ignore"
-                      ).splitlines(),
-                      1
-                  ):
-
-                      line = raw.strip()
-
-
-                      if not line:
-                          continue
-
-
-                      if "," not in line:
-
-                          errors.append(
-                              f"{file}:{lineno}: "
-                              f"invalid classical rule"
-                          )
-
-                          continue
-
-
-                      rule_type = (
-                          line
-                          .split(",", 1)[0]
-                          .strip()
-                          .upper()
-                      )
-
-
-                      if rule_type in {
-                          "PROCESS-NAME",
-                          "PROCESS-PATH",
-                      }:
-
-                          errors.append(
-                              f"{file}:{lineno}: "
-                              f"iOS PROCESS rule remained"
-                          )
-
-
-          if errors:
-
-              print("")
-
-              for item in errors[:100]:
-                  print(item)
-
-
-              raise RuntimeError(
-                  f"{len(errors)} Stash semantic "
-                  f"errors found."
-              )
-
-
-          print(
-              "Stash semantic validation passed."
-          )
-
-          PY
-
-
-      # ==========================================================
-      # 11. Validate semantic audit JSON
-      # ==========================================================
-
-      - name: Validate semantic integrity audit
-        run: |
-          set -euo pipefail
-
-          python3 <<'PY'
-          from pathlib import Path
-          import json
-
-
-          path = Path(
-              "/tmp/sukka-stash/"
-              "SEMANTIC_AUDIT.json"
-          )
-
-
-          data = json.loads(
-              path.read_text(
-                  encoding="utf-8"
-              )
-          )
-
-
-          summary = data["summary"]
-
-
-          source = (
-              summary["source_rules_total"]
-          )
-
-
-          accounted = (
-              summary["deprecated_source_rules"]
-              + summary["markers_removed"]
-              + summary["ios_process_filtered"]
-              + summary["duplicates_removed"]
-              + summary["output_rules"]
-          )
-
-
-          print("")
-          print("====================================")
-          print(" Rule Conservation Check")
-          print("====================================")
-          print(f" Source     : {source}")
-          print(f" Accounted  : {accounted}")
-          print(
-              f" Unaccounted: "
-              f"{source - accounted}"
-          )
-          print("====================================")
-
-
-          if source != accounted:
-
-              raise RuntimeError(
-                  "Global semantic integrity "
-                  "check failed."
-              )
-
-
-          if summary["unaccounted_rules"] != 0:
-
-              raise RuntimeError(
-                  "Unaccounted rules detected."
-              )
-
-
-          bad_files = [
-              item
-              for item in data["files"]
-              if item["unaccounted_rules"] != 0
-          ]
-
-
-          if bad_files:
-
-              raise RuntimeError(
-                  f"{len(bad_files)} source files "
-                  f"failed rule conservation."
-              )
-
-
-          print(
-              "Semantic integrity audit passed."
-          )
-
-          PY
-
-
-      # ==========================================================
-      # 12. Generate full conversion report
-      # ==========================================================
-
-      - name: Generate conversion report
-        run: |
-          set -euo pipefail
-
-          {
-            echo "# Sukka -> Stash V1.4.2.1 Conversion Report"
-            echo ""
-
-            echo "## Upstream"
-            echo ""
-            echo "https://ruleset.skk.moe/"
-            echo ""
-
-            echo "## Pipeline"
-            echo ""
-            echo '```text'
-            echo "Sukka List"
-            echo " -> Remove comments / blank lines"
-            echo " -> Detect Sukka Marker"
-            echo " -> Remove Marker"
-            echo " -> Filter iOS PROCESS rules"
-            echo " -> Analyze provider behavior"
-            echo " -> Convert / normalize"
-            echo " -> Deduplicate"
-            echo " -> Rule conservation audit"
-            echo " -> Stash semantic validation"
-            echo " -> Output"
-            echo '```'
-            echo ""
-
-            echo "## Semantic Integrity"
-            echo ""
-
-            cat \
-              /tmp/sukka-stash/SEMANTIC_AUDIT.md
-
-            echo ""
-
-            echo "## Removed Sukka Markers"
-            echo ""
-
-            if [ -s /tmp/sukka-stash/removed-markers.txt ]; then
-
-              echo '```text'
-              cat /tmp/sukka-stash/removed-markers.txt
-              echo '```'
-
-            else
-
-              echo "None"
-
-            fi
-
-            echo ""
-
-            echo "## iOS PROCESS Rules Filtered"
-            echo ""
-
-            if [ -s /tmp/sukka-stash/ios-filtered.txt ]; then
-
-              echo '```text'
-              cat /tmp/sukka-stash/ios-filtered.txt
-              echo '```'
-
-            else
-
-              echo "None"
-
-            fi
-
-            echo ""
-
-            echo "## non_ip Promoted to domain"
-            echo ""
-
-            if [ -s /tmp/sukka-stash/promoted-domain.txt ]; then
-              sed 's/^/- /' \
-                /tmp/sukka-stash/promoted-domain.txt
-            else
-              echo "- None"
-            fi
-
-            echo ""
-
-            echo "## IP Promoted to ipcidr"
-            echo ""
-
-            if [ -s /tmp/sukka-stash/promoted-ipcidr.txt ]; then
-              sed 's/^/- /' \
-                /tmp/sukka-stash/promoted-ipcidr.txt
-            else
-              echo "- None"
-            fi
-
-            echo ""
-
-            echo "## ipcidr Providers Requiring no-resolve"
-            echo ""
-
-            if [ -s /tmp/sukka-stash/no-resolve-ipcidr.txt ]; then
-              sed 's/^/- /' \
-                /tmp/sukka-stash/no-resolve-ipcidr.txt
-            else
-              echo "- None"
-            fi
-
-            echo ""
-
-            echo "## Skipped Sources"
-            echo ""
-
-            if [ -s /tmp/sukka-stash/skipped.txt ]; then
-              sed 's/^/- /' \
-                /tmp/sukka-stash/skipped.txt
-            else
-              echo "- None"
-            fi
-
-          } > /tmp/sukka-stash/REPORT.md
-
-
-      # ==========================================================
-      # 13. Generate rule checksums
-      # ==========================================================
-
-      - name: Generate new rule checksum
-        run: |
-          set -euo pipefail
-
-          cd /tmp/sukka-stash/output
-
-
-          find domain ipcidr classical \
-            -type f \
-            -name "*.txt" \
-            -print0 \
-            | sort -z \
-            | xargs -0 sha256sum \
-            > /tmp/sukka-stash/new-rules.sha256
-
-
-          sha256sum \
-            /tmp/sukka-stash/new-rules.sha256 \
-            | awk '{print $1}' \
-            > /tmp/sukka-stash/new-rules.master
-
-
-          echo "New rules hash:"
-          cat /tmp/sukka-stash/new-rules.master
-
-
-      # ==========================================================
-      # 14. Generate semantic fingerprint
-      # ==========================================================
-
-      - name: Generate semantic fingerprint
-        run: |
-          set -euo pipefail
-
-
-          {
-            cat /tmp/sukka-stash/new-rules.master
-
-            sha256sum \
-              /tmp/sukka-stash/SEMANTIC_AUDIT.json \
-              | awk '{print $1}'
-
-          } > /tmp/sukka-stash/fingerprint.input
-
-
-          sha256sum \
-            /tmp/sukka-stash/fingerprint.input \
-            | awk '{print $1}' \
-            > /tmp/sukka-stash/new.master
-
-
-          echo "New semantic version:"
-          cat /tmp/sukka-stash/new.master
-
-
-      # ==========================================================
-      # 15. Current semantic fingerprint
-      # ==========================================================
-
-      - name: Generate current fingerprint
-        run: |
-          set -euo pipefail
-
-
-          if [ -d domain ] && \
-             [ -d ipcidr ] && \
-             [ -d classical ] && \
-             [ -s SEMANTIC_AUDIT.json ]; then
-
-
-            find domain ipcidr classical \
-              -type f \
-              -name "*.txt" \
-              -print0 \
-              | sort -z \
-              | xargs -0 sha256sum \
-              > /tmp/sukka-stash/current-rules.sha256
-
-
-            sha256sum \
-              /tmp/sukka-stash/current-rules.sha256 \
-              | awk '{print $1}' \
-              > /tmp/sukka-stash/current-rules.master
-
-
-            {
-              cat /tmp/sukka-stash/current-rules.master
-
-              sha256sum \
-                SEMANTIC_AUDIT.json \
-                | awk '{print $1}'
-
-            } > /tmp/sukka-stash/current-fingerprint.input
-
-
-            sha256sum \
-              /tmp/sukka-stash/current-fingerprint.input \
-              | awk '{print $1}' \
-              > /tmp/sukka-stash/current.master
-
-
-          else
-
-            echo "migration-required" \
-              > /tmp/sukka-stash/current.master
-
-          fi
-
-
-          echo "Current semantic version:"
-          cat /tmp/sukka-stash/current.master
-
-
-      # ==========================================================
-      # 16. Compare
-      # ==========================================================
-
-      - name: Compare versions
-        id: compare
-        run: |
-          set -euo pipefail
-
-
-          NEW=$(cat /tmp/sukka-stash/new.master)
-
-          OLD=$(cat /tmp/sukka-stash/current.master)
-
-
-          echo "Old: ${OLD}"
-          echo "New: ${NEW}"
-
-
-          if [ "${NEW}" = "${OLD}" ]; then
-
-            echo "changed=false" \
-              >> "$GITHUB_OUTPUT"
-
-            echo "Rules and semantic audit are unchanged."
-
-          else
-
-            echo "changed=true" \
-              >> "$GITHUB_OUTPUT"
-
-            echo "Rule or semantic audit update detected."
-
-          fi
-
-
-      # ==========================================================
-      # 17. No update
-      # ==========================================================
-
-      - name: No update required
-        if: steps.compare.outputs.changed == 'false'
-        run: |
-          echo ""
-          echo "===================================="
-          echo " Sukka -> Stash V1.4.2.1"
-          echo "===================================="
-          echo " RULES     : UP TO DATE"
-          echo " AUDIT     : UP TO DATE"
-          echo " COMMIT    : NO"
-          echo "===================================="
-
-
-      # ==========================================================
-      # 18. Replace optimized directories
-      # Bugfix: 正确使用 Bash arithmetic expansion
-      # ==========================================================
-
-      - name: Replace optimized directories
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          echo ""
-          echo "===================================="
-          echo " Preparing replacement"
-          echo "===================================="
-
-
-          rm -rf domain.new
-          rm -rf ipcidr.new
-          rm -rf classical.new
-
-
-          cp -a \
-            /tmp/sukka-stash/output/domain \
-            domain.new
-
-
-          cp -a \
-            /tmp/sukka-stash/output/ipcidr \
-            ipcidr.new
-
-
-          cp -a \
-            /tmp/sukka-stash/output/classical \
-            classical.new
-
-
-          DOMAIN_COUNT=$(
-            find domain.new \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          IPCIDR_COUNT=$(
-            find ipcidr.new \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          CLASSICAL_COUNT=$(
-            find classical.new \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          # 正确算术写法
-          TOTAL=$((DOMAIN_COUNT + IPCIDR_COUNT + CLASSICAL_COUNT))
-
-
-          echo ""
-          echo "===================================="
-          echo " Replacement Provider Audit"
-          echo "===================================="
-          echo " domain    : ${DOMAIN_COUNT}"
-          echo " ipcidr    : ${IPCIDR_COUNT}"
-          echo " classical : ${CLASSICAL_COUNT}"
-          echo "------------------------------------"
-          echo " TOTAL     : ${TOTAL}"
-          echo "===================================="
-
-
-          if [ "${TOTAL}" -lt "${MIN_TOTAL_PROVIDERS}" ]; then
-
-            echo "ERROR:"
-            echo "Replacement provider count too low."
-
-            exit 1
-          fi
-
-
-          if [ ! -d domain.new ]; then
-            echo "ERROR: domain.new missing."
-            exit 1
-          fi
-
-          if [ ! -d ipcidr.new ]; then
-            echo "ERROR: ipcidr.new missing."
-            exit 1
-          fi
-
-          if [ ! -d classical.new ]; then
-            echo "ERROR: classical.new missing."
-            exit 1
-          fi
-
-
-          # 只有全部验证通过后才替换正式目录
-
-          rm -rf domain
-          rm -rf ipcidr
-          rm -rf classical
-
-
-          # 清理旧结构
-
-          rm -rf non_ip
-          rm -rf ip
-
-
-          mv domain.new domain
-          mv ipcidr.new ipcidr
-          mv classical.new classical
-
-
-          FINAL_DOMAIN_COUNT=$(
-            find domain \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          FINAL_IPCIDR_COUNT=$(
-            find ipcidr \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          FINAL_CLASSICAL_COUNT=$(
-            find classical \
-              -type f \
-              -name "*.txt" \
-              | wc -l
-          )
-
-
-          FINAL_TOTAL=$((FINAL_DOMAIN_COUNT + FINAL_IPCIDR_COUNT + FINAL_CLASSICAL_COUNT))
-
-
-          echo ""
-          echo "===================================="
-          echo " Replacement Complete"
-          echo "===================================="
-          echo " domain    : ${FINAL_DOMAIN_COUNT}"
-          echo " ipcidr    : ${FINAL_IPCIDR_COUNT}"
-          echo " classical : ${FINAL_CLASSICAL_COUNT}"
-          echo "------------------------------------"
-          echo " TOTAL     : ${FINAL_TOTAL}"
-          echo "===================================="
-
-
-          if [ "${FINAL_TOTAL}" -ne "${TOTAL}" ]; then
-
-            echo "ERROR:"
-            echo "Provider count changed during replacement."
-
-            echo "Before: ${TOTAL}"
-            echo "After : ${FINAL_TOTAL}"
-
-            exit 1
-          fi
-
-
-          echo ""
-          echo "Optimized directories replaced successfully."
-
-
-      # ==========================================================
-      # 19. Save metadata
-      # ==========================================================
-
-      - name: Save metadata
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          cp \
-            /tmp/sukka-stash/new-rules.sha256 \
-            RULES_SHA256SUMS.txt
-
-
-          cp \
-            /tmp/sukka-stash/new.master \
-            RULES_VERSION.sha256
-
-
-          cp \
-            /tmp/sukka-stash/REPORT.md \
-            CONVERSION_REPORT.md
-
-
-          cp \
-            /tmp/sukka-stash/SEMANTIC_AUDIT.json \
-            SEMANTIC_AUDIT.json
-
-
-          cp \
-            /tmp/sukka-stash/SEMANTIC_AUDIT.md \
-            SEMANTIC_AUDIT.md
-
-
-          if [ -s /tmp/sukka-stash/no-resolve-ipcidr.txt ]; then
-
-            cp \
-              /tmp/sukka-stash/no-resolve-ipcidr.txt \
-              IPCIDR_NO_RESOLVE.txt
-
-          else
-
-            rm -f IPCIDR_NO_RESOLVE.txt
-
-          fi
-
-
-          if [ -s /tmp/sukka-stash/removed-markers.txt ]; then
-
-            cp \
-              /tmp/sukka-stash/removed-markers.txt \
-              REMOVED_SUKKA_MARKERS.txt
-
-          else
-
-            rm -f REMOVED_SUKKA_MARKERS.txt
-
-          fi
-
-
-      # ==========================================================
-      # 20. Update README
-      # ==========================================================
-
-      - name: Update README
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          python3 <<'PY'
-          from pathlib import Path
-          import json
-
-
-          audit = json.loads(
-              Path(
-                  "SEMANTIC_AUDIT.json"
-              ).read_text(
-                  encoding="utf-8"
-              )
-          )
-
-
-          s = audit["summary"]
-
-
-          version = (
-              Path("RULES_VERSION.sha256")
-              .read_text(
-                  encoding="utf-8"
-              )
-              .strip()
-          )
-
-
-          readme = f"""# Sukka Rules for Stash iOS
-
-          Sukka 通用 List 自动转换为 Stash iOS 高性能规则。
-
-          ## Version
-
-          `V1.4.2.1 Semantic Integrity Bugfix Final`
-
-          ## Upstream
-
-          https://ruleset.skk.moe/
-
-          ## Processing Pipeline
-
-          ```text
-          Sukka List
-              ↓
-          Remove comments / blank lines
-              ↓
-          Detect + remove Sukka Marker
-              ↓
-          Filter iOS PROCESS rules
-              ↓
-          Analyze rule behavior
-              ↓
-          domain / ipcidr / classical
-              ↓
-          Normalize
-              ↓
-          Deduplicate
-              ↓
-          Semantic integrity audit
-              ↓
-          Stash semantic validation
-              ↓
-          Output
-          ```
-
-          ## Output
-
-          ```text
-          domain/
-          ├── domainset/
-          └── non_ip/
-
-          ipcidr/
-
-          classical/
-          ├── non_ip/
-          └── ip/
-          ```
-
-          ## Provider Mapping
-
-          | Directory | behavior | format |
-          |---|---|---|
-          | domain/* | domain | text |
-          | ipcidr/* | ipcidr | text |
-          | classical/* | classical | text |
-
-          ## Semantic Integrity
-
-          | Metric | Count |
-          |---|---:|
-          | Source files | {s['source_files']} |
-          | Source rules | {s['source_rules_total']} |
-          | Deprecated rules | {s['deprecated_source_rules']} |
-          | Markers removed | {s['markers_removed']} |
-          | iOS PROCESS filtered | {s['ios_process_filtered']} |
-          | Duplicates removed | {s['duplicates_removed']} |
-          | Final rules | {s['output_rules']} |
-          | Unaccounted rules | {s['unaccounted_rules']} |
-
-          ## Provider Count
-
-          | Behavior | Providers | Rules |
-          |---|---:|---:|
-          | domain | {s['domain_providers']} | {s['domain_rules']} |
-          | ipcidr | {s['ipcidr_providers']} | {s['ipcidr_rules']} |
-          | classical | {s['classical_providers']} | {s['classical_rules']} |
-
-          ## Rule Conservation
-
-          ```text
-          Source Rules
-          =
-          Deprecated
-          + Markers
-          + iOS PROCESS
-          + Duplicates
-          + Final Output
-          ```
-
-          Current result:
-
-          ```text
-          Unaccounted Rules = {s['unaccounted_rules']}
-          ```
-
-          A healthy build must always be:
-
-          ```text
-          Unaccounted Rules = 0
-          ```
-
-          ## Audit Files
-
-          ```text
-          SEMANTIC_AUDIT.json
-          SEMANTIC_AUDIT.md
-          CONVERSION_REPORT.md
-          REMOVED_SUKKA_MARKERS.txt
-          IPCIDR_NO_RESOLVE.txt
-          ```
-
-          ## Raw URL Examples
-
-          ### Apple CDN
-
-          ```text
-          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
-          ```
-
-          ### China IP
-
-          ```text
-          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
-          ```
-
-          ### AI
-
-          ```text
-          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
-          ```
-
-          ### Telegram ASN
-
-          ```text
-          https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
-          ```
-
-          ## Stash Example
-
-          ```yaml
-          rule-providers:
-
-            apple-cdn:
-              type: http
-              behavior: domain
-              format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/domain/domainset/apple_cdn.txt
-              interval: 86400
-
-            china-ip:
-              type: http
-              behavior: ipcidr
-              format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/ipcidr/china_ip.txt
-              interval: 86400
-
-            ai:
-              type: http
-              behavior: classical
-              format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/non_ip/ai.txt
-              interval: 86400
-
-            telegram-asn:
-              type: http
-              behavior: classical
-              format: text
-              url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules-/main/classical/ip/telegram_asn.txt
-              interval: 86400
-
-          rules:
-
-            - RULE-SET,ai,AI
-            - RULE-SET,china-ip,DIRECT,no-resolve
-            - RULE-SET,telegram-asn,Telegram
-            - RULE-SET,apple-cdn,DIRECT
-            - MATCH,Proxy
-          ```
-
-          ## Current Semantic Version
-
-          ```text
-          {version}
-          ```
-
-          ---
-
-          Generated by Sukka List -> Stash V1.4.2.1 Semantic Integrity Bugfix Final.
-          """
-
-
-          Path("README.md").write_text(
-              "\n".join(
-                  line.strip()
-                  for line in readme.splitlines()
-              ) + "\n",
-              encoding="utf-8"
-          )
-
-          PY
-
-
-      # ==========================================================
-      # 21. Final repository audit
-      # ==========================================================
-
-      - name: Final validation
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          python3 <<'PY'
-          from pathlib import Path
-          import json
-          import ipaddress
-
-
-          audit = json.loads(
-              Path(
-                  "SEMANTIC_AUDIT.json"
-              ).read_text(
-                  encoding="utf-8"
-              )
-          )
-
-
-          s = audit["summary"]
-
-
-          if s["unaccounted_rules"] != 0:
-
-              raise RuntimeError(
-                  "Final semantic integrity "
-                  "audit failed."
-              )
-
-
-          marker_suffix = (
-              ".m4d3.by.5ukk4w.skk.moe"
-          )
-
-
-          for root_name in (
-              "domain",
-              "ipcidr",
-              "classical",
-          ):
-
-              root = Path(root_name)
-
-
-              for file in root.rglob("*.txt"):
-
-                  for lineno, raw in enumerate(
-                      file.read_text(
-                          encoding="utf-8",
-                          errors="ignore"
-                      ).splitlines(),
-                      1
-                  ):
-
-                      if (
-                          marker_suffix
-                          in raw.lower()
-                      ):
-
-                          raise RuntimeError(
-                              f"{file}:{lineno}: "
-                              f"Sukka Marker remained"
-                          )
-
-
-          for file in Path(
-              "classical"
-          ).rglob("*.txt"):
-
-              for lineno, raw in enumerate(
-                  file.read_text(
-                      encoding="utf-8",
-                      errors="ignore"
-                  ).splitlines(),
-                  1
-              ):
-
-                  rule_type = (
-                      raw
-                      .split(",", 1)[0]
-                      .strip()
-                      .upper()
+          example_lines = []
+          if sample:
+              for item in sample["ios_providers"]:
+                  suffix = (
+                      ",no-resolve"
+                      if item["behavior"] == "ipcidr" and item["no_resolve"] is True
+                      else ""
                   )
+                  example_lines.append(f"  - RULE-SET,{item['name']},PROXY{suffix}")
+          if not example_lines:
+              example_lines.append("  # Select provider names from PROVIDER_MANIFEST.json.")
 
+          readme = [
+              "# Sukka List for Stash iOS",
+              "",
+              "V1.5 preserves existing provider URLs while adding rule-by-rule optimized",
+              "Full and Lite profiles. Only reference one profile for a given source.",
+              "",
+              "| Output | Compatibility | Behavior |",
+              "| --- | --- | --- |",
+              "| domain/, ipcidr/, classical/ | Existing V1.4.2.1 URLs | Legacy-compatible |",
+              "| ios/domain/, ios/ipcidr/ | New Full profile | Optimized domain and CIDR |",
+              "| ios/classical/ | New Full profile | Unsupported-for-promotion remainder |",
+              "| lite/ | iOS Lite profile | Omits only explicitly audited expensive rules |",
+              "| mrs/ios/, mrs/lite/ | Optional MRS mirrors | domain/ipcidr only |",
+              "",
+              "## Semantic guarantees",
+              "",
+              "- Full profile conserves every non-marker, iOS-supported upstream rule.",
+              "- DOMAIN and DOMAIN-SUFFIX become domain providers.",
+              "- DOMAIN-WILDCARD remains classical because routing glob semantics",
+              "  are not equivalent to domain/MRS provider label wildcards.",
+              "- IP-CIDR and IP-CIDR6 become ipcidr providers.",
+              "- Mixed resolving/no-resolve CIDRs use separate provider files.",
+              "- DOMAIN-KEYWORD, DOMAIN-REGEX, ASN and other supported special rules",
+              "  remain in small classical providers.",
+              "- Existing root-level provider URLs retain their historical contents.",
+              "- Lite omissions are listed in IOS_LITE_OMISSIONS.json and",
+              "  IOS_LITE_OMITTED_RULES.txt; Full never silently discards those rules.",
+              "",
+              "## Stash configuration",
+              "",
+              "Start with STASH_PROVIDERS_FULL_MRS.yaml or",
+              "STASH_PROVIDERS_LITE_MRS.yaml when MRS is enabled; TEXT variants are",
+              "always available. Copy only the providers you actually reference.",
+              "",
+              "Providers split from the same source must be adjacent and use the same",
+              "policy. Preserve the order in PROVIDER_MANIFEST.json. For example:",
+              "",
+              fence + "yaml",
+              "rules:",
+              *example_lines,
+              fence,
+              "",
+              "Add no-resolve only to RULE-SET references whose ipcidr manifest",
+              "entry has no_resolve=true. Classical GEOIP/IP-ASN entries preserve",
+              "their inline no-resolve option.",
+              "",
+              "On iOS, keep DNS upstreams to one or two and avoid loading both Full",
+              "and Lite or both legacy and optimized versions of the same rule set.",
+          ]
+          (OUTPUT / "README.md").write_text(
+              "\n".join(readme) + "\n",
+              encoding="utf-8",
+              newline="\n",
+          )
 
-                  if rule_type in {
-                      "PROCESS-NAME",
-                      "PROCESS-PATH",
-                  }:
+          report = [
+              "# Sukka to Stash semantic conversion report",
+              "",
+              f"- Source files: {summary['source_files']}",
+              f"- Active source rules: {summary['active_source_rules']}",
+              f"- Full conserved output rules: {summary['output_rules']}",
+              f"- Optimized domain rules: {summary['domain_rules']}",
+              f"- Optimized ipcidr rules: {summary['ipcidr_rules']}",
+              f"- Classical remainder rules: {summary['classical_rules']}",
+              f"- Split source files: {summary['split_source_files']}",
+              f"- Mixed no-resolve sources: {summary['mixed_no_resolve_sources']}",
+              f"- iOS Lite omitted rules: {summary['lite_omitted_rules']}",
+              f"- MRS providers: {summary['mrs_providers']}",
+              f"- Reused identical MRS conversions: {summary['mrs_cache_hits']}",
+              f"- MRS bytes: {summary['mrs_bytes']}",
+              f"- Removed Sukka markers: {summary['markers_removed']}",
+              f"- Filtered iOS process rules: {summary['ios_process_filtered']}",
+              f"- Duplicates removed: {summary['duplicates_removed']}",
+              f"- Unaccounted rules: {summary['unaccounted_rules']}",
+              "",
+          ]
+          (OUTPUT / "CONVERSION_REPORT.md").write_text(
+              "\n".join(report),
+              encoding="utf-8",
+              newline="\n",
+          )
+          (OUTPUT / "SEMANTIC_AUDIT.md").write_text(
+              "\n".join(report)
+              + "\nFull source-by-source details: SEMANTIC_AUDIT.json.\n",
+              encoding="utf-8",
+              newline="\n",
+          )
 
-                      raise RuntimeError(
-                          f"{file}:{lineno}: "
-                          f"PROCESS rule remained"
-                      )
+          rule_files = sorted(
+              path
+              for directory in ("domain", "ipcidr", "classical", "ios", "lite", "mrs")
+              if (OUTPUT / directory).is_dir()
+              for path in (OUTPUT / directory).rglob("*")
+              if path.is_file() and path.suffix in {".txt", ".mrs"}
+          )
+          checksum_lines = [
+              f"{hashlib.sha256(path.read_bytes()).hexdigest()}  "
+              f"{path.relative_to(OUTPUT).as_posix()}"
+              for path in rule_files
+          ]
+          checksum_content = "\n".join(checksum_lines) + "\n"
+          (OUTPUT / "RULES_SHA256SUMS.txt").write_text(
+              checksum_content,
+              encoding="utf-8",
+              newline="\n",
+          )
+          fingerprint = hashlib.sha256()
+          fingerprint.update(checksum_content.encode("utf-8"))
+          fingerprint.update(
+              json.dumps(manifest, ensure_ascii=False, sort_keys=True).encode("utf-8")
+          )
+          (OUTPUT / "RULES_VERSION.sha256").write_text(
+              fingerprint.hexdigest() + "\n",
+              encoding="utf-8",
+              newline="\n",
+          )
 
+          print(json.dumps(dict(sorted(summary.items())), ensure_ascii=False, indent=2))
+          print(f"Prepared {len(rule_files)} checksummed physical rule files.")
+          PY
 
-          for file in Path(
-              "ipcidr"
-          ).glob("*.txt"):
+      - name: Validate staged providers and semantic artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from collections import Counter
+          from pathlib import Path
+          import ipaddress
+          import json
+          import os
 
-              for lineno, raw in enumerate(
-                  file.read_text(
-                      encoding="utf-8",
-                      errors="ignore"
-                  ).splitlines(),
-                  1
-              ):
+          output = Path(os.environ["WORK_ROOT"]) / "output"
+          manifest = json.loads((output / "PROVIDER_MANIFEST.json").read_text("utf-8"))
+          audit = json.loads((output / "SEMANTIC_AUDIT.json").read_text("utf-8"))
+          names = Counter()
 
-                  line = raw.strip()
+          for provider in manifest["providers"]:
+              names[(provider["profile"], provider["name"])] += 1
+              path = output / provider["text_path"]
+              if not path.is_file() or path.stat().st_size == 0:
+                  raise RuntimeError(f"Missing or empty provider: {path}")
+              lines = path.read_text(encoding="utf-8", errors="strict").splitlines()
+              if len(lines) != provider["rule_count"]:
+                  raise RuntimeError(f"Provider count mismatch: {path}")
+              if len(lines) != len(set(lines)):
+                  raise RuntimeError(f"Provider contains duplicate entries: {path}")
+              if provider["behavior"] == "domain":
+                  if any("," in line or line.startswith("DOMAIN") for line in lines):
+                      raise RuntimeError(f"Domain provider contains classical syntax: {path}")
+                  if provider["no_resolve"] is not None:
+                      raise RuntimeError(f"Domain provider cannot use no-resolve: {path}")
+              elif provider["behavior"] == "ipcidr":
+                  for line in lines:
+                      if "," in line:
+                          raise RuntimeError(f"CIDR provider contains rule options: {path}")
+                      ipaddress.ip_network(line, strict=True)
+                  if not isinstance(provider["no_resolve"], bool):
+                      raise RuntimeError(f"CIDR provider lacks no-resolve state: {path}")
+              elif provider["behavior"] == "classical":
+                  if any("," not in line for line in lines):
+                      raise RuntimeError(f"Classical provider contains bare entries: {path}")
+                  if provider["no_resolve"] is not None:
+                      raise RuntimeError(f"Classical provider has provider-level no-resolve: {path}")
+              else:
+                  raise RuntimeError(f"Unknown provider behavior: {provider['behavior']}")
 
+              if provider["mrs_path"] is not None:
+                  if provider["behavior"] == "classical":
+                      raise RuntimeError("Classical providers cannot use the MRS format")
+                  mrs = output / provider["mrs_path"]
+                  with mrs.open("rb") as handle:
+                      if handle.read(4) != b"MRS\x01":
+                          raise RuntimeError(f"Invalid MRS provider: {mrs}")
 
-                  if not line:
-                      continue
+          duplicates = [name for name, count in names.items() if count != 1]
+          if duplicates:
+              raise RuntimeError(f"Provider names are not unique: {duplicates}")
+          if audit["summary"]["unaccounted_rules"] != 0:
+              raise RuntimeError("Semantic audit reports unaccounted upstream rules")
 
+          for path in output.rglob("*.txt"):
+              if path.name in {
+                  "REMOVED_SUKKA_MARKERS.txt",
+                  "IOS_FILTERED_PROCESS_RULES.txt",
+                  "IOS_LITE_OMITTED_RULES.txt",
+                  "IPCIDR_NO_RESOLVE.txt",
+                  "DEPRECATED_SOURCE_FILES.txt",
+                  "RULES_SHA256SUMS.txt",
+              }:
+                  continue
+              content = path.read_text(encoding="utf-8", errors="strict").casefold()
+              if ".m4d3.by.5ukk4w.skk.moe" in content:
+                  raise RuntimeError(f"Sukka marker leaked into output provider: {path}")
+              if "process-name," in content or "process-path," in content:
+                  raise RuntimeError(f"iOS-incompatible process rule leaked into {path}")
 
-                  try:
+          print(f"Validated {len(manifest['providers'])} providers and semantic conservation.")
+          PY
+          (
+            cd "$WORK_ROOT/output"
+            sha256sum --check RULES_SHA256SUMS.txt --status
+          )
 
-                      ipaddress.ip_network(
-                          line,
-                          strict=False
-                      )
+      - name: Publish validated managed outputs into checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import os
+          import shutil
 
-
-                  except ValueError as exc:
-
-                      raise RuntimeError(
-                          f"{file}:{lineno}: "
-                          f"invalid CIDR {line}"
-                      ) from exc
-
-
-          required = [
+          repo = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          output = (Path(os.environ["WORK_ROOT"]) / "output").resolve()
+          managed_directories = ("domain", "ipcidr", "classical", "ios", "lite", "mrs")
+          managed_files = (
+              "README.md",
+              "CONVERSION_REPORT.md",
+              "SEMANTIC_AUDIT.md",
+              "SEMANTIC_AUDIT.json",
+              "PROVIDER_MANIFEST.json",
+              "IOS_LITE_OMISSIONS.json",
+              "IOS_LITE_OMITTED_RULES.txt",
+              "REMOVED_SUKKA_MARKERS.txt",
+              "IOS_FILTERED_PROCESS_RULES.txt",
+              "IPCIDR_NO_RESOLVE.txt",
+              "DEPRECATED_SOURCE_FILES.txt",
               "RULES_SHA256SUMS.txt",
               "RULES_VERSION.sha256",
-              "CONVERSION_REPORT.md",
-              "SEMANTIC_AUDIT.json",
-              "SEMANTIC_AUDIT.md",
-          ]
-
-
-          for filename in required:
-
-              path = Path(filename)
-
-              if not path.is_file():
-
-                  raise RuntimeError(
-                      f"Missing {filename}"
-                  )
-
-
-              if path.stat().st_size == 0:
-
-                  raise RuntimeError(
-                      f"Empty {filename}"
-                  )
-
-
-          print("")
-          print("====================================")
-          print(" Final Repository Audit")
-          print("====================================")
-          print(
-              f" Source rules : "
-              f"{s['source_rules_total']}"
+              "STASH_PROVIDERS_FULL_TEXT.yaml",
+              "STASH_PROVIDERS_FULL_MRS.yaml",
+              "STASH_PROVIDERS_LITE_TEXT.yaml",
+              "STASH_PROVIDERS_LITE_MRS.yaml",
           )
-          print(
-              f" Output rules : "
-              f"{s['output_rules']}"
-          )
-          print(
-              f" Unaccounted  : "
-              f"{s['unaccounted_rules']}"
-          )
-          print("====================================")
-          print("")
-          print("Final validation passed.")
 
+          if repo == output or repo in output.parents or output in repo.parents:
+              raise RuntimeError("Staging and repository directories must be independent")
+
+          for name in managed_directories:
+              destination = repo / name
+              staged = output / name
+              if destination.parent != repo or destination.is_symlink():
+                  raise RuntimeError(f"Unsafe managed directory target: {destination}")
+              if destination.exists():
+                  if not destination.is_dir():
+                      raise RuntimeError(f"Managed directory is not a directory: {destination}")
+                  shutil.rmtree(destination)
+              if staged.is_dir():
+                  shutil.copytree(staged, destination)
+
+          for name in managed_files:
+              destination = repo / name
+              staged = output / name
+              if destination.parent != repo or destination.is_symlink():
+                  raise RuntimeError(f"Unsafe managed file target: {destination}")
+              if staged.is_file():
+                  shutil.copy2(staged, destination)
+              elif destination.exists():
+                  if not destination.is_file():
+                      raise RuntimeError(f"Managed file is not a regular file: {destination}")
+                  destination.unlink()
+
+          print("Copied only explicitly managed, prevalidated outputs into the repository.")
           PY
+          sha256sum --check RULES_SHA256SUMS.txt --status
 
-
-      # ==========================================================
-      # 22. Sync remote before commit
-      # ==========================================================
-
-      - name: Sync remote before commit
-        if: steps.compare.outputs.changed == 'true'
+      - name: Commit and push only validated changes
+        shell: bash
         run: |
           set -euo pipefail
+          while IFS= read -r managed_path; do
+            [ -n "$managed_path" ] || continue
+            if [ -e "$managed_path" ] || \
+              git ls-files --error-unmatch -- "$managed_path" >/dev/null 2>&1; then
+              git add --all -- "$managed_path"
+            fi
+          done <<'MANAGED'
+          domain
+          ipcidr
+          classical
+          ios
+          lite
+          mrs
+          README.md
+          CONVERSION_REPORT.md
+          SEMANTIC_AUDIT.md
+          SEMANTIC_AUDIT.json
+          PROVIDER_MANIFEST.json
+          IOS_LITE_OMISSIONS.json
+          IOS_LITE_OMITTED_RULES.txt
+          REMOVED_SUKKA_MARKERS.txt
+          IOS_FILTERED_PROCESS_RULES.txt
+          IPCIDR_NO_RESOLVE.txt
+          DEPRECATED_SOURCE_FILES.txt
+          RULES_SHA256SUMS.txt
+          RULES_VERSION.sha256
+          STASH_PROVIDERS_FULL_TEXT.yaml
+          STASH_PROVIDERS_FULL_MRS.yaml
+          STASH_PROVIDERS_LITE_TEXT.yaml
+          STASH_PROVIDERS_LITE_MRS.yaml
+          MANAGED
 
-
-          git pull \
-            --rebase \
-            --autostash \
-            origin \
-            "${GITHUB_REF_NAME}"
-
-
-      # ==========================================================
-      # 23. Commit changes
-      # ==========================================================
-
-      - name: Commit changes
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          git add -A
-
-
-          if git diff \
-            --cached \
-            --quiet; then
-
-            echo "No effective changes."
+          if git diff --cached --quiet; then
+            printf 'No semantic rule-set changes detected; nothing to commit.\n'
             exit 0
           fi
 
-
-          git commit \
-            -m "chore: sync Sukka Stash V1.4.2.1 semantic audit"
-
-
-      # ==========================================================
-      # 24. Push
-      # ==========================================================
-
-      - name: Push changes
-        if: steps.compare.outputs.changed == 'true'
-        run: |
-          set -euo pipefail
-
-
-          git push \
-            origin \
-            "HEAD:${GITHUB_REF_NAME}"
-
-
-      # ==========================================================
-      # 25. Completed
-      # ==========================================================
-
-      - name: Completed
-        run: |
-          echo ""
-          echo "===================================="
-          echo " Sukka -> Stash V1.4.2.1"
-          echo "===================================="
-          echo " Marker Audit   : ENABLED"
-          echo " iOS Filter     : ENABLED"
-          echo " Dedupe Audit   : ENABLED"
-          echo " Rule Accounting: ENABLED"
-          echo " domain         : OPTIMIZED"
-          echo " ipcidr         : OPTIMIZED"
-          echo " classical      : FALLBACK"
-          echo " Bash arithmetic: FIXED"
-          echo " sync           : 24 HOURS"
-          echo " status         : SUCCESS"
-          echo "===================================="
-
+          sha256sum --check RULES_SHA256SUMS.txt --status
+          version="$(head -c 12 RULES_VERSION.sha256)"
+          git commit -m "chore(stash): sync Sukka iOS hybrid rules [$version]"
+          git push origin "HEAD:$GITHUB_REF_NAME"
