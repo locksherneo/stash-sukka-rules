@@ -161,7 +161,7 @@
       "name": "sukka-legacy-domainset-reject-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 134887,
+      "rule_count": 134984,
       "source": "domainset/reject.conf",
       "text_path": "domain/domainset/reject.txt"
     },
@@ -173,7 +173,7 @@
       "name": "sukka-ios-domainset-reject-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 134887,
+      "rule_count": 134984,
       "source": "domainset/reject.conf",
       "text_path": "ios/domain/domainset/reject.txt"
     },
@@ -185,7 +185,7 @@
       "name": "sukka-lite-domainset-reject-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 134887,
+      "rule_count": 134984,
       "source": "domainset/reject.conf",
       "text_path": "lite/domain/domainset/reject.txt"
     },
@@ -197,7 +197,7 @@
       "name": "sukka-legacy-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 147482,
+      "rule_count": 147504,
       "source": "domainset/reject_phishing.conf",
       "text_path": "domain/domainset/reject_phishing.txt"
     },
@@ -209,7 +209,7 @@
       "name": "sukka-ios-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 147482,
+      "rule_count": 147504,
       "source": "domainset/reject_phishing.conf",
       "text_path": "ios/domain/domainset/reject_phishing.txt"
     },
@@ -221,7 +221,7 @@
       "name": "sukka-lite-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 147482,
+      "rule_count": 147504,
       "source": "domainset/reject_phishing.conf",
       "text_path": "lite/domain/domainset/reject_phishing.txt"
     },
@@ -233,7 +233,7 @@
       "name": "sukka-legacy-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 3348,
+      "rule_count": 3351,
       "source": "domainset/speedtest.conf",
       "text_path": "domain/domainset/speedtest.txt"
     },
@@ -245,7 +245,7 @@
       "name": "sukka-ios-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 3348,
+      "rule_count": 3351,
       "source": "domainset/speedtest.conf",
       "text_path": "ios/domain/domainset/speedtest.txt"
     },
@@ -257,7 +257,7 @@
       "name": "sukka-lite-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 3348,
+      "rule_count": 3351,
       "source": "domainset/speedtest.conf",
       "text_path": "lite/domain/domainset/speedtest.txt"
     },
@@ -2201,7 +2201,7 @@
       "name": "sukka-legacy-ip-china-ip-ipcidr",
       "no_resolve": false,
       "profile": "legacy",
-      "rule_count": 3917,
+      "rule_count": 3915,
       "source": "ip/china_ip.conf",
       "text_path": "ipcidr/china_ip.txt"
     },
@@ -2213,7 +2213,7 @@
       "name": "sukka-ios-ip-china-ip-ipcidr",
       "no_resolve": false,
       "profile": "ios",
-      "rule_count": 3917,
+      "rule_count": 3915,
       "source": "ip/china_ip.conf",
       "text_path": "ios/ipcidr/ip/china_ip.txt"
     },
@@ -2225,7 +2225,7 @@
       "name": "sukka-lite-ip-china-ip-ipcidr",
       "no_resolve": false,
       "profile": "lite",
-      "rule_count": 3917,
+      "rule_count": 3915,
       "source": "ip/china_ip.conf",
       "text_path": "lite/ipcidr/ip/china_ip.txt"
     },
@@ -2237,7 +2237,7 @@
       "name": "sukka-legacy-ip-china-ip-ipv6-ipcidr",
       "no_resolve": false,
       "profile": "legacy",
-      "rule_count": 3429,
+      "rule_count": 3428,
       "source": "ip/china_ip_ipv6.conf",
       "text_path": "ipcidr/china_ip_ipv6.txt"
     },
@@ -2249,7 +2249,7 @@
       "name": "sukka-ios-ip-china-ip-ipv6-ipcidr",
       "no_resolve": false,
       "profile": "ios",
-      "rule_count": 3429,
+      "rule_count": 3428,
       "source": "ip/china_ip_ipv6.conf",
       "text_path": "ios/ipcidr/ip/china_ip_ipv6.txt"
     },
@@ -2261,7 +2261,7 @@
       "name": "sukka-lite-ip-china-ip-ipv6-ipcidr",
       "no_resolve": false,
       "profile": "lite",
-      "rule_count": 3429,
+      "rule_count": 3428,
       "source": "ip/china_ip_ipv6.conf",
       "text_path": "lite/ipcidr/ip/china_ip_ipv6.txt"
     },
