@@ -1,6 +1,5 @@
 +.sdx.microsoft.com
 res.cdn.office.net
-+.cn.windowssearch.com
 res-1.cdn.office.net
 res-2.cdn.office.net
 +.download.microsoft.com
