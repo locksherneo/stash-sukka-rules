@@ -161,7 +161,7 @@
       "name": "sukka-legacy-domainset-reject-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 135371,
+      "rule_count": 135302,
       "source": "domainset/reject.conf",
       "text_path": "domain/domainset/reject.txt"
     },
@@ -173,7 +173,7 @@
       "name": "sukka-ios-domainset-reject-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 135371,
+      "rule_count": 135302,
       "source": "domainset/reject.conf",
       "text_path": "ios/domain/domainset/reject.txt"
     },
@@ -185,7 +185,7 @@
       "name": "sukka-lite-domainset-reject-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 135371,
+      "rule_count": 135302,
       "source": "domainset/reject.conf",
       "text_path": "lite/domain/domainset/reject.txt"
     },
@@ -197,7 +197,7 @@
       "name": "sukka-legacy-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 147504,
+      "rule_count": 148178,
       "source": "domainset/reject_phishing.conf",
       "text_path": "domain/domainset/reject_phishing.txt"
     },
@@ -209,7 +209,7 @@
       "name": "sukka-ios-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 147504,
+      "rule_count": 148178,
       "source": "domainset/reject_phishing.conf",
       "text_path": "ios/domain/domainset/reject_phishing.txt"
     },
@@ -221,7 +221,7 @@
       "name": "sukka-lite-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 147504,
+      "rule_count": 148178,
       "source": "domainset/reject_phishing.conf",
       "text_path": "lite/domain/domainset/reject_phishing.txt"
     },
@@ -233,7 +233,7 @@
       "name": "sukka-legacy-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 3352,
+      "rule_count": 3355,
       "source": "domainset/speedtest.conf",
       "text_path": "domain/domainset/speedtest.txt"
     },
@@ -245,7 +245,7 @@
       "name": "sukka-ios-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 3352,
+      "rule_count": 3355,
       "source": "domainset/speedtest.conf",
       "text_path": "ios/domain/domainset/speedtest.txt"
     },
@@ -257,7 +257,7 @@
       "name": "sukka-lite-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 3352,
+      "rule_count": 3355,
       "source": "domainset/speedtest.conf",
       "text_path": "lite/domain/domainset/speedtest.txt"
     },
