@@ -1019,6 +1019,7 @@ r2.dejavu.moe
 r2cdn.c7d.dev
 +.randomuser.me
 +.rawgithub.com
++.rcsobjects.it
 rdr.windy.com
 +.runkitcdn.com
 +.s-nbcnews.com
@@ -1515,9 +1516,11 @@ cdn1.telesco.pe
 cdn2.hextom.com
 cdn2.macpaw.com
 cdn2.stamped.io
+cdn2.telesco.pe
 cdn2.ttloli.com
 cdn3.hextom.com
 cdn3.stamped.io
+cdn3.telesco.pe
 cdn4.telesco.pe
 cdn5.hextom.com
 cdn5.telesco.pe
@@ -2153,6 +2156,7 @@ cdn.babylonjs.com
 cdn.blogarama.com
 cdn.brandfetch.io
 cdn.buttercms.com
+cdn.candycode.com
 cdn.cds.dmm.co.jp
 cdn.changelog.com
 cdn.cloudcraft.co
@@ -2571,6 +2575,7 @@ favicon.yandex.net
 files.gempages.net
 flows.trysavvy.com
 fonts.codeberg.org
++.gazzettaobjects.it
 genesis-cdn.ff.com
 global.divhunt.com
 graph.facebook.com
@@ -2875,9 +2880,11 @@ cdn1.telegram.space
 cdn1.tubeteen18.com
 cdn2.editmysite.com
 cdn2.iconfinder.com
+cdn2.telegram.space
 cdn2.tubeteen18.com
 cdn2.turboviplay.cc
 cdn3.iconfinder.com
+cdn3.telegram.space
 cdn3.tubeteen18.com
 cdn4.iconfinder.com
 cdn4.telegram.space
@@ -2908,6 +2915,7 @@ error.rakuten.co.jp
 event.ithome.com.tw
 +.events.backtrace.io
 favicons.nextdns.io
+files.blocktempo.ai
 files.namecheap.com
 +.files.wordpress.com
 geoserveis.icgc.cat
@@ -3200,6 +3208,7 @@ gstatic.olympics.com
 hubspotonwebflow.com
 icons.duckduckgo.com
 image-us.samsung.com
+image.blocktempo.com
 imageproxy.ifunny.co
 images.anandtech.com
 images.blockscan.com
@@ -3346,6 +3355,7 @@ uploads.pullfrog.com
 variations.brave.com
 vice-prod.sdiapi.com
 video-meta.humix.com
+video.giroditalia.it
 +.vodvideo.cbsnews.com
 vpncdn.protonweb.com
 wandi-6402.kxcdn.com
@@ -3582,6 +3592,7 @@ videos2-h.sendvid.com
 wac-cdn.atlassian.com
 web-assets.strava.com
 website-cdn.ipinfo.io
+websiteres.nmteam.xyz
 widget.allkeyshop.com
 widget.automizely.com
 widget.freshworks.com
@@ -3770,6 +3781,7 @@ static.tradingview.com
 static.tryprofound.com
 static.underhentai.net
 static.webclicks24.com
+static2.giroditalia.it
 +.static2cdn.hubspot.com
 statics.streamable.com
 +.storage.googleapis.com
@@ -4020,6 +4032,7 @@ cms-assets.nodecraft.com
 conf.config-security.com
 cookie-cdn.cookiepro.com
 css.blackmagicdesign.com
+delivery.twentythree.com
 detectportal.firefox.com
 dynamic-cdn.cms.ayoba.me
 ecn.dev.virtualearth.net

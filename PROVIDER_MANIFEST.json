@@ -53,7 +53,7 @@
       "name": "sukka-legacy-domainset-cdn-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 4632,
+      "rule_count": 4645,
       "source": "domainset/cdn.conf",
       "text_path": "domain/domainset/cdn.txt"
     },
@@ -65,7 +65,7 @@
       "name": "sukka-ios-domainset-cdn-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 4632,
+      "rule_count": 4645,
       "source": "domainset/cdn.conf",
       "text_path": "ios/domain/domainset/cdn.txt"
     },
@@ -77,7 +77,7 @@
       "name": "sukka-lite-domainset-cdn-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 4632,
+      "rule_count": 4645,
       "source": "domainset/cdn.conf",
       "text_path": "lite/domain/domainset/cdn.txt"
     },
@@ -161,7 +161,7 @@
       "name": "sukka-legacy-domainset-reject-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 135302,
+      "rule_count": 135484,
       "source": "domainset/reject.conf",
       "text_path": "domain/domainset/reject.txt"
     },
@@ -173,7 +173,7 @@
       "name": "sukka-ios-domainset-reject-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 135302,
+      "rule_count": 135484,
       "source": "domainset/reject.conf",
       "text_path": "ios/domain/domainset/reject.txt"
     },
@@ -185,7 +185,7 @@
       "name": "sukka-lite-domainset-reject-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 135302,
+      "rule_count": 135484,
       "source": "domainset/reject.conf",
       "text_path": "lite/domain/domainset/reject.txt"
     },
@@ -197,7 +197,7 @@
       "name": "sukka-legacy-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 148178,
+      "rule_count": 148695,
       "source": "domainset/reject_phishing.conf",
       "text_path": "domain/domainset/reject_phishing.txt"
     },
@@ -209,7 +209,7 @@
       "name": "sukka-ios-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 148178,
+      "rule_count": 148695,
       "source": "domainset/reject_phishing.conf",
       "text_path": "ios/domain/domainset/reject_phishing.txt"
     },
@@ -221,7 +221,7 @@
       "name": "sukka-lite-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 148178,
+      "rule_count": 148695,
       "source": "domainset/reject_phishing.conf",
       "text_path": "lite/domain/domainset/reject_phishing.txt"
     },
@@ -233,7 +233,7 @@
       "name": "sukka-legacy-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 3355,
+      "rule_count": 3357,
       "source": "domainset/speedtest.conf",
       "text_path": "domain/domainset/speedtest.txt"
     },
@@ -245,7 +245,7 @@
       "name": "sukka-ios-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 3355,
+      "rule_count": 3357,
       "source": "domainset/speedtest.conf",
       "text_path": "ios/domain/domainset/speedtest.txt"
     },
@@ -257,7 +257,7 @@
       "name": "sukka-lite-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 3355,
+      "rule_count": 3357,
       "source": "domainset/speedtest.conf",
       "text_path": "lite/domain/domainset/speedtest.txt"
     },
@@ -557,7 +557,7 @@
       "name": "sukka-legacy-non-ip-direct-classical",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 182,
+      "rule_count": 183,
       "source": "non_ip/direct.conf",
       "text_path": "classical/non_ip/direct.txt"
     },
@@ -569,14 +569,14 @@
       "name": "sukka-ios-non-ip-direct-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 172,
+      "rule_count": 173,
       "source": "non_ip/direct.conf",
       "text_path": "ios/domain/non_ip/direct.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 173,
+      "first_source_index": 174,
       "mrs_path": null,
       "name": "sukka-ios-non-ip-direct-classical",
       "no_resolve": null,
@@ -593,14 +593,14 @@
       "name": "sukka-lite-non-ip-direct-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 172,
+      "rule_count": 173,
       "source": "non_ip/direct.conf",
       "text_path": "lite/domain/non_ip/direct.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 173,
+      "first_source_index": 174,
       "mrs_path": null,
       "name": "sukka-lite-non-ip-direct-classical",
       "no_resolve": null,
@@ -1097,7 +1097,7 @@
       "name": "sukka-legacy-non-ip-my-reject-classical",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 47,
+      "rule_count": 49,
       "source": "non_ip/my_reject.conf",
       "text_path": "classical/non_ip/my_reject.txt"
     },
@@ -1109,14 +1109,14 @@
       "name": "sukka-ios-non-ip-my-reject-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 41,
+      "rule_count": 43,
       "source": "non_ip/my_reject.conf",
       "text_path": "ios/domain/non_ip/my_reject.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 42,
+      "first_source_index": 44,
       "mrs_path": null,
       "name": "sukka-ios-non-ip-my-reject-classical",
       "no_resolve": null,
@@ -1133,14 +1133,14 @@
       "name": "sukka-lite-non-ip-my-reject-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 41,
+      "rule_count": 43,
       "source": "non_ip/my_reject.conf",
       "text_path": "lite/domain/non_ip/my_reject.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 42,
+      "first_source_index": 44,
       "mrs_path": null,
       "name": "sukka-lite-non-ip-my-reject-classical",
       "no_resolve": null,
@@ -1313,7 +1313,7 @@
       "name": "sukka-legacy-non-ip-reject-drop-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 27,
+      "rule_count": 28,
       "source": "non_ip/reject-drop.conf",
       "text_path": "domain/non_ip/reject-drop.txt"
     },
@@ -1325,14 +1325,14 @@
       "name": "sukka-ios-non-ip-reject-drop-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 26,
+      "rule_count": 27,
       "source": "non_ip/reject-drop.conf",
       "text_path": "ios/domain/non_ip/reject-drop.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 27,
+      "first_source_index": 28,
       "mrs_path": null,
       "name": "sukka-ios-non-ip-reject-drop-classical",
       "no_resolve": null,
@@ -1349,14 +1349,14 @@
       "name": "sukka-lite-non-ip-reject-drop-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 26,
+      "rule_count": 27,
       "source": "non_ip/reject-drop.conf",
       "text_path": "lite/domain/non_ip/reject-drop.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 27,
+      "first_source_index": 28,
       "mrs_path": null,
       "name": "sukka-lite-non-ip-reject-drop-classical",
       "no_resolve": null,
@@ -1373,7 +1373,7 @@
       "name": "sukka-legacy-non-ip-reject-no-drop-classical",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 44,
+      "rule_count": 45,
       "source": "non_ip/reject-no-drop.conf",
       "text_path": "classical/non_ip/reject-no-drop.txt"
     },
@@ -1397,7 +1397,7 @@
       "name": "sukka-ios-non-ip-reject-no-drop-classical",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 9,
+      "rule_count": 10,
       "source": "non_ip/reject-no-drop.conf",
       "text_path": "ios/classical/non_ip/reject-no-drop.txt"
     },
@@ -1421,7 +1421,7 @@
       "name": "sukka-lite-non-ip-reject-no-drop-classical",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 9,
+      "rule_count": 10,
       "source": "non_ip/reject-no-drop.conf",
       "text_path": "lite/classical/non_ip/reject-no-drop.txt"
     },

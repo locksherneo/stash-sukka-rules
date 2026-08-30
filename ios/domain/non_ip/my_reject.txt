@@ -17,6 +17,7 @@ epay.10010.com
 +.mibi.xiaomi.com
 +.microfin.ele.me
 daisydiskapp.com
++.game.meituan.com
 +.xiaomimobile.com
 +.easytomessage.com
 +.hybrid.xiaomi.com
@@ -25,13 +26,14 @@ daisydiskapp.com
 +.unicompayment.com
 +.video.goofish.com
 +.0.0.198.in-addr.arpa
-contents.meituan.com
++.contents.meituan.com
 fyb-2.cdn.bcebos.com
 +.genuine.autodesk.com
 mpush-api.aliyun.com
 +.jr.airstarfinance.net
 +.mtvod-ali.meituan.net
 +.newbuy.chinaunicom.cn
+app-download.fliggy.com
 +.expenses-fe.meituan.com
 userlocation.googleapis.com
 loan-supermarket.faas.ele.me

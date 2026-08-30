@@ -41,4 +41,5 @@ DOMAIN-WILDCARD,p2pchunk-*.douyucdn.cn
 DOMAIN-WILDCARD,dyp2p-*.douyucdn.cn
 DOMAIN-WILDCARD,p2plive-*.douyucdn.cn
 DOMAIN-WILDCARD,stun*.douyucdn.cn
+DOMAIN-WILDCARD,upos-sz-302*.bilivideo.com
 AND,((PROTOCOL,UDP), (DOMAIN-SUFFIX,googlevideo.com))
