@@ -9,18 +9,18 @@
       "duplicates_removed": 0,
       "ios_process_filtered": 0,
       "markers_removed": 8,
-      "output_rules": 292398,
+      "output_rules": 292658,
       "source_files": 10,
-      "source_rules": 371078
+      "source_rules": 371235
     },
     "ip": {
       "active_files": 20,
       "duplicates_removed": 0,
       "ios_process_filtered": 0,
       "markers_removed": 19,
-      "output_rules": 8206,
+      "output_rules": 8197,
       "source_files": 20,
-      "source_rules": 8225
+      "source_rules": 8216
     },
     "non_ip": {
       "active_files": 36,
@@ -80,7 +80,7 @@
           "mrs_path": "mrs/ios/domain/domainset/cdn.mrs",
           "name": "sukka-ios-domainset-cdn-domain",
           "no_resolve": null,
-          "rule_count": 4645,
+          "rule_count": 4646,
           "text_path": "ios/domain/domainset/cdn.txt"
         }
       ],
@@ -94,14 +94,14 @@
           "mrs_path": "mrs/lite/domain/domainset/cdn.mrs",
           "name": "sukka-lite-domainset-cdn-domain",
           "no_resolve": null,
-          "rule_count": 4645,
+          "rule_count": 4646,
           "text_path": "lite/domain/domainset/cdn.txt"
         }
       ],
       "markers_removed": 1,
-      "output_rules": 4645,
+      "output_rules": 4646,
       "source": "domainset/cdn.conf",
-      "source_rules": 4646,
+      "source_rules": 4647,
       "unaccounted_rules": 0
     },
     {
@@ -199,7 +199,7 @@
           "mrs_path": "mrs/ios/domain/domainset/reject.mrs",
           "name": "sukka-ios-domainset-reject-domain",
           "no_resolve": null,
-          "rule_count": 135484,
+          "rule_count": 135255,
           "text_path": "ios/domain/domainset/reject.txt"
         }
       ],
@@ -213,14 +213,14 @@
           "mrs_path": "mrs/lite/domain/domainset/reject.mrs",
           "name": "sukka-lite-domainset-reject-domain",
           "no_resolve": null,
-          "rule_count": 135484,
+          "rule_count": 135255,
           "text_path": "lite/domain/domainset/reject.txt"
         }
       ],
       "markers_removed": 1,
-      "output_rules": 135484,
+      "output_rules": 135255,
       "source": "domainset/reject.conf",
-      "source_rules": 135485,
+      "source_rules": 135256,
       "unaccounted_rules": 0
     },
     {
@@ -234,7 +234,7 @@
       "markers_removed": 0,
       "output_rules": 0,
       "source": "domainset/reject_extra.conf",
-      "source_rules": 76705,
+      "source_rules": 76602,
       "unaccounted_rules": 0
     },
     {
@@ -248,7 +248,7 @@
           "mrs_path": "mrs/ios/domain/domainset/reject_phishing.mrs",
           "name": "sukka-ios-domainset-reject-phishing-domain",
           "no_resolve": null,
-          "rule_count": 148695,
+          "rule_count": 149180,
           "text_path": "ios/domain/domainset/reject_phishing.txt"
         }
       ],
@@ -262,14 +262,14 @@
           "mrs_path": "mrs/lite/domain/domainset/reject_phishing.mrs",
           "name": "sukka-lite-domainset-reject-phishing-domain",
           "no_resolve": null,
-          "rule_count": 148695,
+          "rule_count": 149180,
           "text_path": "lite/domain/domainset/reject_phishing.txt"
         }
       ],
       "markers_removed": 1,
-      "output_rules": 148695,
+      "output_rules": 149180,
       "source": "domainset/reject_phishing.conf",
-      "source_rules": 148696,
+      "source_rules": 149181,
       "unaccounted_rules": 0
     },
     {
@@ -297,7 +297,7 @@
           "mrs_path": "mrs/ios/domain/domainset/speedtest.mrs",
           "name": "sukka-ios-domainset-speedtest-domain",
           "no_resolve": null,
-          "rule_count": 3357,
+          "rule_count": 3360,
           "text_path": "ios/domain/domainset/speedtest.txt"
         }
       ],
@@ -311,14 +311,14 @@
           "mrs_path": "mrs/lite/domain/domainset/speedtest.mrs",
           "name": "sukka-lite-domainset-speedtest-domain",
           "no_resolve": null,
-          "rule_count": 3357,
+          "rule_count": 3360,
           "text_path": "lite/domain/domainset/speedtest.txt"
         }
       ],
       "markers_removed": 2,
-      "output_rules": 3357,
+      "output_rules": 3360,
       "source": "domainset/speedtest.conf",
-      "source_rules": 3359,
+      "source_rules": 3362,
       "unaccounted_rules": 0
     },
     {
@@ -2088,7 +2088,7 @@
           "mrs_path": "mrs/ios/ipcidr/ip/china_ip_ipv6.mrs",
           "name": "sukka-ios-ip-china-ip-ipv6-ipcidr",
           "no_resolve": false,
-          "rule_count": 3406,
+          "rule_count": 3397,
           "text_path": "ios/ipcidr/ip/china_ip_ipv6.txt"
         }
       ],
@@ -2102,14 +2102,14 @@
           "mrs_path": "mrs/lite/ipcidr/ip/china_ip_ipv6.mrs",
           "name": "sukka-lite-ip-china-ip-ipv6-ipcidr",
           "no_resolve": false,
-          "rule_count": 3406,
+          "rule_count": 3397,
           "text_path": "lite/ipcidr/ip/china_ip_ipv6.txt"
         }
       ],
       "markers_removed": 1,
-      "output_rules": 3406,
+      "output_rules": 3397,
       "source": "ip/china_ip_ipv6.conf",
-      "source_rules": 3407,
+      "source_rules": 3398,
       "unaccounted_rules": 0
     },
     {
@@ -2549,46 +2549,46 @@
   ],
   "rule_types": {
     "AND": 32,
-    "DOMAIN": 8176,
+    "DOMAIN": 8182,
     "DOMAIN-KEYWORD": 211,
-    "DOMAIN-SUFFIX": 287523,
+    "DOMAIN-SUFFIX": 287777,
     "DOMAIN-WILDCARD": 96,
     "DST-PORT": 1,
     "IP-ASN": 20,
     "IP-CIDR": 4802,
-    "IP-CIDR6": 3431,
+    "IP-CIDR6": 3422,
     "URL-REGEX": 183,
     "USER-AGENT": 78
   },
   "schema": "sukka-stash-semantic-audit/v1.5.1",
   "summary": {
     "active_files": 63,
-    "active_source_rules": 304700,
+    "active_source_rules": 304951,
     "alias_conversions": 1,
     "classical_providers": 26,
     "classical_rules": 621,
     "deprecated_files": 5,
-    "deprecated_source_rules": 78672,
+    "deprecated_source_rules": 78569,
     "domain_providers": 41,
-    "domain_rules": 295699,
+    "domain_rules": 295959,
     "duplicates_removed": 0,
     "ios_process_filtered": 85,
     "ipcidr_providers": 15,
-    "ipcidr_rules": 8233,
+    "ipcidr_rules": 8224,
     "legacy_providers": 57,
     "lite_omitted_rules": 183,
     "lite_providers": 80,
-    "lite_rules": 304370,
+    "lite_rules": 304621,
     "markers_removed": 62,
     "mixed_no_resolve_sources": 1,
-    "mrs_bytes": 5795152,
+    "mrs_bytes": 5801728,
     "mrs_cache_hits": 56,
     "mrs_providers": 112,
     "no_resolve_ipcidr_providers": 10,
     "output_providers": 82,
-    "output_rules": 304553,
+    "output_rules": 304804,
     "source_files": 68,
-    "source_rules_total": 383372,
+    "source_rules_total": 383520,
     "split_source_files": 23,
     "total_physical_providers": 219,
     "unaccounted_rules": 0
