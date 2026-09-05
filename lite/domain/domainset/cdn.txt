@@ -316,6 +316,7 @@ o.n1mp.org
 +.odycdn.com
 p.sda1.dev
 +.pagecdn.io
++.pgimgs.com
 +.phncdn.com
 +.pinimg.com
 +.pixhost.to
@@ -3575,6 +3576,7 @@ static.buydomains.com
 static.chessarena.com
 static.clips4sale.com
 static.getpostman.com
+static.idp.sph.com.sg
 static.mytonwallet.io
 static.openreplay.com
 static.pfrt.yna.co.kr
