@@ -2389,6 +2389,7 @@ st.codeforces.com
 st.deviantart.net
 static-id.fc2.com
 static-sv.fc2.com
++.static-upwork.com
 static.ahrefs.com
 static.anysex.com
 static.bbci.co.uk
@@ -4012,7 +4013,6 @@ assets.documentcloud.org
 assets.geeksforgeeks.org
 assets.nationbuilder.com
 assets.prowritingaid.com
-assets.static-upwork.com
 assets.trainingpeaks.com
 assets10.lottiefiles.com
 atl-global.atlassian.com
