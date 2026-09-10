@@ -25,6 +25,7 @@ ip/stream_tw.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 ip/stream_us.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 ip/telegram.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 ip/telegram_asn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+ip/teleproto.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/ai.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/apple_cn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/apple_intelligence.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe

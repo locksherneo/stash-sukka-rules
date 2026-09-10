@@ -5,3 +5,4 @@ download
 neteasemusic
 stream
 telegram
+teleproto

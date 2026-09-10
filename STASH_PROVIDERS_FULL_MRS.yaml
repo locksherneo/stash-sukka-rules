@@ -411,6 +411,11 @@ rule-providers:
     format: text
     url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ios/classical/ip/telegram_asn.txt
     interval: 86400
+  sukka-ios-ip-teleproto-ipcidr:
+    behavior: ipcidr
+    format: mrs
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/mrs/ios/ipcidr/ip/teleproto.mrs
+    interval: 86400
 
 # Keep each source's provider order from PROVIDER_MANIFEST.json.
 # Add ,no-resolve only when the manifest marks an ipcidr provider.
