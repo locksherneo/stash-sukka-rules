@@ -53,7 +53,7 @@
       "name": "sukka-legacy-domainset-cdn-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 4653,
+      "rule_count": 4661,
       "source": "domainset/cdn.conf",
       "text_path": "domain/domainset/cdn.txt"
     },
@@ -65,7 +65,7 @@
       "name": "sukka-ios-domainset-cdn-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 4653,
+      "rule_count": 4661,
       "source": "domainset/cdn.conf",
       "text_path": "ios/domain/domainset/cdn.txt"
     },
@@ -77,7 +77,7 @@
       "name": "sukka-lite-domainset-cdn-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 4653,
+      "rule_count": 4661,
       "source": "domainset/cdn.conf",
       "text_path": "lite/domain/domainset/cdn.txt"
     },
@@ -161,7 +161,7 @@
       "name": "sukka-legacy-domainset-reject-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 134963,
+      "rule_count": 135146,
       "source": "domainset/reject.conf",
       "text_path": "domain/domainset/reject.txt"
     },
@@ -173,7 +173,7 @@
       "name": "sukka-ios-domainset-reject-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 134963,
+      "rule_count": 135146,
       "source": "domainset/reject.conf",
       "text_path": "ios/domain/domainset/reject.txt"
     },
@@ -185,7 +185,7 @@
       "name": "sukka-lite-domainset-reject-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 134963,
+      "rule_count": 135146,
       "source": "domainset/reject.conf",
       "text_path": "lite/domain/domainset/reject.txt"
     },
@@ -197,7 +197,7 @@
       "name": "sukka-legacy-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 147099,
+      "rule_count": 146672,
       "source": "domainset/reject_phishing.conf",
       "text_path": "domain/domainset/reject_phishing.txt"
     },
@@ -209,7 +209,7 @@
       "name": "sukka-ios-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 147099,
+      "rule_count": 146672,
       "source": "domainset/reject_phishing.conf",
       "text_path": "ios/domain/domainset/reject_phishing.txt"
     },
@@ -221,7 +221,7 @@
       "name": "sukka-lite-domainset-reject-phishing-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 147099,
+      "rule_count": 146672,
       "source": "domainset/reject_phishing.conf",
       "text_path": "lite/domain/domainset/reject_phishing.txt"
     },
@@ -233,7 +233,7 @@
       "name": "sukka-legacy-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 3381,
+      "rule_count": 3382,
       "source": "domainset/speedtest.conf",
       "text_path": "domain/domainset/speedtest.txt"
     },
@@ -245,7 +245,7 @@
       "name": "sukka-ios-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 3381,
+      "rule_count": 3382,
       "source": "domainset/speedtest.conf",
       "text_path": "ios/domain/domainset/speedtest.txt"
     },
@@ -257,7 +257,7 @@
       "name": "sukka-lite-domainset-speedtest-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 3381,
+      "rule_count": 3382,
       "source": "domainset/speedtest.conf",
       "text_path": "lite/domain/domainset/speedtest.txt"
     },
@@ -749,7 +749,7 @@
       "name": "sukka-legacy-non-ip-global-classical",
       "no_resolve": null,
       "profile": "legacy",
-      "rule_count": 1269,
+      "rule_count": 1270,
       "source": "non_ip/global.conf",
       "text_path": "classical/non_ip/global.txt"
     },
@@ -761,14 +761,14 @@
       "name": "sukka-ios-non-ip-global-domain",
       "no_resolve": null,
       "profile": "ios",
-      "rule_count": 1259,
+      "rule_count": 1260,
       "source": "non_ip/global.conf",
       "text_path": "ios/domain/non_ip/global.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 1260,
+      "first_source_index": 1261,
       "mrs_path": null,
       "name": "sukka-ios-non-ip-global-classical",
       "no_resolve": null,
@@ -785,14 +785,14 @@
       "name": "sukka-lite-non-ip-global-domain",
       "no_resolve": null,
       "profile": "lite",
-      "rule_count": 1259,
+      "rule_count": 1260,
       "source": "non_ip/global.conf",
       "text_path": "lite/domain/non_ip/global.txt"
     },
     {
       "behavior": "classical",
       "category": "non_ip",
-      "first_source_index": 1260,
+      "first_source_index": 1261,
       "mrs_path": null,
       "name": "sukka-lite-non-ip-global-classical",
       "no_resolve": null,
@@ -2237,7 +2237,7 @@
       "name": "sukka-legacy-ip-china-ip-ipv6-ipcidr",
       "no_resolve": false,
       "profile": "legacy",
-      "rule_count": 3461,
+      "rule_count": 3459,
       "source": "ip/china_ip_ipv6.conf",
       "text_path": "ipcidr/china_ip_ipv6.txt"
     },
@@ -2249,7 +2249,7 @@
       "name": "sukka-ios-ip-china-ip-ipv6-ipcidr",
       "no_resolve": false,
       "profile": "ios",
-      "rule_count": 3461,
+      "rule_count": 3459,
       "source": "ip/china_ip_ipv6.conf",
       "text_path": "ios/ipcidr/ip/china_ip_ipv6.txt"
     },
@@ -2261,7 +2261,7 @@
       "name": "sukka-lite-ip-china-ip-ipv6-ipcidr",
       "no_resolve": false,
       "profile": "lite",
-      "rule_count": 3461,
+      "rule_count": 3459,
       "source": "ip/china_ip_ipv6.conf",
       "text_path": "lite/ipcidr/ip/china_ip_ipv6.txt"
     },
