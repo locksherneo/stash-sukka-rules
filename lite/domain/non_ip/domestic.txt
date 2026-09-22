@@ -276,6 +276,7 @@ dot.pub
 +.qiniu.com
 +.qixin.com
 +.qzone.com
++.rnote.com
 +.roblox.cn
 +.sifou.com
 +.sinajs.cn
