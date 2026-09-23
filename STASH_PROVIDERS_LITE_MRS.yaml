@@ -101,6 +101,16 @@ rule-providers:
     format: text
     url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/domestic.txt
     interval: 86400
+  sukka-lite-non-ip-domestic-cdn-domain:
+    behavior: domain
+    format: mrs
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/mrs/lite/domain/non_ip/domestic_cdn.mrs
+    interval: 86400
+  sukka-lite-non-ip-domestic-cdn-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/non_ip/domestic_cdn.txt
+    interval: 86400
   sukka-lite-non-ip-download-classical:
     behavior: classical
     format: text

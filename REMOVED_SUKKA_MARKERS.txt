@@ -34,6 +34,7 @@ non_ip/cdn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/cloudmounter.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/direct.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/domestic.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
+non_ip/domestic_cdn.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/download.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/gitlab.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
 non_ip/global.conf: DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe
