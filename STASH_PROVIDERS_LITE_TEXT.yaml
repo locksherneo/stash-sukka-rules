@@ -336,6 +336,11 @@ rule-providers:
     format: text
     url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/ipcidr/ip/ai.txt
     interval: 86400
+  sukka-lite-ip-ai-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/lite/classical/ip/ai.txt
+    interval: 86400
   sukka-lite-ip-apple-services-ipcidr:
     behavior: ipcidr
     format: text

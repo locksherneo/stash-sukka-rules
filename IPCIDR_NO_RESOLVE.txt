@@ -1,4 +1,3 @@
-ai
 apple_services
 domestic
 download

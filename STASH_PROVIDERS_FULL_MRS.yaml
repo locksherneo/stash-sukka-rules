@@ -346,6 +346,11 @@ rule-providers:
     format: mrs
     url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/mrs/ios/ipcidr/ip/ai.mrs
     interval: 86400
+  sukka-ios-ip-ai-classical:
+    behavior: classical
+    format: text
+    url: https://raw.githubusercontent.com/locksherneo/stash-sukka-rules/main/ios/classical/ip/ai.txt
+    interval: 86400
   sukka-ios-ip-apple-services-ipcidr:
     behavior: ipcidr
     format: mrs
