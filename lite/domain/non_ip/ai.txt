@@ -32,9 +32,11 @@ jules.google.com
 +.gemini.google.com
 +.notebooklm.google
 antigravity.google
+server.codeium.com
 aida.googleapis.com
 +.aistudio.google.com
 +.generativeai.google
+inference.codeium.com
 +.makersuite.google.com
 +.notebooklm.google.com
 antigravity-unleash.goog
@@ -42,6 +44,7 @@ antigravity-unleash.goog
 gateway.ai.cloudflare.com
 aisandbox-pa.googleapis.com
 +.cloudcode-pa.googleapis.com
+server.self-serve.windsurf.com
 robinfrontend-pa.googleapis.com
 alkalicore-pa.clients6.google.com
 daily-cloudcode-pa.googleapis.com
