@@ -1491,6 +1491,7 @@ cdn.parsely.com
 cdn.perfops.net
 cdn.pixabay.com
 cdn.plus500.com
+cdn.priv.center
 cdn.privacy.com
 cdn.quadpay.com
 cdn.readmoo.com
@@ -1586,6 +1587,7 @@ icons.llamao.fi
 image.gyutto.jp
 image.status.io
 images.dmca.com
+images.higgs.ai
 images.kick.com
 images.pluto.tv
 images.vudu.com
@@ -4523,6 +4525,7 @@ cdn.designerapp.osi.office.net
 cdn.quickemailverification.com
 cdn.rex.contents.rakuten.co.jp
 config.extension.grammarly.com
+customer-first-focus.b-cdn.net
 dev.visualwebsiteoptimizer.com
 edgeassetservice.azureedge.net
 explorer-api.walletconnect.com
