@@ -2306,6 +2306,7 @@ image.ap-mail.org
 image.civitai.com
 image.comicbz.com
 image.freepik.com
+image.gameapps.hk
 image.mgstage.com
 image.prntscr.com
 image.xmanhua.net
@@ -2414,6 +2415,7 @@ static.anysex.com
 static.bbci.co.uk
 static.beebom.com
 static.buffer.com
+static.capcom.com
 static.carfax.com
 static.chaika.moe
 static.change.org
@@ -2749,6 +2751,7 @@ static.snaptube.in
 static.srcspot.com
 static.svc.litv.tv
 static.tp-link.com
+static.truemed.com
 static.uptimia.com
 static.workday.com
 static.xgroovy.com
@@ -3170,6 +3173,7 @@ cdn.boostcommerce.io
 cdn.botframework.com
 cdn.buymeacoffee.com
 cdn.c1.amplience.net
+cdn.capcom-unity.com
 cdn.clever-cloud.com
 cdn.cnx-software.com
 cdn.downdetector.com
@@ -3908,6 +3912,7 @@ cdn-static-1.medium.com
 cdn-uicons.flaticon.com
 cdn.northropgrumman.com
 cdn.prod.www.spiegel.de
+cdn.promo.capcomusa.com
 cdn.ready-market.com.tw
 +.cdn.survey.medallia.com
 cdn.worldvectorlogo.com
