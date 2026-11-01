@@ -7,7 +7,9 @@
 +.gepush.com
 +.slackb.com
 +.trace.qq.com
++.amplitude.com
 +.beacon.qq.com
+api.segment.io
 +.geo2.adobe.com
 data.bilibili.com
 +.easytomessage.com
