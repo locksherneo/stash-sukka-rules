@@ -847,6 +847,7 @@ www.layuicdn.com
 +.tencent-cloud.com
 +.tencent-cloud.net
 +.toutiaostatic.com
+app.jianguoyun.com
 +.chinanetcenter.com
 +.dl.pinyuncloud.com
 +.heytapdownload.com
@@ -859,6 +860,7 @@ assets2.xboxlive.cn
 +.cm.steampowered.com
 +.luckincoffeecdn.com
 ocsp.globalsign.com
+comet.jianguoyun.com
 ocsp2.globalsign.com
 +.alibabausercontent.com
 cn.download.nvidia.com
