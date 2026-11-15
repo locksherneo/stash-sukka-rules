@@ -3343,6 +3343,7 @@ static.grammarly.com
 static.helpjuice.com
 static.incapsula.com
 static.infomaniak.ch
+static.karousell.com
 static.macupdate.com
 static.mediafire.com
 static.meteoblue.com
