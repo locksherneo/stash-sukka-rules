@@ -20,6 +20,7 @@ DOMAIN-SUFFIX,chatgpt.site
 DOMAIN-SUFFIX,deepmind.com
 DOMAIN,ai.google.dev
 DOMAIN-SUFFIX,anthropic.com
+DOMAIN,cloud.zed.dev
 DOMAIN-SUFFIX,gemini.google
 DOMAIN-SUFFIX,oaistatic.com
 DOMAIN,openrouter.ai

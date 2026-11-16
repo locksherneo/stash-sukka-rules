@@ -2649,6 +2649,7 @@ maps.wikimedia.org
 maptile.osmand.net
 media-cms.ayoba.me
 media.cgtrader.com
+media.datacamp.com
 media.flaticon.com
 media.formula1.com
 media.gamestop.com

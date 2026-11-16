@@ -20,6 +20,7 @@
 +.deepmind.com
 ai.google.dev
 +.anthropic.com
+cloud.zed.dev
 +.gemini.google
 +.oaistatic.com
 openrouter.ai

@@ -7,10 +7,13 @@ non_ip/apple_services.conf: PROCESS-NAME,findmydevice-user-agent
 non_ip/apple_services.conf: PROCESS-NAME,fmfd
 non_ip/apple_services.conf: PROCESS-NAME,mapspushd
 non_ip/cloudmounter.conf: AND,((DOMAIN,api.onedrive.com),(PROCESS-NAME,*CloudMounter))
+non_ip/cloudmounter.conf: AND,((DOMAIN,app.drime.cloud),(PROCESS-NAME,*CloudMounter))
 non_ip/cloudmounter.conf: AND,((DOMAIN,www.googleapis.com),(PROCESS-NAME,*CloudMounter))
 non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,files.1drv.com),(PROCESS-NAME,*CloudMounter))
 non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,graph.microsoft.com),(PROCESS-NAME,*CloudMounter))
 non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,my.microsoftpersonalcontent.com),(PROCESS-NAME,*CloudMounter))
+non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,r2.cloudflarestorage.com),(PROCESS-NAME,*CloudMounter))
+non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,r2.dev),(PROCESS-NAME,*CloudMounter))
 non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,sharepoint.com),(PROCESS-NAME,*CloudMounter))
 non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,storage.live.com),(PROCESS-NAME,*CloudMounter))
 non_ip/cloudmounter.conf: AND,((DOMAIN-SUFFIX,upload.app.box.com),(PROCESS-NAME,*CloudMounter))
