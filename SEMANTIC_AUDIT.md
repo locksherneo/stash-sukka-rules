@@ -1,17 +1,17 @@
 # Sukka to Stash semantic conversion report
 
 - Source files: 70
-- Active source rules: 312239
-- Full conserved output rules: 312087
-- Optimized domain rules: 302769
-- Optimized ipcidr rules: 8684
+- Active source rules: 311234
+- Full conserved output rules: 311082
+- Optimized domain rules: 301765
+- Optimized ipcidr rules: 8683
 - Classical remainder rules: 634
 - Split source files: 25
 - Mixed no-resolve sources: 1
 - iOS Lite omitted rules: 183
 - MRS providers: 116
 - Reused identical MRS conversions: 59
-- MRS bytes: 6047212
+- MRS bytes: 6034856
 - Removed Sukka markers: 64
 - Filtered iOS process rules: 88
 - Duplicates removed: 0
